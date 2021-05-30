@@ -1,0 +1,10 @@
+.loginForm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary {
+  margin-left: 30%;
+  margin-top: 5%;
+}
