@@ -1,0 +1,23 @@
+import HeaderBar from "../components/HeaderBar";
+import NewProjectForm from "../components/NewProjectForm";
+import ProjectList from "../components/ProjectList/ProjectList";
+
+function MyProjectsPage(props) {
+    const { setIsAuthenticated, projectList, setProjectList } = props;
+
+    return (
+        <>
+            <HeaderBar setIsAuthenticated={setIsAuthenticated} />
+            <NewProjectForm
+                projectList={projectList}
+                setProjectList={setProjectList}
+            />
+            <ProjectList
+                projectList={projectList}
+                setProjectList={setProjectList}
+            />
+        </>
+    );
+}
+
+export default MyProjectsPage;
