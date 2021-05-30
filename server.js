@@ -5,7 +5,8 @@ import session from "express-session";
 import passport from "passport";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-import path from "path";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 
 import passportConfig from "./config/passport.js";
 import users from "./api/v1/users.js";
@@ -59,6 +60,8 @@ const port = process.env.PORT || 5000;
 
 // For use in Heroku app
 if (process.env.NODE_ENV === "production") {
+  // eslint-disable-next-line no-underscore-dangle
+  const __dirname = dirname(fileURLToPath(import.meta.url));
   app.use(express.static(path.resolve(__dirname, "./client/build")));
   app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "./client/build", "index.html"));
