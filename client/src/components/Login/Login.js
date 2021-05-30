@@ -47,6 +47,7 @@ function Login(props) {
             id="email"
             label="Email"
             variant="outlined"
+            type="email"
             value={logInEmail}
             onChange={(event) => setLogInEmail(event.target.value)}
           />
