@@ -5,14 +5,13 @@ import styles from "./Login.module.css";
 import axios from "axios";
 
 function Login(props) {
-  const [logInUsername, setLogInUsername] = useState("");
+  const [logInEmail, setLogInEmail] = useState("");
   const [logInPassword, setLogInPassword] = useState("");
   const { isAuthenticated, setIsAuthenticated } = props;
 
   function handleLogIn(event) {
-    // placeholder function: replace with authentication procedure
     event.preventDefault();
-    logIn(logInUsername, logInPassword);
+    logIn(logInEmail, logInPassword);
   }
 
   function logIn(userEmail, userPassword) {
@@ -45,11 +44,11 @@ function Login(props) {
         <legend>Sign in</legend>
         <div>
           <TextField
-            id="username"
-            label="Username"
+            id="email"
+            label="Email"
             variant="outlined"
-            value={logInUsername}
-            onChange={(event) => setLogInUsername(event.target.value)}
+            value={logInEmail}
+            onChange={(event) => setLogInEmail(event.target.value)}
           />
         </div>
         <div>

@@ -38,7 +38,7 @@ function Registration() {
     } else {
       // Passwords are valid
       axios.post(
-        "/api/v1/users/login",
+        "/api/v1/users/register",
         {
           email: email,
           username: username,
