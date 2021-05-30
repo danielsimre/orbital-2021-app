@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import passportConfig from "./config/passport.js";
 import settings from "./config/keys.js";
 import users from "./api/v1/users.js";
+import projects from "./api/v1/projects.js";
 
 const app = express();
 
@@ -53,6 +54,7 @@ mongoose
 
 // Routes for API
 app.use("/api/v1/users", users);
+app.use("/api/v1/projects", projects);
 app.use("*", (req, res) => res.status(404).json({ error: "not found" }));
 
 const port = process.env.PORT || 5000;

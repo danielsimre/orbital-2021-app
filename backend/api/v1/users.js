@@ -107,7 +107,7 @@ router.post("/login", (req, res, next) => {
 // @desc Displays a message requesting user to login
 // @access Public
 router.get("/login", (req, res) => {
-  res.json({ msg: "Failed to authenticate, please login" });
+  res.status(401).json({ msg: "Failed to authenticate, please login" });
 });
 
 // @route POST api/v1/users/logout
@@ -123,7 +123,21 @@ router.post("/logout", ensureAuthenticated, (req, res) => {
 // @desc Get the info of the logged in user
 // @access Private
 router.get("/", ensureAuthenticated, (req, res) => {
-  res.json(req.user.populate("projects"));
+  // api/v1/users?projects returns an array of all projects the user is involved in
+  if (req.query.projects === "") {
+    User.findById(req.user.id)
+      .populate({
+        path: "projects",
+        populate: {
+          path: "projectId",
+        },
+      })
+      .then((curUser) => res.json({ projects: curUser.projects }));
+  } else {
+    User.findById(req.user.id)
+      .populate("projects")
+      .then((curUser) => res.json(curUser));
+  }
 });
 
 export default router;
