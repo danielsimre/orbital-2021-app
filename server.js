@@ -54,7 +54,6 @@ mongoose
 // Routes for API
 app.use("/api/v1/users", users);
 app.use("/api/v1/projects", projects);
-app.use("*", (req, res) => res.status(404).json({ error: "not found" }));
 
 const port = process.env.PORT || 5000;
 
