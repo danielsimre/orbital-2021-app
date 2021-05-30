@@ -8,10 +8,6 @@ function MyProjectsPage(props) {
     return (
         <>
             <HeaderBar setIsAuthenticated={setIsAuthenticated} />
-            <NewProjectForm
-                projectList={projectList}
-                setProjectList={setProjectList}
-            />
             <ProjectList
                 projectList={projectList}
                 setProjectList={setProjectList}

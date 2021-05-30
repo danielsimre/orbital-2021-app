@@ -1,36 +1,33 @@
 import { useState } from "react";
 import { Button, TextField } from "@material-ui/core";
 import styles from "./NewProjectForm.module.css";
+import axios from "axios";
 
 function NewProjectForm(props) {
     // States for project name, description and due date
     const [projName, setProjName] = useState("");
     const [projDescription, setProjDescription] = useState("");
-    const [projDueDate, setProjDueDate] = useState();
-
-    const { projectList, setProjectList } = props;
+    const [projDueDate, setProjDueDate] = useState(
+        new Date().toISOString().slice(0, 10)
+    );
 
     // adds a new project to the list, should update to the database
     const handleSubmit = (event) => {
         event.preventDefault();
-        console.log(
-            "New Project (Due " +
-                projDueDate +
-                ") " +
-                projName +
-                ": " +
-                projDescription
-        );
-        const newProjectList = [
-            ...projectList,
-            {
-                name: projName,
-                description: projDescription,
-                dueDate: projDueDate,
-            },
-        ];
-        setProjectList(newProjectList);
+        handleNewProject(projName, projDescription, projDueDate);
     };
+
+    function handleNewProject(name, desc, dueDate) {
+        axios.post(
+            "http://localhost:5000/api/v1/projects/new",
+            {
+                name: name,
+                desc: desc,
+                dueDate: dueDate,
+            },
+            { withCredentials: true }
+        );
+    }
 
     return (
         <form onSubmit={handleSubmit} className={styles.newProjectForm}>
