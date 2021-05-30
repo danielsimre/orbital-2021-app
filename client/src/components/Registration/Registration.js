@@ -40,9 +40,10 @@ function Registration() {
       axios.post(
         "/api/v1/users/register",
         {
-          email: email,
           username: username,
+          email: email,
           password: password,
+          passwordConfirm: passwordConfirm,
         },
         { withCredentials: true }
       );
