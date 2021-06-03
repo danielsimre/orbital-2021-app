@@ -1,4 +1,4 @@
-import Login from "../components/Login";
+import LoginForm from "../components/LoginForm";
 import { Button } from "@material-ui/core";
 
 function LoginPage(props) {
@@ -6,7 +6,7 @@ function LoginPage(props) {
 
   return (
     <>
-      <Login
+      <LoginForm
         isAuthenticated={isAuthenticated}
         setIsAuthenticated={setIsAuthenticated}
       />

@@ -1,13 +1,11 @@
-import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import NewProjectPage from "./pages/NewProjectPage";
 import MyProjectsPage from "./pages/MyProjectsPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import { useState, useEffect } from "react";
-import { BrowserRouter, Route, Switch, Link } from "react-router-dom";
-import ProtectedRoute from "./ProtectedRoute";
-import ProjectMainPage from "./pages/ProjectMainPage";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import ProtectedRoute from "./components/router/ProtectedRoute";
 import axios from "axios";
 
 /* CURRENT STRUCTURE (pages -> components under them)

@@ -1,7 +1,7 @@
-import Registration from "../components/Registration";
+import RegistrationForm from "../components/RegistrationForm";
 
 function RegistrationPage() {
-  return <Registration />;
+  return <RegistrationForm />;
 }
 
 export default RegistrationPage;

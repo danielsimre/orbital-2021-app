@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
-import { Route } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import axios from "axios";
-
-/* TODO:
-    1) Figure out how to pass name, desc, due date props to a project in the list
-    
-*/
 
 const useStyles = makeStyles({
   tableTitle: {
@@ -21,7 +15,6 @@ const useStyles = makeStyles({
 });
 
 function ProjectList(props) {
-  const { projectList } = props;
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [queriedProjectList, setQueriedProjectList] = useState([]);
   const classes = useStyles();

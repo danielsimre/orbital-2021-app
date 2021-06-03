@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button, TextField } from "@material-ui/core";
-import styles from "./Registration.module.css";
+import styles from "./RegistrationForm.module.css";
 import axios from "axios";
 
-function Registration() {
+function RegistrationForm() {
   const [registerUsername, setRegisterUsername] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
@@ -118,4 +118,4 @@ function Registration() {
   );
 }
 
-export default Registration;
+export default RegistrationForm;

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Redirect } from "react-router-dom";
 import { Button, TextField } from "@material-ui/core";
-import styles from "./Login.module.css";
+import styles from "./LoginForm.module.css";
 import axios from "axios";
 
-function Login(props) {
+function LoginForm(props) {
   const [logInEmail, setLogInEmail] = useState("");
   const [logInPassword, setLogInPassword] = useState("");
   const { isAuthenticated, setIsAuthenticated } = props;
@@ -77,4 +77,4 @@ function Login(props) {
   );
 }
 
-export default Login;
+export default LoginForm;
