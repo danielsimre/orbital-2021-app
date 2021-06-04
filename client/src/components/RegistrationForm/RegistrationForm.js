@@ -49,97 +49,83 @@ function RegistrationForm() {
                     },
                     { withCredentials: true }
                 )
-                .then(() => setHasSuccessRegister(true))
                 .catch((err) => console.log(err));
         }
     }
 
     return (
-        <>
-            <form
-                className={styles.registrationForm}
-                onSubmit={handleRegistration}
-            >
-                <fieldset>
-                    <legend>Register</legend>
-                    <div>
-                        <TextField
-                            required
-                            id="email"
-                            label="Email"
-                            variant="outlined"
-                            type="email"
-                            value={registerEmail}
-                            onChange={(event) =>
-                                setRegisterEmail(event.target.value)
-                            }
-                        />
-                    </div>
-                    <div>
-                        <TextField
-                            required
-                            id="username"
-                            label="Username"
-                            variant="outlined"
-                            value={registerUsername}
-                            onChange={(event) =>
-                                setRegisterUsername(event.target.value)
-                            }
-                        />
-                    </div>
-                    <div>
-                        <TextField
-                            required
-                            id="password"
-                            label="Password"
-                            variant="outlined"
-                            type="password"
-                            value={registerPassword}
-                            onChange={(event) =>
-                                setRegisterPassword(event.target.value)
-                            }
-                            error={hasPasswordError}
-                        />
-                    </div>
-                    <div>
-                        <TextField
-                            required
-                            id="password"
-                            label="Confirm Password"
-                            variant="outlined"
-                            type="password"
-                            value={registerPasswordConfirm}
-                            onChange={(event) =>
-                                setRegisterPasswordConfirm(event.target.value)
-                            }
-                            error={hasPasswordError}
-                            helperText={errorText}
-                        />
-                    </div>
-                    <div>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            style={{ margin: "0 auto", display: "flex" }}
-                        >
-                            Register
-                        </Button>
-                    </div>
-                    <div>
-                        <Button href="/">Back to Login</Button>
-                    </div>
-                </fieldset>
-            </form>
-            {hasSuccessRegister ? (
-                <p>
-                    New account {registerUsername} with email {registerEmail}{" "}
-                    created successfully!
-                </p>
-            ) : (
-                <></>
-            )}
-        </>
+        <form className={styles.registrationForm} onSubmit={handleRegistration}>
+            <fieldset>
+                <legend>Register</legend>
+                <div>
+                    <TextField
+                        required
+                        id="email"
+                        label="Email"
+                        variant="outlined"
+                        type="email"
+                        value={registerEmail}
+                        onChange={(event) =>
+                            setRegisterEmail(event.target.value)
+                        }
+                    />
+                </div>
+                <div>
+                    <TextField
+                        required
+                        id="username"
+                        label="Username"
+                        variant="outlined"
+                        value={registerUsername}
+                        onChange={(event) =>
+                            setRegisterUsername(event.target.value)
+                        }
+                    />
+                </div>
+                <div>
+                    <TextField
+                        required
+                        id="password"
+                        label="Password"
+                        variant="outlined"
+                        type="password"
+                        value={registerPassword}
+                        onChange={(event) =>
+                            setRegisterPassword(event.target.value)
+                        }
+                        error={hasPasswordError}
+                    />
+                </div>
+                <div>
+                    <TextField
+                        required
+                        id="password"
+                        label="Confirm Password"
+                        variant="outlined"
+                        type="password"
+                        value={registerPasswordConfirm}
+                        onChange={(event) =>
+                            setRegisterPasswordConfirm(event.target.value)
+                        }
+                        error={hasPasswordError}
+                        helperText={errorText}
+                    />
+                </div>
+                <div>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        style={{ margin: "0 auto", display: "flex" }}
+                    >
+                        Register
+                    </Button>
+                </div>
+                <div>
+                    <Button href="/">Back to Login</Button>
+                </div>
+            </fieldset>
+        </form>
     );
 }
 
