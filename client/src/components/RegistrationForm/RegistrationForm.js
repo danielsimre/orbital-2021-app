@@ -10,7 +10,6 @@ function RegistrationForm() {
     const [registerPasswordConfirm, setRegisterPasswordConfirm] = useState("");
     const [hasPasswordError, setHasPasswordError] = useState(false);
     const [errorText, setErrorText] = useState("");
-    const [hasSuccessRegister, setHasSuccessRegister] = useState(false);
 
     const MIN_PASSWORD_LENGTH = 6;
 
