@@ -79,21 +79,28 @@ function App() {
                         <RegistrationPage />
                     </Route>
 
-                    <ProtectedRoute path="/home" component={HomePage} />
+                    <ProtectedRoute
+                        path="/home"
+                        component={HomePage}
+                        isAuthenticated={isAuthenticated}
+                    />
 
                     <ProtectedRoute
                         path="/new_project"
                         component={NewProjectPage}
+                        isAuthenticated={isAuthenticated}
                     />
 
                     <ProtectedRoute
                         path="/my_projects/:projectID"
                         component={ProjectMainPage}
+                        isAuthenticated={isAuthenticated}
                     />
 
                     <ProtectedRoute
                         path="/my_projects"
                         component={MyProjectsPage}
+                        isAuthenticated={isAuthenticated}
                     />
 
                     <Route path="*" component={Page404} />
