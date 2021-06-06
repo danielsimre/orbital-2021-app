@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import ProtectedRoute from "./components/router/ProtectedRoute";
 import axios from "axios";
 
+import HeaderBar from "./components/HeaderBar";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import NewProjectPage from "./pages/NewProjectPage";
@@ -59,54 +60,46 @@ function App() {
             <h1>Verifying...</h1>
         </div>
     ) : (
-        <BrowserRouter>
-            <Switch>
-                <Route exact path="/">
-                    <LoginPage
-                        isAuthenticated={isAuthenticated}
-                        setIsAuthenticated={setIsAuthenticated}
+        <>
+            {isAuthenticated ? (
+                <HeaderBar setIsAuthenticated={setIsAuthenticated} />
+            ) : (
+                <></>
+            )}
+            <BrowserRouter>
+                <Switch>
+                    <Route exact path="/">
+                        <LoginPage
+                            isAuthenticated={isAuthenticated}
+                            setIsAuthenticated={setIsAuthenticated}
+                        />
+                    </Route>
+
+                    <Route exact path="/register">
+                        <RegistrationPage />
+                    </Route>
+
+                    <ProtectedRoute path="/home" component={HomePage} />
+
+                    <ProtectedRoute
+                        path="/new_project"
+                        component={NewProjectPage}
                     />
-                </Route>
 
-                <Route exact path="/register">
-                    <RegistrationPage />
-                </Route>
+                    <ProtectedRoute
+                        path="/my_projects/:projectID"
+                        component={ProjectMainPage}
+                    />
 
-                <ProtectedRoute
-                    path="/home"
-                    component={HomePage}
-                    isAuthenticated={isAuthenticated}
-                    setIsAuthenticated={setIsAuthenticated}
-                />
+                    <ProtectedRoute
+                        path="/my_projects"
+                        component={MyProjectsPage}
+                    />
 
-                <ProtectedRoute
-                    path="/new_project"
-                    component={NewProjectPage}
-                    isAuthenticated={isAuthenticated}
-                    setIsAuthenticated={setIsAuthenticated}
-                />
-
-                <ProtectedRoute
-                    path="/my_projects/:projectID"
-                    component={ProjectMainPage}
-                    isAuthenticated={isAuthenticated}
-                    setIsAuthenticated={setIsAuthenticated}
-                />
-
-                <ProtectedRoute
-                    path="/my_projects"
-                    component={MyProjectsPage}
-                    isAuthenticated={isAuthenticated}
-                    setIsAuthenticated={setIsAuthenticated}
-                />
-
-                <Route
-                    path="*"
-                    component={Page404}
-                    isAuthenticated={isAuthenticated}
-                />
-            </Switch>
-        </BrowserRouter>
+                    <Route path="*" component={Page404} />
+                </Switch>
+            </BrowserRouter>
+        </>
     );
 }
 
