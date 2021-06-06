@@ -4,6 +4,9 @@ function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
-  return res.redirect("/api/v1/users/login");
+  return res.status(401).json({
+    msg: "Failed to authenticate, please login",
+    isAuthenticated: false,
+  });
 }
 export default ensureAuthenticated;

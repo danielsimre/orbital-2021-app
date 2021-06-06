@@ -8,8 +8,11 @@
     "start": "node server.js",
     "server": "nodemon server.js",
     "build": "cd client && npm run build",
+    "client": "cd client && npm run start",
     "install-client": "cd client && npm install",
-    "heroku-postbuild": "npm run install-client && npm run build"
+    "heroku-postbuild": "npm run install-client && npm run build",
+    "install-app": "concurrently --kill-others \"npm install\" \"npm run install-client\"",
+    "start-app": "concurrently --kill-others \"npm run server\" \"npm run client\""
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +29,7 @@
     "passport-local": "^1.0.0"
   },
   "devDependencies": {
+    "concurrently": "^6.2.0",
     "eslint": "^7.27.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^8.3.0",

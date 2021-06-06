@@ -1,5 +1,4 @@
 import HeaderBar from "../components/HeaderBar";
-import NewProjectForm from "../components/NewProjectForm";
 import ProjectList from "../components/ProjectList/ProjectList";
 
 function MyProjectsPage(props) {

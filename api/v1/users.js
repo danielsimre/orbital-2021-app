@@ -103,13 +103,6 @@ router.post("/login", (req, res, next) => {
   })(req, res, next);
 });
 
-// @route GET api/v1/users/login
-// @desc Displays a message requesting user to login
-// @access Public
-router.get("/login", (req, res) => {
-  res.status(401).json({ msg: "Failed to authenticate, please login" });
-});
-
 // @route POST api/v1/users/logout
 // @desc Log out of the current session
 // @access Private
@@ -138,6 +131,13 @@ router.get("/", ensureAuthenticated, (req, res) => {
       .populate("projects")
       .then((curUser) => res.json(curUser));
   }
+});
+
+// @route GET api/v1/users/auth
+// @desc Checks if the user is logged in
+// @access Private
+router.get("/auth", ensureAuthenticated, (req, res) => {
+  res.json({ isAuthenticated: true });
 });
 
 export default router;
