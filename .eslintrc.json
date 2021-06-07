@@ -19,6 +19,7 @@
     "linebreak-style": ["error", "windows"],
     "no-console": "off",
     "import/extensions": "off",
-    "consistent-return": "warn"
+    "consistent-return": "warn",
+    "no-underscore-dangle": ["error", { "props": false }]
   }
 }

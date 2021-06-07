@@ -29,85 +29,82 @@ import Page404 from "./pages/Page404";
 */
 
 function App() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-    async function getUserData() {
-        try {
-            await axios
-                .get("/api/v1/users", {
-                    withCredentials: true,
-                })
-                .then((response) => {
-                    if (
-                        response.data.msg !==
-                        "Failed to authenticate, please login"
-                    ) {
-                        setIsAuthenticated(true);
-                    }
-                });
-        } catch (err) {
-            console.log(err);
-        } finally {
-            setIsLoading(false);
-        }
+  async function getUserData() {
+    try {
+      await axios
+        .get("/api/v1/users", {
+          withCredentials: true,
+        })
+        .then((response) => {
+          if (response.data.msg !== "Failed to authenticate, please login") {
+            setIsAuthenticated(true);
+          }
+        });
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsLoading(false);
     }
+  }
 
-    useEffect(() => getUserData(), []);
+  useEffect(() => getUserData(), []);
 
-    return isLoading ? (
-        <div>
-            <h1>Verifying...</h1>
-        </div>
-    ) : (
-        <>
-            {isAuthenticated ? (
-                <HeaderBar setIsAuthenticated={setIsAuthenticated} />
-            ) : (
-                <></>
-            )}
-            <BrowserRouter>
-                <Switch>
-                    <Route exact path="/">
-                        <LoginPage
-                            isAuthenticated={isAuthenticated}
-                            setIsAuthenticated={setIsAuthenticated}
-                        />
-                    </Route>
+  return isLoading ? (
+    <div>
+      <h1>Verifying...</h1>
+    </div>
+  ) : (
+    <>
+      {isAuthenticated ? (
+        <HeaderBar setIsAuthenticated={setIsAuthenticated} />
+      ) : (
+        <></>
+      )}
+      <BrowserRouter>
+        <Switch>
+          <Route exact path="/">
+            <LoginPage
+              isAuthenticated={isAuthenticated}
+              setIsAuthenticated={setIsAuthenticated}
+            />
+          </Route>
 
-                    <Route exact path="/register">
-                        <RegistrationPage />
-                    </Route>
+          <Route exact path="/register">
+            <RegistrationPage />
+          </Route>
 
-                    <ProtectedRoute
-                        path="/home"
-                        component={HomePage}
-                        isAuthenticated={isAuthenticated}
-                    />
+          <ProtectedRoute
+            path="/home"
+            component={HomePage}
+            isAuthenticated={isAuthenticated}
+          />
 
-                    <ProtectedRoute
-                        path="/new_project"
-                        component={NewProjectPage}
-                        isAuthenticated={isAuthenticated}
-                    />
+          <ProtectedRoute
+            path="/new_project"
+            component={NewProjectPage}
+            isAuthenticated={isAuthenticated}
+          />
 
-                    <ProtectedRoute
-                        path="/my_projects/:projectID"
-                        component={ProjectMainPage}
-                        isAuthenticated={isAuthenticated}
-                    />
+          <ProtectedRoute
+            path="/my_projects/:projectID"
+            component={ProjectMainPage}
+            isAuthenticated={isAuthenticated}
+          />
 
-                    <ProtectedRoute
-                        path="/my_projects"
-                        component={MyProjectsPage}
-                        isAuthenticated={isAuthenticated}
-                    />
+          <ProtectedRoute
+            path="/my_projects"
+            component={MyProjectsPage}
+            isAuthenticated={isAuthenticated}
+          />
 
-                    <Route path="*" component={Page404} />
-                </Switch>
-            </BrowserRouter>
-        </>
-    );
+          <Route path="*" component={Page404} />
+        </Switch>
+      </BrowserRouter>
+    </>
+  );
 }
 
 export default App;

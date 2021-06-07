@@ -1,7 +1,7 @@
 import ProjectMain from "../components/ProjectMain";
 
 function ProjectMainPage() {
-    return <ProjectMain />;
+  return <ProjectMain />;
 }
 
 export default ProjectMainPage;
