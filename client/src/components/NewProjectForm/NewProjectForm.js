@@ -5,7 +5,8 @@ import axios from "axios";
 
 function NewProjectForm(props) {
   // States for project name, description and due date
-  const { projName, setProjName, setHasNewProjectCreated } = props;
+  const { projName, setProjName, setHasNewProjectCreated, setNewestProjName } =
+    props;
   const [projDescription, setProjDescription] = useState("");
   const [projDueDate, setProjDueDate] = useState(
     new Date().toISOString().slice(0, 10)
@@ -28,7 +29,8 @@ function NewProjectForm(props) {
         },
         { withCredentials: true }
       )
-      .then(() => setHasNewProjectCreated(true));
+      .then(() => setHasNewProjectCreated(true))
+      .then(() => setNewestProjName(name));
   }
 
   return (
@@ -42,7 +44,9 @@ function NewProjectForm(props) {
             variant="outlined"
             required
             value={projName}
-            onChange={(event) => setProjName(event.target.value)}
+            onChange={(event) => {
+              setProjName(event.target.value);
+            }}
           />
         </div>
         <div>
