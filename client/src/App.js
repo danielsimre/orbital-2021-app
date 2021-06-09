@@ -1,37 +1,38 @@
-import LoginPage from "./pages/LoginPage";
-import HomePage from "./pages/HomePage";
-import NewProjectPage from "./pages/NewProjectPage";
-import MyProjectsPage from "./pages/MyProjectsPage";
-import RegistrationPage from "./pages/RegistrationPage";
 import { useState, useEffect } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import ProtectedRoute from "./components/router/ProtectedRoute";
 import axios from "axios";
 
+import HeaderBar from "./components/HeaderBar";
+import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage";
+import NewProjectPage from "./pages/NewProjectPage";
+import MyProjectsPage from "./pages/MyProjectsPage";
+import RegistrationPage from "./pages/RegistrationPage";
+import ProjectMainPage from "./pages/ProjectMainPage";
+import GroupMainPage from "./pages/GroupMainPage";
+import Page404 from "./pages/Page404";
+
 /* CURRENT STRUCTURE (pages -> components under them)
   - Login Page
     - Login
+  - HeaderBar on all pages below
   - Home Page
-    - HeaderBar
     - Home
   - New Project Page
-    - HeaderBar
-    - NewProjectForm (does not work here, need to connect to database)
+    - NewProjectForm
   - My Projects Page
-    - HeaderBar
     - ProjectList
-    - NewProjectForm (works here)
-  - Project Main Page (ideally linked from button from ProjectList: see dynamic paths for react-router)
+  - Project Main Page
     - ProjectMain
+  - Group Main Page
+    - TaskBoard
+      - TaskList
 */
 
 function App() {
-  // lift projectList state up to App level for both NewProjectForm and ProjectList
-  const [projectList, setProjectList] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  console.log(isAuthenticated);
 
   async function getUserData() {
     try {
@@ -58,45 +59,59 @@ function App() {
       <h1>Verifying...</h1>
     </div>
   ) : (
-    <BrowserRouter>
-      <Switch>
-        <Route exact path="/">
-          <LoginPage
+    <>
+      {isAuthenticated ? (
+        <HeaderBar setIsAuthenticated={setIsAuthenticated} />
+      ) : (
+        <></>
+      )}
+      <BrowserRouter>
+        <Switch>
+          <Route exact path="/">
+            <LoginPage
+              isAuthenticated={isAuthenticated}
+              setIsAuthenticated={setIsAuthenticated}
+            />
+          </Route>
+
+          <Route exact path="/register">
+            <RegistrationPage />
+          </Route>
+
+          <ProtectedRoute
+            path="/home"
+            component={HomePage}
             isAuthenticated={isAuthenticated}
-            setIsAuthenticated={setIsAuthenticated}
           />
-        </Route>
 
-        <Route exact path="/register">
-          <RegistrationPage />
-        </Route>
+          <ProtectedRoute
+            path="/new_project"
+            component={NewProjectPage}
+            isAuthenticated={isAuthenticated}
+          />
 
-        <ProtectedRoute
-          path="/home"
-          component={HomePage}
-          isAuthenticated={isAuthenticated}
-          setIsAuthenticated={setIsAuthenticated}
-        />
+          <ProtectedRoute
+            path="/my_projects/:projectID"
+            component={ProjectMainPage}
+            isAuthenticated={isAuthenticated}
+          />
 
-        <ProtectedRoute
-          path="/new_project"
-          component={NewProjectPage}
-          isAuthenticated={isAuthenticated}
-          setIsAuthenticated={setIsAuthenticated}
-          projectList={projectList}
-          setProjectList={setProjectList}
-        />
+          <ProtectedRoute
+            path="/my_projects"
+            component={MyProjectsPage}
+            isAuthenticated={isAuthenticated}
+          />
 
-        <ProtectedRoute
-          path="/my_projects"
-          component={MyProjectsPage}
-          isAuthenticated={isAuthenticated}
-          setIsAuthenticated={setIsAuthenticated}
-          projectList={projectList}
-          setProjectList={setProjectList}
-        />
-      </Switch>
-    </BrowserRouter>
+          <ProtectedRoute
+            path="/groups/:groupID"
+            component={GroupMainPage}
+            isAuthenticated={isAuthenticated}
+          />
+
+          <Route path="*" component={Page404} />
+        </Switch>
+      </BrowserRouter>
+    </>
   );
 }
 

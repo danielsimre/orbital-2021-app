@@ -5,7 +5,7 @@ import axios from "axios";
 
 function NewProjectForm(props) {
   // States for project name, description and due date
-  const [projName, setProjName] = useState("");
+  const { projName, setProjName, setHasNewProjectCreated } = props;
   const [projDescription, setProjDescription] = useState("");
   const [projDueDate, setProjDueDate] = useState(
     new Date().toISOString().slice(0, 10)
@@ -18,15 +18,17 @@ function NewProjectForm(props) {
   };
 
   function handleNewProject(name, desc, dueDate) {
-    axios.post(
-      "/api/v1/projects/new",
-      {
-        name: name,
-        desc: desc,
-        dueDate: dueDate,
-      },
-      { withCredentials: true }
-    );
+    axios
+      .post(
+        "/api/v1/projects/new",
+        {
+          name: name,
+          desc: desc,
+          dueDate: dueDate,
+        },
+        { withCredentials: true }
+      )
+      .then(() => setHasNewProjectCreated(true));
   }
 
   return (

@@ -21,7 +21,9 @@ router.get("/info/:id", ensureAuthenticated, (req, res) => {
     .then((curProject) => {
       // If the users array is empty, then the logged in user's id was not found in this project
       if (!curProject.users.length) {
-        res.status(401).json({ msg: "Not authorized to view this project" });
+        res.status(403).json({
+          msg: "Not authorized to view this project",
+        });
       } else {
         res.json(curProject);
       }
@@ -85,4 +87,26 @@ router.post("/new", ensureAuthenticated, (req, res) => {
     .catch((err) => console.log(err));
 });
 
+/*
+// @route GET api/v1/projects/
+// @desc Get the users that belong in a project
+// @access Private
+router.get("/", ensureAuthenticated, (req, res) => {
+    // api/v1/projects?users returns an array of all users belonging to that project
+    if (req.query.users === "") {
+      Project.findById(req.project.id)
+        .populate({
+          path: "users",
+          populate: {
+            path: "userId",
+          },
+        })
+        .then((currProj) => res.json({ users: currProj.users }));
+    } else {
+      Project.findById(req.project.id)
+        .populate("users")
+        .then((currProj) => res.json(currProj));
+    }
+  });
+*/
 export default router;

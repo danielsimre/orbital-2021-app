@@ -26,7 +26,7 @@ function ProjectList(props) {
           withCredentials: true,
         })
         .then((response) => {
-          console.log(response);
+          console.log(response); // REMOVE WHEN NOT NEEDED
           setQueriedProjectList(response.data.projects);
         });
     } catch (err) {
@@ -37,6 +37,10 @@ function ProjectList(props) {
   }
 
   useEffect(() => queryProjectList(), []);
+
+  function getProjectURL(projectID) {
+    return "my_projects/" + projectID;
+  }
 
   return isRetrieving ? (
     <div>
@@ -55,13 +59,14 @@ function ProjectList(props) {
         </thead>
         <tbody align="center">
           {queriedProjectList.map((project, index) => (
-            <tr key={project.projectId._id}>
+            <tr key={project.projectId.id}>
               <td>{index + 1}</td>
-              {/* Current link is a link to a common page not modified by any props */}
               <td>
-                <Button href="/project/main">{project.projectId.name}</Button>
+                <Button href={getProjectURL(project.projectId.id)}>
+                  {project.projectId.attributes.name}
+                </Button>
               </td>
-              <td>{project.projectId.desc}</td>
+              <td>{project.projectId.attributes.desc}</td>
             </tr>
           ))}
         </tbody>
