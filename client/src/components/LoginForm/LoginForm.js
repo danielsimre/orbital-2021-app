@@ -25,13 +25,12 @@ function LoginForm(props) {
         { withCredentials: true }
       )
       .then(function (response) {
-        console.log(response);
         if (response.data.msg === "Successfully Authenticated") {
           setIsAuthenticated(true);
         }
       })
       .catch(function (error) {
-        console.log(userEmail);
+        console.log("Error with email: " + userEmail);
         console.log(error);
       });
   }
