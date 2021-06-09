@@ -37,13 +37,11 @@ function App() {
   async function getUserData() {
     try {
       await axios
-        .get("/api/v1/users", {
+        .get("/api/v1/users/auth", {
           withCredentials: true,
         })
         .then((response) => {
-          if (response.data.msg !== "Failed to authenticate, please login") {
-            setIsAuthenticated(true);
-          }
+          setIsAuthenticated(response.data.isAuthenticated);
         });
     } catch (err) {
       console.log(err);

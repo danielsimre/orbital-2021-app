@@ -9,8 +9,8 @@ import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 
 import passportConfig from "./config/passport.js";
-import users from "./api/v1/users.js";
-import projects from "./api/v1/projects.js";
+import users from "./routes/users.js";
+import projects from "./routes/projects.js";
 
 const app = express();
 dotenv.config();

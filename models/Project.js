@@ -40,7 +40,7 @@ const ProjectSchema = new Schema(
         const { id, ...rest } = ret;
         delete rest._id;
         delete rest.__v;
-        return { id: ret.id, type: "users", attributes: { ...rest } };
+        return { id: ret.id, type: "projects", attributes: { ...rest } };
       },
     },
   }
