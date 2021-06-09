@@ -42,7 +42,7 @@ export const validateGetProjectInfo = (curProject, res) => {
     res.status(401).json({ msg: "Not authorized to view this project" });
     return Promise.reject(new Error("User unauthorized to view project"));
   }
-  return Promise.resolve();
+  return curProject;
 };
 
 // Checks if user has permissions to add users to project/groups
