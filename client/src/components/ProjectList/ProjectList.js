@@ -59,14 +59,14 @@ function ProjectList(props) {
         </thead>
         <tbody align="center">
           {queriedProjectList.map((project, index) => (
-            <tr key={project.projectId._id}>
+            <tr key={project.projectId.id}>
               <td>{index + 1}</td>
               <td>
-                <Button href={getProjectURL(project.projectId._id)}>
-                  {project.projectId.name}
+                <Button href={getProjectURL(project.projectId.id)}>
+                  {project.projectId.attributes.name}
                 </Button>
               </td>
-              <td>{project.projectId.desc}</td>
+              <td>{project.projectId.attributes.desc}</td>
             </tr>
           ))}
         </tbody>

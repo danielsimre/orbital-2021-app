@@ -16,7 +16,7 @@ function ProjectMain(props) {
       })
       .then(function (response) {
         console.log(response); // REMOVE WHEN NOT NEEDED
-        setProjectData(response.data);
+        setProjectData(response.data.attributes);
       })
       .catch(function (error) {
         console.log(`Could not find project with ID: ${projID}`);

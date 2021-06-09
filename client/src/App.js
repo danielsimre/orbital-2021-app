@@ -10,22 +10,24 @@ import NewProjectPage from "./pages/NewProjectPage";
 import MyProjectsPage from "./pages/MyProjectsPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import ProjectMainPage from "./pages/ProjectMainPage";
+import GroupMainPage from "./pages/GroupMainPage";
 import Page404 from "./pages/Page404";
 
 /* CURRENT STRUCTURE (pages -> components under them)
   - Login Page
     - Login
+  - HeaderBar on all pages below
   - Home Page
-    - HeaderBar
     - Home
   - New Project Page
-    - HeaderBar
     - NewProjectForm
   - My Projects Page
-    - HeaderBar
     - ProjectList
-  - Project Main Page (ideally linked from button from ProjectList: see dynamic paths for react-router)
+  - Project Main Page
     - ProjectMain
+  - Group Main Page
+    - TaskBoard
+      - TaskList
 */
 
 function App() {
@@ -97,6 +99,12 @@ function App() {
           <ProtectedRoute
             path="/my_projects"
             component={MyProjectsPage}
+            isAuthenticated={isAuthenticated}
+          />
+
+          <ProtectedRoute
+            path="/groups/:groupID"
+            component={GroupMainPage}
             isAuthenticated={isAuthenticated}
           />
 
