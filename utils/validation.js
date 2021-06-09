@@ -1,4 +1,4 @@
-import ProjectRoles from "./enums.js";
+import { ProjectRoles } from "./enums.js";
 
 export const validateRegistration = (req, res, queriedUser) => {
   const { username, email, password, passwordConfirm } = req.body;
