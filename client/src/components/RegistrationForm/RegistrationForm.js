@@ -1,15 +1,25 @@
 import { useState } from "react";
-import { Button, TextField } from "@material-ui/core";
+import { Button, TextField, IconButton } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
+import CloseIcon from "@material-ui/icons/Close";
+
 import styles from "./RegistrationForm.module.css";
 import axios from "axios";
 
 function RegistrationForm() {
+  // for the form
   const [registerUsername, setRegisterUsername] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerPasswordConfirm, setRegisterPasswordConfirm] = useState("");
   const [hasPasswordError, setHasPasswordError] = useState(false);
   const [errorText, setErrorText] = useState("");
+
+  // for the laert
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
 
   const MIN_PASSWORD_LENGTH = 6;
 
@@ -48,9 +58,24 @@ function RegistrationForm() {
           },
           { withCredentials: true }
         )
-        .then((res) => console.log(res))
-        .catch((err) => console.log(err));
+        .then(
+          (res) =>
+            handleAlert(
+              "Success!",
+              "Your new account has been created!",
+              "success"
+            ),
+          (err) =>
+            handleAlert("Error!", "Reason: " + err.response.data.msg, "error")
+        )
+        .finally(() => setDisplayAlert(true));
     }
+  }
+
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
   }
 
   return (
@@ -129,6 +154,28 @@ function RegistrationForm() {
         >
           Back to Login
         </Button>
+      </div>
+      <div>
+        {displayAlert && (
+          <Alert
+            severity={alertState}
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setDisplayAlert(false);
+                }}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            <AlertTitle>{alertTitleText}</AlertTitle>
+            {alertText}
+          </Alert>
+        )}
       </div>
     </>
   );
