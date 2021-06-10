@@ -20,6 +20,7 @@
     "no-console": "off",
     "import/extensions": "off",
     "consistent-return": "warn",
-    "no-underscore-dangle": ["error", { "props": false }]
+    "no-underscore-dangle": "off",
+    "no-param-reassign": "off"
   }
 }

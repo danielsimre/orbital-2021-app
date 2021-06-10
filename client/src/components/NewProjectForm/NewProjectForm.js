@@ -10,6 +10,8 @@ function NewProjectForm(props) {
   const [projDueDate, setProjDueDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
+  const [hasDateError, setHasDateError] = useState(false);
+  const [errorText, setErrorText] = useState("");
 
   // adds a new project to the list, should update to the database
   const handleSubmit = (event) => {
@@ -18,6 +20,17 @@ function NewProjectForm(props) {
   };
 
   function handleNewProject(name, desc, dueDate) {
+    // Reset state of date checker
+    setHasDateError(false);
+    setErrorText("");
+
+    // Validate date
+    if (dueDate <= new Date().toISOString().slice(0, 10)) {
+      setHasDateError(true);
+      setErrorText("Due date invalid, must be set after today's date");
+      return;
+    }
+
     axios
       .post(
         "/api/v1/projects/new",
@@ -67,6 +80,8 @@ function NewProjectForm(props) {
             InputLabelProps={{
               shrink: true,
             }}
+            error={hasDateError}
+            helperText={errorText}
           />
         </div>
         <Button

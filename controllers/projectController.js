@@ -46,9 +46,11 @@ export const create = (req, res) => {
     dueDate,
     created_by: req.user.id,
   });
-
-  // Check if date is valid
-  if (!(newProject.dueDate instanceof Date)) {
+  // Check if dueDate is the proper date and that the due date is after the current date
+  if (
+    !(newProject.dueDate instanceof Date) ||
+    newProject.dueDate <= new Date()
+  ) {
     res.status(400).json({ msg: "Please enter a valid date" });
     return;
   }
