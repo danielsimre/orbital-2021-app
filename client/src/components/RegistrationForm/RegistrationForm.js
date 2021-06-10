@@ -15,7 +15,7 @@ function RegistrationForm() {
   const [hasPasswordError, setHasPasswordError] = useState(false);
   const [errorText, setErrorText] = useState("");
 
-  // for the laert
+  // for the alert
   const [displayAlert, setDisplayAlert] = useState(false);
   const [alertText, setAlertText] = useState("");
   const [alertTitleText, setAlertTitleText] = useState("");
