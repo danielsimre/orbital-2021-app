@@ -7,45 +7,25 @@ import { validateRegistration } from "../utils/validation.js";
 export const register = (req, res) => {
   const { username, email, password } = req.body;
 
-  User.findOne({
-    $or: [
-      {
-        email,
-      },
-      {
+  User.findOne({ $or: [{ email }, { username }] })
+    .then((queriedUser) => validateRegistration(req, res, queriedUser))
+    // Hash password with bcryptjs, then store in database
+    .then(() => bcrypt.genSalt(10))
+    .then((salt) => bcrypt.hash(password, salt))
+    .then((hash) => {
+      const newUser = new User({
         username,
-      },
-    ],
-  })
-    .then((queriedUser) => {
-      if (!validateRegistration(req, res, queriedUser)) {
-        return Promise.reject(new Error("Registration failed"));
-      }
-      // Hash password with bcryptjs, then store in database
-      return bcrypt.genSalt(10, (err, salt) =>
-        bcrypt.hash(password, salt, (hashErr, hash) => {
-          if (hashErr) throw hashErr;
-          const newUser = new User({
-            username,
-            email,
-            password: hash,
-          });
-
-          // Send back user details for confirmation
-          newUser
-            .save()
-            .then((savedUser) => {
-              res.json({
-                user: {
-                  id: savedUser.id,
-                  username: savedUser.username,
-                  email: savedUser.email,
-                },
-              });
-            })
-            .catch((saveErr) => console.log(saveErr));
-        })
-      );
+        email,
+        password: hash,
+      });
+      // Send back user details for confirmation
+      newUser.save();
+      console.log(`Successfully registered: ${email}`);
+      res.json({
+        id: newUser.id,
+        username,
+        email,
+      });
     })
     .catch((err) => console.log(err));
 };
