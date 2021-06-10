@@ -1,57 +1,74 @@
 import { ProjectRoles } from "./enums.js";
 
+// Internal function to send json message + throw error for failed validation
+const sendJsonErrMessage = (res, status, msg) => {
+  res.status(status).json({ msg });
+  throw new Error(msg);
+};
+
+// The following two functions return truthy values if the query was successful, falsy values otherwise
+export const successfulFindQuery = (queriedObjects) => queriedObjects.length;
+export const successfulFindOneQuery = (queriedObject) => queriedObject;
+
+export const validateFieldsPresent = (res, msg, ...fields) => {
+  if (!fields.every((field) => field)) {
+    sendJsonErrMessage(res, 400, msg);
+  }
+};
+
 export const validateRegistration = (req, res, queriedUser) => {
   const { username, email, password, passwordConfirm } = req.body;
 
-  // Ensure all fields are filled in
-  if (!username || !email || !password || !passwordConfirm) {
-    res.status(400).json({ msg: "Please fill in all fields" });
-    return false;
-  }
+  validateFieldsPresent(
+    res,
+    "Please fill in the fields username, email, password, passwordConfirm",
+    username,
+    email,
+    password,
+    passwordConfirm
+  );
 
   // Ensure that user confirms password correctly
   if (password !== passwordConfirm) {
-    res.status(400).json({ msg: "Password confirmation failed" });
-    return false;
+    sendJsonErrMessage(res, 400, "Password confirmation failed");
   }
 
   // Enforces password length of >= 6
   if (password.length < 6) {
-    res.status(400).json({ msg: "Password should be at least 6 characters" });
-    return false;
+    sendJsonErrMessage(res, 400, "Password should be at least 6 characters");
   }
 
   if (queriedUser && queriedUser.email === email) {
-    res.status(400).json({ msg: "Email is already registered" });
-    return false;
+    sendJsonErrMessage(res, 400, "Email is already registered");
   }
+
   if (queriedUser && queriedUser.username === username) {
-    res.status(400).json({ msg: "Username is already in use" });
-    return false;
+    sendJsonErrMessage(res, 400, "Username is already in use");
   }
-  return true;
 };
 
-export const validateGetProjectInfo = (curProject, res) => {
+export const validateGetProjectInfo = (res, curProject) => {
   // If the users array is empty, then the logged in user's id was not found in this project
-  if (curProject == null) {
-    res.status(401).json({ msg: "Project does not exist" });
-    return Promise.reject(new Error("Project does not exist"));
+  if (successfulFindOneQuery(curProject)) {
+    sendJsonErrMessage(res, 401, "Project does not exist");
   }
+
   if (!curProject.users.length) {
-    res.status(401).json({ msg: "Not authorized to view this project" });
-    return Promise.reject(new Error("User unauthorized to view project"));
+    sendJsonErrMessage(res, 401, "Not authorized to view this project");
   }
   return curProject;
 };
 
 // Checks if user has permissions to add users to project/groups
-export const validateAddUsers = (curProject, res) => {
+export const validateAddUsers = (res, curProject) => {
   if (curProject.users[0].role !== ProjectRoles.MENTOR) {
-    res.status(401).json({ msg: "Not authorized to add users to project" });
-    return Promise.reject(
-      new Error("User unauthorized to add users to project")
-    );
+    sendJsonErrMessage(res, 401, "Not authorized to add users to project");
   }
   return curProject;
+};
+
+export const validateDueDate = (res, dueDate) => {
+  if (!(dueDate instanceof Date) || dueDate <= new Date()) {
+    sendJsonErrMessage(res, 400, "Please enter a valid date");
+  }
 };
