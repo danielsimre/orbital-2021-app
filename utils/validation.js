@@ -39,22 +39,22 @@ export const validateRegistration = (req, res, queriedUser) => {
   }
 
   if (queriedUser && queriedUser.email === email) {
-    sendJsonErrMessage(res, 400, "Email is already registered");
+    sendJsonErrMessage(res, 409, "Email is already registered");
   }
 
   if (queriedUser && queriedUser.username === username) {
-    sendJsonErrMessage(res, 400, "Username is already in use");
+    sendJsonErrMessage(res, 409, "Username is already in use");
   }
 };
 
 export const validateGetProjectInfo = (res, curProject) => {
   // If the users array is empty, then the logged in user's id was not found in this project
   if (successfulFindOneQuery(curProject)) {
-    sendJsonErrMessage(res, 401, "Project does not exist");
+    sendJsonErrMessage(res, 404, "Project does not exist");
   }
 
   if (!curProject.users.length) {
-    sendJsonErrMessage(res, 401, "Not authorized to view this project");
+    sendJsonErrMessage(res, 403, "Not authorized to view this project");
   }
   return curProject;
 };
@@ -62,7 +62,7 @@ export const validateGetProjectInfo = (res, curProject) => {
 // Checks if user has permissions to add users to project/groups
 export const validateAddUsers = (res, curProject) => {
   if (curProject.users[0].role !== ProjectRoles.MENTOR) {
-    sendJsonErrMessage(res, 401, "Not authorized to add users to project");
+    sendJsonErrMessage(res, 403, "Not authorized to add users to project");
   }
   return curProject;
 };
