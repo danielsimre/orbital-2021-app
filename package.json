@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@material-ui/lab": "^4.0.0-alpha.58",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
