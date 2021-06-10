@@ -28,10 +28,15 @@ function ProjectMain(props) {
     console.log(projectID);
   }, [projectID]);
 
+  function convertDate(dateString) {
+    return new Date(dateString).toLocaleDateString();
+  }
+
   return (
     <div>
       <h1>
-        Project Main Page for {projectData.name} due {projectData.dueDate}.
+        Project Main Page for {projectData.name} due{" "}
+        {convertDate(projectData.dueDate)}.
       </h1>
       <p>Description: {projectData.desc}</p>
     </div>
