@@ -21,6 +21,7 @@ const ProjectSchema = new Schema(
       type: Date,
       required: true,
     },
+    groups: [{ type: Schema.Types.ObjectId, ref: "Group" }],
     created_by: {
       type: Schema.Types.ObjectId,
       ref: "User",

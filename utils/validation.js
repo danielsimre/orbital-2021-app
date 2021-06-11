@@ -48,21 +48,49 @@ export const validateRegistration = (req, res, queriedUser) => {
 };
 
 export const validateGetProjectInfo = (res, curProject) => {
-  // If the users array is empty, then the logged in user's id was not found in this project
-  if (successfulFindOneQuery(curProject)) {
+  if (!successfulFindOneQuery(curProject)) {
     sendJsonErrMessage(res, 404, "Project does not exist");
   }
-
+  // If the users array is empty, then the logged in user's id was not found in this project
   if (!curProject.users.length) {
     sendJsonErrMessage(res, 403, "Not authorized to view this project");
   }
   return curProject;
 };
 
+export const validateGetGroupInfo = (res, curGroup) => {
+  if (!successfulFindOneQuery(curGroup)) {
+    sendJsonErrMessage(
+      res,
+      400,
+      "Group does not exist or user is not authorized to access this group"
+    );
+  }
+  return curGroup;
+};
+
 // Checks if user has permissions to add users to project/groups
-export const validateAddUsers = (res, curProject) => {
+export const validateAddUsersToProject = (res, curProject) => {
   if (curProject.users[0].role !== ProjectRoles.MENTOR) {
     sendJsonErrMessage(res, 403, "Not authorized to add users to project");
+  }
+  return curProject;
+};
+
+export const validateAddUsersToGroup = (res, curGroup) => {
+  if (!successfulFindOneQuery(curGroup)) {
+    sendJsonErrMessage(
+      res,
+      400,
+      "Group does not exist or user is not authorized to add users to group"
+    );
+  }
+  return curGroup;
+};
+
+export const validateAddGroupsToProject = (res, curProject) => {
+  if (curProject.users[0].role !== ProjectRoles.MENTOR) {
+    sendJsonErrMessage(res, 403, "Not authorized to add groups to project");
   }
   return curProject;
 };
