@@ -25,7 +25,7 @@ export const getInfo = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-// Can add users as group members or mentors
+// Can add users as group members or mentors (by adding ?mentor to the url)
 export const addUsers = (req, res) => {
   Group.findOne({
     _id: req.params.id,

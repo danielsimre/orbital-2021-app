@@ -87,7 +87,7 @@ export const create = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-// Currently only adds students
+// Can add users as group members or mentors (by adding ?mentor to the url)
 export const addUsers = (req, res) => {
   Project.findById(req.params.id)
     .populate({
@@ -103,7 +103,8 @@ export const addUsers = (req, res) => {
     // Add user(s) to the project
     .then(async () => {
       let { userEmails } = req.body;
-
+      const newUserRole =
+        req.query.mentor === "" ? ProjectRoles.MENTOR : ProjectRoles.STUDENT;
       validateFieldsPresent(
         res,
         "Please add an array of user email(s) for attribute userEmails",
@@ -141,7 +142,7 @@ export const addUsers = (req, res) => {
           const newProjectRole = new ProjectRole({
             userId: curUser.id,
             projectId: req.params.id,
-            role: ProjectRoles.STUDENT,
+            role: newUserRole,
           });
           newProjectRole.save();
         })
