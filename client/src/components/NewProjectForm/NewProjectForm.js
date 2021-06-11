@@ -15,7 +15,6 @@ function NewProjectForm(props) {
   );
   const [hasDateError, setHasDateError] = useState(false);
   const [errorText, setErrorText] = useState("");
-  
 
   // for the alert
   const [displayAlert, setDisplayAlert] = useState(false);
@@ -37,7 +36,7 @@ function NewProjectForm(props) {
     // Validate date
     if (dueDate <= new Date().toISOString().slice(0, 10)) {
       setHasDateError(true);
-      setErrorText("Due date invalid, must be set after today's date");
+      setErrorText("Invalid due date");
       return;
     }
 
@@ -75,56 +74,56 @@ function NewProjectForm(props) {
   }
 
   return (
-  <>
-    <form onSubmit={handleSubmit} className={styles.newProjectForm}>
-      <fieldset>
-        <legend>Create New Project</legend>
-        <div>
-          <TextField
-            id="project_name"
-            label="Project Name"
-            variant="outlined"
-            required
-            value={projName}
-            onChange={(event) => setProjName(event.target.value)}
-          />
-        </div>
-        <div>
-          <TextField
-            id="project_descrption"
-            label="Description"
-            variant="outlined"
-            multiline
-            required
-            value={projDescription}
-            onChange={(event) => setProjDescription(event.target.value)}
-          />
-        </div>
-        <div>
-          <TextField
-            id="due_date"
-            label="Due Date"
-            type="date"
-            required
-            value={projDueDate}
-            onChange={(event) => setProjDueDate(event.target.value)}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            error={hasDateError}
-            helperText={errorText}
-          />
-        </div>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          style={{ margin: "0 auto", display: "flex" }}
-        >
-          Create New Project
-        </Button>
-      </fieldset>
-    </form>
+    <>
+      <form onSubmit={handleSubmit} className={styles.newProjectForm}>
+        <fieldset>
+          <legend>Create New Project</legend>
+          <div>
+            <TextField
+              id="project_name"
+              label="Project Name"
+              variant="outlined"
+              required
+              value={projName}
+              onChange={(event) => setProjName(event.target.value)}
+            />
+          </div>
+          <div>
+            <TextField
+              id="project_descrption"
+              label="Description"
+              variant="outlined"
+              multiline
+              required
+              value={projDescription}
+              onChange={(event) => setProjDescription(event.target.value)}
+            />
+          </div>
+          <div>
+            <TextField
+              id="due_date"
+              label="Due Date"
+              type="date"
+              required
+              value={projDueDate}
+              onChange={(event) => setProjDueDate(event.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              error={hasDateError}
+              helperText={errorText}
+            />
+          </div>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            style={{ margin: "0 auto", display: "flex" }}
+          >
+            Create New Project
+          </Button>
+        </fieldset>
+      </form>
       <div>
         {displayAlert && (
           <Alert
