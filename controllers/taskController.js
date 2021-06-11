@@ -1,7 +1,7 @@
 import Task from "../models/Task";
-import { validateFieldsPresent } from "../utils/validation";
+import { validateDueDate, validateFieldsPresent } from "../utils/validation";
 
-export const createTask = (req, res) => {
+export const addTask = (req, res) => {
   const { name, desc, dueDate, assignedUser } = req.body;
 
   validateFieldsPresent(
@@ -13,6 +13,7 @@ export const createTask = (req, res) => {
     assignedUser
   );
 
+  validateDueDate(res, dueDate);
   // need to check if user performing request is mentor
   // const isMentor = req.user...???
 
@@ -23,7 +24,7 @@ export const createTask = (req, res) => {
     assignedTo: req.user.id,
   });
 
-  newTask.save();
+  console.log(newTask);
 };
 
 export const getTaskInfo = (req, res) => {
