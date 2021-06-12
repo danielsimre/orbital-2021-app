@@ -9,6 +9,7 @@ import {
   validateFieldsPresent,
   successfulFindOneQuery,
   successfulFindQuery,
+  validateValueInEnum,
 } from "../utils/validation.js";
 
 export const getInfo = (req, res) => {
@@ -25,7 +26,7 @@ export const getInfo = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-// Can add users as group members or mentors (by adding ?mentor to the url)
+// Can add users as group members or mentors
 export const addUsers = (req, res) => {
   Group.findOne({
     _id: req.params.id,
@@ -33,18 +34,25 @@ export const addUsers = (req, res) => {
   })
     .then((curGroup) => validateAddUsersToGroup(res, curGroup))
     .then(async (curGroup) => {
-      let { userEmails } = req.body;
-      const newUsersRole =
-        req.query.mentor === "" ? GroupRoles.MENTOR : GroupRoles.GROUPMEMBER;
+      const { userEmails, newUserRole } = req.body;
 
       validateFieldsPresent(
         res,
-        "Please add an array of user email(s) for attribute userEmails",
-        userEmails
+        "Please add an array of user email(s) for attribute userEmails, " +
+          "and either GROUPMEMBER/GROUPLEADER or MENTOR for attribute newUserRole",
+        userEmails,
+        newUserRole
+      );
+
+      validateValueInEnum(
+        res,
+        "Please enter GROUPMEMBER/GROUPLEADER or MENTOR for attribute newUserRole",
+        GroupRoles,
+        newUserRole
       );
 
       // Remove duplicate emails
-      userEmails = [...new Set(userEmails)];
+      const uniqueUserEmails = [...new Set(userEmails)];
 
       // These five arrays contain the user emails, split into three categories:
       // Successfully added users, emails that are not attached to a user,
@@ -58,7 +66,7 @@ export const addUsers = (req, res) => {
       const roleMismatchArr = [];
 
       await Promise.all(
-        userEmails.map(async (userEmail) => {
+        uniqueUserEmails.map(async (userEmail) => {
           // Check if user exists
           const curUser = await User.findOne({ email: userEmail });
           if (!successfulFindOneQuery(curUser)) {
@@ -66,23 +74,23 @@ export const addUsers = (req, res) => {
             return;
           }
           // Check if user is in the project
-          const userProjectRole = await ProjectRole.findOne({
+          const projectRole = await ProjectRole.findOne({
             projectId: curGroup.projectId,
             userId: curUser.id,
           });
-          if (!successfulFindOneQuery(userProjectRole)) {
+          if (!successfulFindOneQuery(projectRole)) {
             notInProjectArr.push(userEmail);
             return;
           }
           // If mentors are being added, check if mentor is already in charge of this group
-          if (newUsersRole === GroupRoles.MENTOR) {
+          if (newUserRole === GroupRoles.MENTOR) {
             if (curGroup.mentoredBy.include(curUser.id)) {
               alreadyHasGroupArr.push(userEmail);
               return;
             }
 
             // Check if there is a role mismatch (user is not a project mentor)
-            if (userProjectRole.role !== ProjectRoles.MENTOR) {
+            if (projectRole.role !== ProjectRoles.MENTOR) {
               roleMismatchArr.push(userEmail);
               return;
             }
@@ -98,14 +106,14 @@ export const addUsers = (req, res) => {
             }
 
             // Check if there is a role mismatch for the user (user is not a student)
-            if (userProjectRole.role !== ProjectRoles.STUDENT) {
+            if (projectRole.role !== ProjectRoles.STUDENT) {
               roleMismatchArr.push(userEmail);
               return;
             }
           }
           // Successfully added
           successArr.push(userEmail);
-          if (newUsersRole === GroupRoles.MENTOR) {
+          if (newUserRole === GroupRoles.MENTOR) {
             curGroup.mentoredBy.push(curUser.id);
           } else {
             curGroup.groupMembers.push(curUser.id);

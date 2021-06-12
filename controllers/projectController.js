@@ -9,6 +9,7 @@ import {
   validateAddGroupsToProject,
   validateFieldsPresent,
   validateDueDate,
+  validateValueInEnum,
   successfulFindOneQuery,
 } from "../utils/validation.js";
 
@@ -87,7 +88,7 @@ export const create = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-// Can add users as group members or mentors (by adding ?mentor to the url)
+// Can add users as group members or mentors
 export const addUsers = (req, res) => {
   Project.findById(req.params.id)
     .populate({
@@ -102,17 +103,24 @@ export const addUsers = (req, res) => {
     .then((curProject) => validateAddUsersToProject(res, curProject))
     // Add user(s) to the project
     .then(async () => {
-      let { userEmails } = req.body;
-      const newUserRole =
-        req.query.mentor === "" ? ProjectRoles.MENTOR : ProjectRoles.STUDENT;
+      const { userEmails, newUserRole } = req.body;
       validateFieldsPresent(
         res,
-        "Please add an array of user email(s) for attribute userEmails",
-        userEmails
+        "Please add an array of user email(s) for attribute userEmails, " +
+          "and either STUDENT or MENTOR for attribute newUserRole",
+        userEmails,
+        newUserRole
+      );
+
+      validateValueInEnum(
+        res,
+        "Please enter STUDENT or MENTOR for attribute newUserRole",
+        ProjectRoles,
+        newUserRole
       );
 
       // Remove duplicate emails
-      userEmails = [...new Set(userEmails)];
+      const uniqueUserEmails = [...new Set(userEmails)];
 
       // These three arrays contain the user emails, split into three categories:
       // Successfully added users, emails that are not attached to a user,
@@ -121,7 +129,7 @@ export const addUsers = (req, res) => {
       const doesNotExistArr = [];
       const alreadyAddedArr = [];
       await Promise.all(
-        userEmails.map(async (userEmail) => {
+        uniqueUserEmails.map(async (userEmail) => {
           // Check if user exists
           const curUser = await User.findOne({ email: userEmail });
           if (!successfulFindOneQuery(curUser)) {
@@ -129,11 +137,11 @@ export const addUsers = (req, res) => {
             return;
           }
           // Check if user is already in project
-          const userProjectRole = await ProjectRole.findOne({
+          const projectRole = await ProjectRole.findOne({
             projectId: req.params.id,
             userId: curUser.id,
           });
-          if (successfulFindOneQuery(userProjectRole)) {
+          if (successfulFindOneQuery(projectRole)) {
             alreadyAddedArr.push(userEmail);
             return;
           }
@@ -170,7 +178,7 @@ export const createGroups = (req, res) => {
     .then((curProject) => validateAddGroupsToProject(res, curProject))
     // Add user(s) to the project
     .then(async (curProject) => {
-      let { groupNames } = req.body;
+      const { groupNames } = req.body;
 
       validateFieldsPresent(
         res,
@@ -185,7 +193,7 @@ export const createGroups = (req, res) => {
       const nameConflictArr = [];
 
       // Remove duplicated names, and add them to the error array
-      groupNames = groupNames.filter((groupName, index, self) => {
+      const uniqueGroupNames = groupNames.filter((groupName, index, self) => {
         if (self.indexOf(groupName) !== index) {
           dupeInRequestArr.push(groupName);
           return false;
@@ -194,7 +202,7 @@ export const createGroups = (req, res) => {
       });
 
       await Promise.all(
-        groupNames.map(async (groupName) => {
+        uniqueGroupNames.map(async (groupName) => {
           const group = await Group.findOne({ name: groupName });
           if (successfulFindOneQuery(group)) {
             nameConflictArr.push(groupName);

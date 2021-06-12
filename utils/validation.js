@@ -100,3 +100,9 @@ export const validateDueDate = (res, dueDate) => {
     sendJsonErrMessage(res, 400, "Please enter a valid date");
   }
 };
+
+export const validateValueInEnum = (res, msg, enumType, value) => {
+  if (!Object.values(enumType).includes(value)) {
+    sendJsonErrMessage(res, 400, msg);
+  }
+};
