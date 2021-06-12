@@ -8,7 +8,7 @@ function ProjectMain(props) {
 
   function getProjectData(projID) {
     axios
-      .get(`/api/v1/projects/info/${projID}`, {
+      .get(`/api/v1/projects/${projID}`, {
         withCredentials: true,
         params: {
           id: projID,

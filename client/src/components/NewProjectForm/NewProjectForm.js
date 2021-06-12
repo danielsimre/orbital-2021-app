@@ -42,7 +42,7 @@ function NewProjectForm(props) {
 
     axios
       .post(
-        "/api/v1/projects/new",
+        "/api/v1/projects/",
         {
           name: name,
           desc: desc,

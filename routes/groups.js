@@ -10,10 +10,10 @@ const router = express.Router();
 // @access Private
 router.get("/:id", ensureAuthenticated, groupController.getInfo);
 
-// @route POST api/v1/groups/:id
+// @route POST api/v1/groups/:id/users
 // @desc Add users/mentors to the group (?mentor to add mentors, no params for students)
 //       User must be a mentor of the group
 // @access Private
-router.post("/:id", ensureAuthenticated, groupController.addUsers);
+router.post("/:id/users", ensureAuthenticated, groupController.addUsers);
 
 export default router;
