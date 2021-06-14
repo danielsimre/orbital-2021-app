@@ -32,84 +32,91 @@ import Page404 from "./pages/Page404";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  async function getUserData() {
+  /*
+  function getUserData() {
     try {
-      await axios
+      axios
         .get("/api/v1/users/auth", {
           withCredentials: true,
         })
         .then((response) => {
-          setIsAuthenticated(response.data.isAuthenticated);
+          return response.data.isAuthenticated;
         });
     } catch (err) {
-      console.log(err);
+      console.log(err.response.data);
+      setIsAuthenticated(false);
     } finally {
-      setIsLoading(false);
+      console.log("In finally block");
     }
   }
+  async function getUserData() {
+    const res = await axios.get("/api/v1/users/auth", {
+      withCredentials: true,
+    });
+    return await res.data.isAuthenticated;
+  }
+  */
 
-  useEffect(() => getUserData(), []);
+  useEffect(() => {
+    (async () => {
+      const res = await axios.get("/api/v1/users/auth", {
+        withCredentials: true,
+      });
+      setIsAuthenticated(res.data.isAuthenticated);
+    })();
+  }, [setIsAuthenticated]);
 
-  return isLoading ? (
-    <div>
-      <h1>Verifying...</h1>
-    </div>
-  ) : (
-    <>
-      {isAuthenticated ? (
-        <HeaderBar setIsAuthenticated={setIsAuthenticated} />
-      ) : (
-        <></>
-      )}
-      <BrowserRouter>
-        <Switch>
-          <Route exact path="/">
-            <LoginPage
-              isAuthenticated={isAuthenticated}
-              setIsAuthenticated={setIsAuthenticated}
-            />
-          </Route>
-
-          <Route exact path="/register">
-            <RegistrationPage />
-          </Route>
-
-          <ProtectedRoute
-            path="/home"
-            component={HomePage}
+  return (
+    <BrowserRouter>
+      <HeaderBar
+        isAuthenticated={isAuthenticated}
+        setIsAuthenticated={setIsAuthenticated}
+      />
+      <Switch>
+        <Route exact path="/">
+          <LoginPage
             isAuthenticated={isAuthenticated}
+            setIsAuthenticated={setIsAuthenticated}
           />
+        </Route>
 
-          <ProtectedRoute
-            path="/new_project"
-            component={NewProjectPage}
-            isAuthenticated={isAuthenticated}
-          />
+        <Route exact path="/register">
+          <RegistrationPage isAuthenticated={isAuthenticated} />
+        </Route>
 
-          <ProtectedRoute
-            path="/my_projects/:projectID"
-            component={ProjectMainPage}
-            isAuthenticated={isAuthenticated}
-          />
+        <ProtectedRoute
+          path="/home"
+          component={HomePage}
+          isAuthenticated={isAuthenticated}
+        />
 
-          <ProtectedRoute
-            path="/my_projects"
-            component={MyProjectsPage}
-            isAuthenticated={isAuthenticated}
-          />
+        <ProtectedRoute
+          path="/new_project"
+          component={NewProjectPage}
+          isAuthenticated={isAuthenticated}
+        />
 
-          <ProtectedRoute
-            path="/groups/:groupID"
-            component={GroupMainPage}
-            isAuthenticated={isAuthenticated}
-          />
+        <ProtectedRoute
+          path="/my_projects/:projectID"
+          component={ProjectMainPage}
+          isAuthenticated={isAuthenticated}
+        />
 
-          <Route path="*" component={Page404} />
-        </Switch>
-      </BrowserRouter>
-    </>
+        <ProtectedRoute
+          path="/my_projects"
+          component={MyProjectsPage}
+          isAuthenticated={isAuthenticated}
+        />
+
+        <ProtectedRoute
+          path="/groups/:groupID"
+          component={GroupMainPage}
+          isAuthenticated={isAuthenticated}
+        />
+
+        <Route path="*" component={Page404} />
+      </Switch>
+    </BrowserRouter>
   );
 }
 

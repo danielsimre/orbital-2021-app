@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 const useStyles = makeStyles({
@@ -62,7 +63,10 @@ function ProjectList(props) {
             <tr key={project.projectId.id}>
               <td>{index + 1}</td>
               <td>
-                <Button href={getProjectURL(project.projectId.id)}>
+                <Button
+                  component={Link}
+                  to={getProjectURL(project.projectId.id)}
+                >
                   {project.projectId.attributes.name}
                 </Button>
               </td>

@@ -4,6 +4,8 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
+import { Link } from "react-router-dom";
+
 import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
@@ -19,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function HeaderBar(props) {
-  const { setIsAuthenticated } = props;
+  const { isAuthenticated, setIsAuthenticated } = props;
 
   function handleLogout() {
     axios
@@ -30,24 +32,28 @@ function HeaderBar(props) {
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
-      <AppBar position="static">
-        <Toolbar>
-          <Button href="/home">Home</Button>
-          <Typography className={classes.title}>
-            <Button href="/new_project" color="default">
-              Create New Project
+    isAuthenticated && (
+      <div className={classes.root}>
+        <AppBar position="static">
+          <Toolbar>
+            <Button component={Link} to="/home">
+              Home
             </Button>
-            <Button href="/my_projects" color="default">
-              View My Projects
+            <Typography className={classes.title}>
+              <Button component={Link} to="/new_project" color="default">
+                Create New Project
+              </Button>
+              <Button component={Link} to="/my_projects" color="default">
+                View My Projects
+              </Button>
+            </Typography>
+            <Button onClick={handleLogout} color="inherit">
+              Logout
             </Button>
-          </Typography>
-          <Button onClick={handleLogout} color="inherit">
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
-    </div>
+          </Toolbar>
+        </AppBar>
+      </div>
+    )
   );
 }
 

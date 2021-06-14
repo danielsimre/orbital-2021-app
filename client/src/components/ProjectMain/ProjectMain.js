@@ -19,6 +19,7 @@ function ProjectMain(props) {
         setProjectData(response.data.attributes);
       })
       .catch(function (error) {
+        console.error(error.response);
         console.log(`Could not find project with ID: ${projID}`);
       });
   }
