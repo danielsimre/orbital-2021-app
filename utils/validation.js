@@ -1,4 +1,4 @@
-import { ProjectRoles } from "./enums.js";
+import { ClassRoles } from "./enums.js";
 
 // Internal function to send json message + throw error for failed validation
 const sendJsonErrMessage = (res, status, msg) => {
@@ -47,28 +47,62 @@ export const validateRegistration = (req, res, queriedUser) => {
   }
 };
 
-export const validateGetProjectInfo = (res, curProject) => {
-  // If the users array is empty, then the logged in user's id was not found in this project
-  if (successfulFindOneQuery(curProject)) {
-    sendJsonErrMessage(res, 404, "Project does not exist");
+export const validateGetClassInfo = (res, curClass) => {
+  if (!successfulFindOneQuery(curClass)) {
+    sendJsonErrMessage(res, 404, "Class does not exist");
   }
-
-  if (!curProject.users.length) {
-    sendJsonErrMessage(res, 403, "Not authorized to view this project");
+  // If the users array is empty, then the logged in user's id was not found in this class
+  if (!curClass.users.length) {
+    sendJsonErrMessage(res, 403, "Not authorized to view this class");
   }
-  return curProject;
+  return curClass;
 };
 
-// Checks if user has permissions to add users to project/groups
-export const validateAddUsers = (res, curProject) => {
-  if (curProject.users[0].role !== ProjectRoles.MENTOR) {
-    sendJsonErrMessage(res, 403, "Not authorized to add users to project");
+export const validateGetGroupInfo = (res, curGroup) => {
+  if (!successfulFindOneQuery(curGroup)) {
+    sendJsonErrMessage(
+      res,
+      400,
+      "Group does not exist or user is not authorized to access this group"
+    );
   }
-  return curProject;
+  return curGroup;
+};
+
+// Checks if user has permissions to add users to class/groups
+export const validateAddUsersToClass = (res, curClass) => {
+  if (curClass.users[0].role !== ClassRoles.MENTOR) {
+    sendJsonErrMessage(res, 403, "Not authorized to add users to class");
+  }
+  return curClass;
+};
+
+export const validateAddUsersToGroup = (res, curGroup) => {
+  if (!successfulFindOneQuery(curGroup)) {
+    sendJsonErrMessage(
+      res,
+      400,
+      "Group does not exist or user is not authorized to add users to group"
+    );
+  }
+  return curGroup;
+};
+
+export const validateAddGroupsToClass = (res, curClass) => {
+  if (curClass.users[0].role !== ClassRoles.MENTOR) {
+    sendJsonErrMessage(res, 403, "Not authorized to add groups to class");
+  }
+  return curClass;
 };
 
 export const validateDueDate = (res, dueDate) => {
   if (!(dueDate instanceof Date) || dueDate <= new Date()) {
     sendJsonErrMessage(res, 400, "Please enter a valid date");
+  }
+};
+
+export const validateValueInEnum = (res, msg, enumType, value) => {
+  if (!Object.values(enumType).includes(value)) {
+    sendJsonErrMessage(res, 400, msg);
   }
 };

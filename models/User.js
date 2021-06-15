@@ -40,8 +40,8 @@ const UserSchema = new Schema(
 );
 
 // Virtual populate
-UserSchema.virtual("projects", {
-  ref: "ProjectRole",
+UserSchema.virtual("classes", {
+  ref: "ClassRole",
   localField: "_id",
   foreignField: "userId",
 });

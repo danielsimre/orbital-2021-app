@@ -35,11 +35,11 @@ function HeaderBar(props) {
         <Toolbar>
           <Button href="/home">Home</Button>
           <Typography className={classes.title}>
-            <Button href="/new_project" color="default">
-              Create New Project
+            <Button href="/new_class" color="default">
+              Create New Class
             </Button>
-            <Button href="/my_projects" color="default">
-              View My Projects
+            <Button href="/my_classes" color="default">
+              View My Classes
             </Button>
           </Typography>
           <Button onClick={handleLogout} color="inherit">
