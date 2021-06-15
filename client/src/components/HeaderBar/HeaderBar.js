@@ -40,10 +40,10 @@ function HeaderBar(props) {
               Home
             </Button>
             <Typography className={classes.title}>
-              <Button component={Link} to="/new_project" color="default">
+              <Button component={Link} to="/new_class" color="default">
                 Create New Class
               </Button>
-              <Button component={Link} to="/my_projects" color="default">
+              <Button component={Link} to="/my_classes" color="default">
                 View My Classes
               </Button>
             </Typography>
