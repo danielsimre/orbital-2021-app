@@ -2,16 +2,16 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
-const ProjectRoleSchema = new Schema(
+const ClassRoleSchema = new Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    projectId: {
+    classId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Project",
+      ref: "Class",
       required: true,
     },
     role: {
@@ -31,6 +31,6 @@ const ProjectRoleSchema = new Schema(
   }
 );
 
-const ProjectRole = mongoose.model("ProjectRole", ProjectRoleSchema);
+const ClassRole = mongoose.model("ClassRole", ClassRoleSchema);
 
-export default ProjectRole;
+export default ClassRole;

@@ -1,8 +1,8 @@
 import Group from "../models/Group.js";
 import User from "../models/User.js";
-import ProjectRole from "../models/ProjectRole.js";
+import ClassRole from "../models/ClassRole.js";
 
-import { GroupRoles, ProjectRoles } from "../utils/enums.js";
+import { GroupRoles, ClassRoles } from "../utils/enums.js";
 import {
   validateGetGroupInfo,
   validateAddUsersToGroup,
@@ -56,8 +56,8 @@ export const addUsers = (req, res) => {
 
       // These five arrays contain the user emails, split into three categories:
       // Successfully added users, emails that are not attached to a user,
-      // users that are not in the project,
-      // users that are already in the group (or other groups under this project, for group members)
+      // users that are not in the class,
+      // users that are already in the group (or other groups under this class, for group members)
       // and users that have a role mismatch (adding a mentor as a group member, or student as a mentor)
       const successArr = [];
       const doesNotExistArr = [];
@@ -73,12 +73,12 @@ export const addUsers = (req, res) => {
             doesNotExistArr.push(userEmail);
             return;
           }
-          // Check if user is in the project
-          const projectRole = await ProjectRole.findOne({
-            projectId: curGroup.projectId,
+          // Check if user is in the class
+          const classRole = await ClassRole.findOne({
+            classId: curGroup.classId,
             userId: curUser.id,
           });
-          if (!successfulFindOneQuery(projectRole)) {
+          if (!successfulFindOneQuery(classRole)) {
             notInProjectArr.push(userEmail);
             return;
           }
@@ -89,15 +89,15 @@ export const addUsers = (req, res) => {
               return;
             }
 
-            // Check if there is a role mismatch (user is not a project mentor)
-            if (projectRole.role !== ProjectRoles.MENTOR) {
+            // Check if there is a role mismatch (user is not a class mentor)
+            if (classRole.role !== ClassRoles.MENTOR) {
               roleMismatchArr.push(userEmail);
               return;
             }
           } else {
-            // Check if user already has a group for this project (need not be the current group)
+            // Check if user already has a group for this class (need not be the current group)
             const userGroup = await Group.find({
-              projectId: curGroup.projectId,
+              classId: curGroup.classId,
               groupMembers: curUser.id,
             });
             if (successfulFindQuery(userGroup)) {
@@ -106,7 +106,7 @@ export const addUsers = (req, res) => {
             }
 
             // Check if there is a role mismatch for the user (user is not a student)
-            if (projectRole.role !== ProjectRoles.STUDENT) {
+            if (classRole.role !== ClassRoles.STUDENT) {
               roleMismatchArr.push(userEmail);
               return;
             }

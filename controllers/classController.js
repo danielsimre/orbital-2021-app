@@ -1,20 +1,19 @@
 import User from "../models/User.js";
-import Project from "../models/Project.js";
-import ProjectRole from "../models/ProjectRole.js";
+import Class from "../models/Class.js";
+import ClassRole from "../models/ClassRole.js";
 import Group from "../models/Group.js";
-import { ProjectRoles } from "../utils/enums.js";
+import { ClassRoles } from "../utils/enums.js";
 import {
-  validateGetProjectInfo,
-  validateAddUsersToProject,
-  validateAddGroupsToProject,
+  validateGetClassInfo,
+  validateAddUsersToClass,
+  validateAddGroupsToClass,
   validateFieldsPresent,
-  validateDueDate,
   validateValueInEnum,
   successfulFindOneQuery,
 } from "../utils/validation.js";
 
 export const getInfo = (req, res) => {
-  Project.findById(req.params.id)
+  Class.findById(req.params.id)
     .populate({
       path: "users",
       match: { userId: req.user.id },
@@ -22,75 +21,71 @@ export const getInfo = (req, res) => {
         path: "userId",
       },
     })
-    // Verify that the user can view this project
-    .then((curProject) => validateGetProjectInfo(res, curProject))
-    // Query the project, now with info of ALL users involved in the project
+    // Verify that the user can view this class
+    .then((curClass) => validateGetClassInfo(res, curClass))
+    // Query the class, now with info of ALL users involved in the class
     .then(() =>
-      Project.findById(req.params.id).populate({
+      Class.findById(req.params.id).populate({
         path: "users",
         populate: {
           path: "userId",
         },
       })
     )
-    .then((curProject) => res.json(curProject))
+    .then((curClass) => res.json(curClass))
     .catch((err) => console.log(err));
 };
 
 export const create = (req, res) => {
-  const { name, desc, dueDate } = req.body;
+  const { name, desc } = req.body;
 
   // Ensure all fields are filled in
   validateFieldsPresent(
     res,
-    "Please fill in the name, desc and dueDate fields",
+    "Please fill in the name and desc fields",
     name,
-    desc,
-    dueDate
+    desc
   );
 
-  const newProject = new Project({
+  const newClass = new Class({
     name,
     desc,
-    dueDate,
     created_by: req.user.id,
   });
-  // Check if dueDate is the proper date and that the due date is after the current date
-  validateDueDate(res, newProject.dueDate);
 
-  newProject
+  newClass
     .save()
-    .then((savedProject) => {
-      // Creator of the project is automatically considered a 'mentor'
-      const newProjectRole = new ProjectRole({
+    .then((savedClass) => {
+      // Creator of the class is automatically considered a 'mentor'
+      const newClassRole = new ClassRole({
         userId: req.user.id,
-        projectId: savedProject.id,
-        role: ProjectRoles.MENTOR,
+        classId: savedClass.id,
+        role: ClassRoles.MENTOR,
       });
-      newProjectRole.save();
+      newClassRole.save();
       return {
         user: {
-          id: savedProject.id,
-          name: savedProject.name,
-          created_by: savedProject.created_by,
+          id: savedClass.id,
+          name: savedClass.name,
+          created_by: savedClass.created_by,
         },
-        projectRole: {
-          userId: newProjectRole.userId,
-          projectID: newProjectRole.projectId,
-          role: newProjectRole.role,
+        classRole: {
+          userId: newClassRole.userId,
+          classId: newClassRole.classId,
+          role: newClassRole.role,
         },
       };
     })
-    .then((projectRoleInfo) => {
-      console.log(projectRoleInfo);
-      res.json(projectRoleInfo);
+    .then((classRoleInfo) => {
+      console.log(classRoleInfo);
+      res.json(classRoleInfo);
     })
     .catch((err) => console.log(err));
 };
 
 // Can add users as group members or mentors
 export const addUsers = (req, res) => {
-  Project.findById(req.params.id)
+  Class.findById(req.params.id)
     .populate({
       path: "users",
       match: { userId: req.user.id },
@@ -98,10 +93,10 @@ export const addUsers = (req, res) => {
         path: "userId",
       },
     })
-    // Verify that the user can add users to the project
-    .then((curProject) => validateGetProjectInfo(res, curProject))
-    .then((curProject) => validateAddUsersToProject(res, curProject))
-    // Add user(s) to the project
+    // Verify that the user can add users to the Class
+    .then((curClass) => validateGetClassInfo(res, curClass))
+    .then((curClass) => validateAddUsersToClass(res, curClass))
+    // Add user(s) to the class
     .then(async () => {
       const { userEmails, newUserRole } = req.body;
       validateFieldsPresent(
@@ -115,7 +110,7 @@ export const addUsers = (req, res) => {
       validateValueInEnum(
         res,
         "Please enter STUDENT or MENTOR for attribute newUserRole",
-        ProjectRoles,
+        ClassRoles,
         newUserRole
       );
 
@@ -124,7 +119,7 @@ export const addUsers = (req, res) => {
 
       // These three arrays contain the user emails, split into three categories:
       // Successfully added users, emails that are not attached to a user,
-      // and users that are already in the project
+      // and users that are already in the class
       const successArr = [];
       const doesNotExistArr = [];
       const alreadyAddedArr = [];
@@ -136,23 +131,23 @@ export const addUsers = (req, res) => {
             doesNotExistArr.push(userEmail);
             return;
           }
-          // Check if user is already in project
-          const projectRole = await ProjectRole.findOne({
-            projectId: req.params.id,
+          // Check if user is already in class
+          const classRole = await ClassRole.findOne({
+            classId: req.params.id,
             userId: curUser.id,
           });
-          if (successfulFindOneQuery(projectRole)) {
+          if (successfulFindOneQuery(classRole)) {
             alreadyAddedArr.push(userEmail);
             return;
           }
           // Successfully added user
           successArr.push(userEmail);
-          const newProjectRole = new ProjectRole({
+          const newClassRole = new ClassRole({
             userId: curUser.id,
-            projectId: req.params.id,
+            classId: req.params.id,
             role: newUserRole,
           });
-          newProjectRole.save();
+          newClassRole.save();
         })
       );
       res.json({
@@ -165,7 +160,7 @@ export const addUsers = (req, res) => {
 };
 
 export const createGroups = (req, res) => {
-  Project.findById(req.params.id)
+  Class.findById(req.params.id)
     .populate({
       path: "users",
       match: { userId: req.user.id },
@@ -173,11 +168,11 @@ export const createGroups = (req, res) => {
         path: "userId",
       },
     })
-    // Verify that the user can add groups to the project
-    .then((curProject) => validateGetProjectInfo(res, curProject))
-    .then((curProject) => validateAddGroupsToProject(res, curProject))
-    // Add user(s) to the project
-    .then(async (curProject) => {
+    // Verify that the user can add groups to the class
+    .then((curClass) => validateGetClassInfo(res, curClass))
+    .then((curClass) => validateAddGroupsToClass(res, curClass))
+    // Add user(s) to the class
+    .then(async (curClass) => {
       const { groupNames } = req.body;
 
       validateFieldsPresent(
@@ -187,7 +182,7 @@ export const createGroups = (req, res) => {
       );
       // These three arrays contain the group names, split into three categories:
       // Successfully added groups, group names repeated in the current request,
-      // and group names that are already associated with a group in this project
+      // and group names that are already associated with a group in this class
       const successArr = [];
       const dupeInRequestArr = [];
       const nameConflictArr = [];
@@ -212,11 +207,11 @@ export const createGroups = (req, res) => {
           successArr.push(groupName);
           const newGroup = new Group({
             name: groupName,
-            projectId: curProject.id,
+            classId: curClass.id,
             createdBy: req.user.id,
           });
-          // Add the new group id to this project
-          curProject.groups.push(newGroup.id);
+          // Add the new group id to this Class
+          curClass.groups.push(newGroup.id);
           // Add whoever created this group as a mentor for the group
           newGroup.mentoredBy.push(req.user.id);
           newGroup.save();
@@ -227,16 +222,16 @@ export const createGroups = (req, res) => {
         nameConflict: nameConflictArr,
         successfullyAdded: successArr,
       });
-      curProject.save();
+      curClass.save();
     })
     .catch((err) => console.log(err));
 };
 
-// If the user is not a part of the project, do not return anything
-// If the user is a part of the project as a student, return their group (if they have one)
-// If the user is a part of the project as a mentor, return all groups they are mentoring
+// If the user is not a part of the class, do not return anything
+// If the user is a part of the class as a student, return their group (if they have one)
+// If the user is a part of the class as a mentor, return all groups they are mentoring
 export const getGroups = (req, res) => {
-  Project.findById(req.params.id)
+  Class.findById(req.params.id)
     .populate({
       path: "users",
       match: { userId: req.user.id },
@@ -244,15 +239,15 @@ export const getGroups = (req, res) => {
         path: "userId",
       },
     })
-    // Verify that the user can access the project
-    .then((curProject) => validateGetProjectInfo(res, curProject))
+    // Verify that the user can access the class
+    .then((curClass) => validateGetClassInfo(res, curClass))
     // Return a object with attributes groups, which contains an array of all groups
-    // and an attribute user_role, which describes the user's role in the project
+    // and an attribute user_role, which describes the user's role in the class
     // Mentors can have multiple groups in the array, students have at most one
-    .then((curProject) =>
+    .then((curClass) =>
       Group.find({
         $and: [
-          { projectId: curProject.id },
+          { classId: curClass.id },
           {
             $or: [{ groupMembers: req.user.id }, { mentoredBy: req.user.id }],
           },

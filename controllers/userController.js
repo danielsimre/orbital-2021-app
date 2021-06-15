@@ -55,19 +55,19 @@ export const logout = (req, res) => {
 };
 
 export const getInfo = (req, res) => {
-  // api/v1/users?projects returns an array of all projects the user is involved in
-  if (req.query.projects === "") {
+  // api/v1/users?classes returns an array of all classes the user is involved in
+  if (req.query.classes === "") {
     User.findById(req.user.id)
       .populate({
-        path: "projects",
+        path: "classes",
         populate: {
-          path: "projectId",
+          path: "classId",
         },
       })
-      .then((curUser) => res.json({ projects: curUser.projects }));
+      .then((curUser) => res.json({ classes: curUser.classes }));
   } else {
     User.findById(req.user.id)
-      .populate("projects")
+      .populate("classes")
       .then((curUser) => res.json(curUser));
   }
 };

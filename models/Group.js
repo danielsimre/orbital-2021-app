@@ -10,9 +10,9 @@ const GroupSchema = new Schema(
     },
     groupMembers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     mentoredBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    projectId: {
+    classId: {
       type: Schema.Types.ObjectId,
-      ref: "Project",
+      ref: "Class",
       required: true,
     },
     createdBy: {

@@ -8,9 +8,9 @@ const TaskSchema = new Schema({
     ref: "User",
     required: true,
   },
-  projectId: {
+  classId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Project",
+    ref: "Class",
     required: true,
   },
   desc: {

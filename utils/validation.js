@@ -1,4 +1,4 @@
-import { ProjectRoles } from "./enums.js";
+import { ClassRoles } from "./enums.js";
 
 // Internal function to send json message + throw error for failed validation
 const sendJsonErrMessage = (res, status, msg) => {
@@ -47,15 +47,15 @@ export const validateRegistration = (req, res, queriedUser) => {
   }
 };
 
-export const validateGetProjectInfo = (res, curProject) => {
-  if (!successfulFindOneQuery(curProject)) {
-    sendJsonErrMessage(res, 404, "Project does not exist");
+export const validateGetClassInfo = (res, curClass) => {
+  if (!successfulFindOneQuery(curClass)) {
+    sendJsonErrMessage(res, 404, "Class does not exist");
   }
-  // If the users array is empty, then the logged in user's id was not found in this project
-  if (!curProject.users.length) {
-    sendJsonErrMessage(res, 403, "Not authorized to view this project");
+  // If the users array is empty, then the logged in user's id was not found in this class
+  if (!curClass.users.length) {
+    sendJsonErrMessage(res, 403, "Not authorized to view this class");
   }
-  return curProject;
+  return curClass;
 };
 
 export const validateGetGroupInfo = (res, curGroup) => {
@@ -69,12 +69,12 @@ export const validateGetGroupInfo = (res, curGroup) => {
   return curGroup;
 };
 
-// Checks if user has permissions to add users to project/groups
-export const validateAddUsersToProject = (res, curProject) => {
-  if (curProject.users[0].role !== ProjectRoles.MENTOR) {
-    sendJsonErrMessage(res, 403, "Not authorized to add users to project");
+// Checks if user has permissions to add users to class/groups
+export const validateAddUsersToClass = (res, curClass) => {
+  if (curClass.users[0].role !== ClassRoles.MENTOR) {
+    sendJsonErrMessage(res, 403, "Not authorized to add users to class");
   }
-  return curProject;
+  return curClass;
 };
 
 export const validateAddUsersToGroup = (res, curGroup) => {
@@ -88,11 +88,11 @@ export const validateAddUsersToGroup = (res, curGroup) => {
   return curGroup;
 };
 
-export const validateAddGroupsToProject = (res, curProject) => {
-  if (curProject.users[0].role !== ProjectRoles.MENTOR) {
-    sendJsonErrMessage(res, 403, "Not authorized to add groups to project");
+export const validateAddGroupsToClass = (res, curClass) => {
+  if (curClass.users[0].role !== ClassRoles.MENTOR) {
+    sendJsonErrMessage(res, 403, "Not authorized to add groups to class");
   }
-  return curProject;
+  return curClass;
 };
 
 export const validateDueDate = (res, dueDate) => {

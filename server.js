@@ -10,7 +10,7 @@ import { fileURLToPath } from "url";
 
 import passportConfig from "./config/passport.js";
 import users from "./routes/users.js";
-import projects from "./routes/projects.js";
+import classes from "./routes/classes.js";
 import groups from "./routes/groups.js";
 
 const app = express();
@@ -54,7 +54,7 @@ mongoose
 
 // Routes for API
 app.use("/api/v1/users", users);
-app.use("/api/v1/projects", projects);
+app.use("/api/v1/classes", classes);
 app.use("/api/v1/groups", groups);
 
 const port = process.env.PORT || 5000;
