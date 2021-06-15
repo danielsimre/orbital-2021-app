@@ -6,10 +6,10 @@ import axios from "axios";
 import HeaderBar from "./components/HeaderBar";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
-import NewProjectPage from "./pages/NewProjectPage";
-import MyProjectsPage from "./pages/MyProjectsPage";
+import NewClassPage from "./pages/NewClassPage";
+import MyClassesPage from "./pages/MyClassesPage";
 import RegistrationPage from "./pages/RegistrationPage";
-import ProjectMainPage from "./pages/ProjectMainPage";
+import ClassMainPage from "./pages/ClassMainPage";
 import GroupMainPage from "./pages/GroupMainPage";
 import Page404 from "./pages/Page404";
 
@@ -19,12 +19,12 @@ import Page404 from "./pages/Page404";
   - HeaderBar on all pages below
   - Home Page
     - Home
-  - New Project Page
-    - NewProjectForm
-  - My Projects Page
-    - ProjectList
-  - Project Main Page
-    - ProjectMain
+  - New Class Page
+    - NewClassForm
+  - My Classes Page
+    - ClassList
+  - Class Main Page
+    - ClassMain
   - Group Main Page
     - TaskBoard
       - TaskList
@@ -89,22 +89,21 @@ function App() {
           component={HomePage}
           isAuthenticated={isAuthenticated}
         />
-
         <ProtectedRoute
-          path="/new_project"
-          component={NewProjectPage}
+          path="/new_class"
+          component={NewClassPage}
           isAuthenticated={isAuthenticated}
         />
 
         <ProtectedRoute
-          path="/my_projects/:projectID"
-          component={ProjectMainPage}
+          path="/my_classes/:classID"
+          component={ClassMainPage}
           isAuthenticated={isAuthenticated}
         />
 
         <ProtectedRoute
-          path="/my_projects"
-          component={MyProjectsPage}
+          path="/my_classes"
+          component={MyClassesPage}
           isAuthenticated={isAuthenticated}
         />
 

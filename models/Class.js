@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
-const ProjectSchema = new Schema(
+const ClassSchema = new Schema(
   {
     name: {
       type: String,
@@ -17,10 +17,7 @@ const ProjectSchema = new Schema(
       required: true,
       default: false,
     },
-    dueDate: {
-      type: Date,
-      required: true,
-    },
+    groups: [{ type: Schema.Types.ObjectId, ref: "Group" }],
     created_by: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -40,19 +37,19 @@ const ProjectSchema = new Schema(
         const { id, ...rest } = ret;
         delete rest._id;
         delete rest.__v;
-        return { id: ret.id, type: "projects", attributes: { ...rest } };
+        return { id: ret.id, type: "classes", attributes: { ...rest } };
       },
     },
   }
 );
 
 // Virtual populate
-ProjectSchema.virtual("users", {
-  ref: "ProjectRole",
+ClassSchema.virtual("users", {
+  ref: "ClassRole",
   localField: "_id",
-  foreignField: "projectId",
+  foreignField: "classId",
 });
 
-const Project = mongoose.model("Project", ProjectSchema);
+const Class = mongoose.model("Class", ClassSchema);
 
-export default Project;
+export default Class;
