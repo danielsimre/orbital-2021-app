@@ -16,7 +16,7 @@ const useStyles = makeStyles({
 });
 
 function ClassList(props) {
-  const [isRetrieving, setIsRetrieving] = useState(false);
+  const [isRetrieving, setIsRetrieving] = useState(true);
   const [queriedClassList, setQueriedClassList] = useState([]);
   const styles = useStyles();
 
@@ -42,36 +42,37 @@ function ClassList(props) {
     return "my_classes/" + classID;
   }
 
-  return isRetrieving ? (
-    <div>
-      <h1>Retrieving your classes...</h1>
-    </div>
-  ) : (
-    <div>
-      <h2 className={styles.tableTitle}>Class List</h2>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Name</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody align="center">
-          {queriedClassList.map((curClass, index) => (
-            <tr key={curClass.classId.id}>
-              <td>{index + 1}</td>
-              <td>
-                <Button component={Link} to={getClassURL(curClass.classId.id)}>
-                  {curClass.classId.attributes.name}
-                </Button>
-              </td>
-              <td>{curClass.classId.attributes.desc}</td>
+  return (
+    isRetrieving || (
+      <div>
+        <h2 className={styles.tableTitle}>Class List</h2>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Name</th>
+              <th>Description</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody align="center">
+            {queriedClassList.map((curClass, index) => (
+              <tr key={curClass.classId.id}>
+                <td>{index + 1}</td>
+                <td>
+                  <Button
+                    component={Link}
+                    to={getClassURL(curClass.classId.id)}
+                  >
+                    {curClass.classId.attributes.name}
+                  </Button>
+                </td>
+                <td>{curClass.classId.attributes.desc}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
   );
 }
 
