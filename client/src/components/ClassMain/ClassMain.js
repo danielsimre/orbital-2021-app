@@ -1,22 +1,42 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { Switch, useRouteMatch, Route } from "react-router-dom";
+import { makeStyles } from "@material-ui/core";
+
+import ClassSidebar from "../ClassSidebar";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "row",
+    height: "calc(100% - 64px)",
+  },
+  sidebar: {
+    flex: "0 0 10em",
+    height: "100%",
+  },
+  info: {
+    flex: "1 1",
+    height: "100%",
+    textAlign: "center",
+  },
+}));
 
 function ClassMain(props) {
   const { classID } = useParams();
   const [classData, setClassData] = useState({});
   const [isRetrieving, setIsRetrieving] = useState(true);
+  const { path } = useRouteMatch();
+
+  const classes = useStyles();
 
   function getClassData(classID) {
     axios
       .get(`/api/v1/classes/${classID}`, {
         withCredentials: true,
-        params: {
-          id: classID,
-        },
       })
       .then(function (response) {
-        console.log(response); // REMOVE WHEN NOT NEEDED
         setClassData(response.data.attributes);
       })
       .catch(function (error) {
@@ -32,9 +52,27 @@ function ClassMain(props) {
 
   return (
     isRetrieving || (
-      <div>
-        <h1>Class Main Page for {classData.name}</h1>
-        <p>Description: {classData.desc}</p>
+      <div className={classes.root}>
+        <div className={classes.sidebar}>
+          <ClassSidebar classID={classID} />
+        </div>
+        <div className={classes.info}>
+          <Switch>
+            <Route path={`${path}/users`}>
+              <p>Users</p>
+            </Route>
+            <Route path={`${path}/tasks`}>
+              <p>Tasks</p>
+            </Route>
+            <Route path={`${path}/groups`}>
+              <p>Groups</p>
+            </Route>
+            <Route path={`${path}`}>
+              <h1>Class Main Page for {classData.name}</h1>
+              <p>Description: {classData.desc}</p>
+            </Route>
+          </Switch>
+        </div>
       </div>
     )
   );
