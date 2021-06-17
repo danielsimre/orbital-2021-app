@@ -4,6 +4,10 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import { Link } from "react-router-dom";
+
 import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
@@ -16,38 +20,87 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
+  text: {
+    color: "#FF0000",
+  },
 }));
 
-function HeaderBar(props) {
+function ProfileMenuButton(props) {
   const { setIsAuthenticated } = props;
+  const classes = useStyles();
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   function handleLogout() {
     axios
       .post("/api/v1/users/logout", {}, { withCredentials: true })
-      .then(setIsAuthenticated(false));
+      .then(() => setIsAuthenticated(false));
   }
+
+  return (
+    <>
+      <Button
+        aria-controls="simple-menu"
+        aria-haspopup="true"
+        onClick={handleOpen}
+      >
+        Settings
+      </Button>
+      <Menu
+        id="fade-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        <MenuItem component={Link} to="/profile">
+          Profile
+        </MenuItem>
+        <MenuItem component={Link} to="/settings">
+          Options
+        </MenuItem>
+        <MenuItem onClick={handleLogout} className={classes.text}>
+          Logout
+        </MenuItem>
+      </Menu>
+    </>
+  );
+}
+
+function HeaderBar(props) {
+  const { isAuthenticated, setIsAuthenticated } = props;
 
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
-      <AppBar position="static">
-        <Toolbar>
-          <Button href="/home">Home</Button>
-          <Typography className={classes.title}>
-            <Button href="/new_class" color="default">
-              Create New Class
+    isAuthenticated && (
+      <div className={classes.root}>
+        <AppBar position="static">
+          <Toolbar>
+            <Button component={Link} to="/home">
+              Home
             </Button>
-            <Button href="/my_classes" color="default">
-              View My Classes
-            </Button>
-          </Typography>
-          <Button onClick={handleLogout} color="inherit">
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
-    </div>
+            <Typography className={classes.title}>
+              <Button component={Link} to="/new_class" color="default">
+                Create New Class
+              </Button>
+              <Button component={Link} to="/my_classes" color="default">
+                View My Classes
+              </Button>
+            </Typography>
+            <ProfileMenuButton setIsAuthenticated={setIsAuthenticated} />
+          </Toolbar>
+        </AppBar>
+      </div>
+    )
   );
 }
 
