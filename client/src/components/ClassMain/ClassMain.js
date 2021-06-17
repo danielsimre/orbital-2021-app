@@ -5,6 +5,7 @@ import axios from "axios";
 function ClassMain(props) {
   const { classID } = useParams();
   const [classData, setClassData] = useState({});
+  const [isRetrieving, setIsRetrieving] = useState(true);
 
   function getClassData(classID) {
     axios
@@ -20,7 +21,8 @@ function ClassMain(props) {
       })
       .catch(function (error) {
         console.log(`Could not find class with ID: ${classID}`);
-      });
+      })
+      .finally(() => setIsRetrieving(false));
   }
 
   useEffect(() => {
@@ -29,10 +31,12 @@ function ClassMain(props) {
   }, [classID]);
 
   return (
-    <div>
-      <h1>Class Main Page for {classData.name}</h1>
-      <p>Description: {classData.desc}</p>
-    </div>
+    isRetrieving || (
+      <div>
+        <h1>Class Main Page for {classData.name}</h1>
+        <p>Description: {classData.desc}</p>
+      </div>
+    )
   );
 }
 

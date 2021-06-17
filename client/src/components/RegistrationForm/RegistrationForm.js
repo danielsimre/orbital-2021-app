@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button, TextField, IconButton } from "@material-ui/core";
 import { Alert, AlertTitle } from "@material-ui/lab";
 import CloseIcon from "@material-ui/icons/Close";
@@ -150,7 +151,8 @@ function RegistrationForm() {
             margin: "0 auto",
             width: "200px",
           }}
-          href="/"
+          component={Link}
+          to="/"
         >
           Back to Login
         </Button>

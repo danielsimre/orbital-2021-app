@@ -19,10 +19,10 @@ function NewClassForm(props) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    handleNewProject(className, classDescription);
+    handleNewClass(className, classDescription);
   };
 
-  function handleNewProject(name, desc) {
+  function handleNewClass(name, desc) {
     axios
       .post(
         "/api/v1/classes/",

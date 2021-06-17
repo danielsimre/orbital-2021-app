@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Redirect } from "react-router-dom";
 import { Button, TextField } from "@material-ui/core";
 import styles from "./LoginForm.module.css";
 import axios from "axios";
@@ -7,7 +6,7 @@ import axios from "axios";
 function LoginForm(props) {
   const [logInEmail, setLogInEmail] = useState("");
   const [logInPassword, setLogInPassword] = useState("");
-  const { isAuthenticated, setIsAuthenticated } = props;
+  const { setIsAuthenticated } = props;
 
   function handleLogIn(event) {
     event.preventDefault();
@@ -35,9 +34,7 @@ function LoginForm(props) {
       });
   }
 
-  return isAuthenticated ? (
-    <Redirect to="/home" />
-  ) : (
+  return (
     <form className={styles.loginForm} onSubmit={handleLogIn}>
       <fieldset>
         <legend>Sign in</legend>
@@ -75,5 +72,4 @@ function LoginForm(props) {
     </form>
   );
 }
-
 export default LoginForm;

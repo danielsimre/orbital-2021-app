@@ -61,7 +61,7 @@ export const addUsers = (req, res) => {
       // and users that have a role mismatch (adding a mentor as a group member, or student as a mentor)
       const successArr = [];
       const doesNotExistArr = [];
-      const notInProjectArr = [];
+      const notInClassArr = [];
       const alreadyHasGroupArr = [];
       const roleMismatchArr = [];
 
@@ -79,7 +79,7 @@ export const addUsers = (req, res) => {
             userId: curUser.id,
           });
           if (!successfulFindOneQuery(classRole)) {
-            notInProjectArr.push(userEmail);
+            notInClassArr.push(userEmail);
             return;
           }
           // If mentors are being added, check if mentor is already in charge of this group
@@ -122,7 +122,7 @@ export const addUsers = (req, res) => {
       );
       res.json({
         doesNotExist: doesNotExistArr,
-        notInProject: notInProjectArr,
+        notInClass: notInClassArr,
         alreadyHasGroup: alreadyHasGroupArr,
         roleMismatch: roleMismatchArr,
         successfullyAdded: successArr,
