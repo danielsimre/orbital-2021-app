@@ -87,7 +87,7 @@ function HeaderBar(props) {
               <Button component={Link} to="/new_class" color="default">
                 Create New Class
               </Button>
-              <Button component={Link} to="/my_classes" color="default">
+              <Button component={Link} to="/classes" color="default">
                 View My Classes
               </Button>
             </Typography>
