@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// This is the dropdown menu for the Profile + Logout
 function ProfileMenuButton(props) {
   const { setIsAuthenticated } = props;
   const classes = useStyles();
@@ -47,13 +48,7 @@ function ProfileMenuButton(props) {
 
   return (
     <>
-      <Button
-        aria-controls="simple-menu"
-        aria-haspopup="true"
-        onClick={handleOpen}
-      >
-        Settings
-      </Button>
+      <Button onClick={handleOpen}>Settings</Button>
       <Menu
         id="fade-menu"
         anchorEl={anchorEl}

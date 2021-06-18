@@ -163,7 +163,6 @@ function RegistrationForm() {
             severity={alertState}
             action={
               <IconButton
-                aria-label="close"
                 color="inherit"
                 size="small"
                 onClick={() => {
