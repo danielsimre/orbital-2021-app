@@ -29,6 +29,14 @@ function ClassSidebar(props) {
           button
           className={classes.option}
           component={Link}
+          to={`/my_classes/${classID}/announcements`}
+        >
+          <ListItemText primary="Announcements" />
+        </ListItem>
+        <ListItem
+          button
+          className={classes.option}
+          component={Link}
           to={`/my_classes/${classID}/users`}
         >
           <ListItemText primary="Users" />

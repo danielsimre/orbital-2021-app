@@ -5,6 +5,7 @@ import { Switch, useRouteMatch, Route } from "react-router-dom";
 import { makeStyles } from "@material-ui/core";
 
 import ClassSidebar from "../ClassSidebar";
+import UserList from "../UserList";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,8 +59,11 @@ function ClassMain(props) {
         </div>
         <div className={classes.info}>
           <Switch>
+            <Route path={`${path}/announcements`}>
+              <p>Announcements</p>
+            </Route>
             <Route path={`${path}/users`}>
-              <p>Users</p>
+              <UserList />
             </Route>
             <Route path={`${path}/tasks`}>
               <p>Tasks</p>
