@@ -26,9 +26,6 @@ function TaskIncompleteList(props) {
                   color="primary"
                   checked={task.isComplete}
                   onChange={() => handleTaskToggle(task, index)}
-                  inputProps={{
-                    "aria-label": `checkbox that determines if task ${index} is done`,
-                  }}
                 />
               </td>
             </tr>

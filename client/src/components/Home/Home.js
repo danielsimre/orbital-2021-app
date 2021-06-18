@@ -1,7 +1,8 @@
 import React from "react";
+import Dashboard from "../Dashboard";
 
 function Home() {
-  return <h1>Home Page: Dashboard and due tasks shown here</h1>;
+  return <Dashboard />;
 }
 
 export default Home;

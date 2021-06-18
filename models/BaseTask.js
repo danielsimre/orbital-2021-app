@@ -51,6 +51,10 @@ const BaseTaskSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    className: {
+      type: String,
+      required: true,
+    },
   },
   baseOptions
 );
