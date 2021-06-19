@@ -4,11 +4,13 @@ import { Typography } from "@material-ui/core";
 import CustomBox from "../CustomBox";
 import DashboardTasks from "./DashboardTasks";
 import DashboardAnnouncements from "./DashboardAnnouncements";
+import DashboardComments from "./DashboardComments";
 
 function Dashboard() {
   const [isRetrieving, setIsRetrieving] = useState(true);
   const [userTaskList, setUserTaskList] = useState([]);
   const [userAnnouncementList, setUserAnnouncementList] = useState([]);
+  const [userCommentList, setUserCommentList] = useState([]);
 
   // conduct query for users tasks
   function getAllUserTasks() {
@@ -40,6 +42,16 @@ function Dashboard() {
       },
     ]);
 
+    setUserCommentList([
+      {
+        createdBy: "User 2",
+        creationDate: "3 Jun 2021",
+        title: "additional changes",
+        content:
+          "need to add an extra sentence explaining the cause in front i think",
+      },
+    ]);
+
     setIsRetrieving(false);
   }
 
@@ -63,6 +75,7 @@ function Dashboard() {
             </CustomBox>
             <CustomBox>
               <Typography variant="h5">Comments</Typography>
+              <DashboardComments userCommentList={userCommentList} />
             </CustomBox>
           </div>
         </div>
