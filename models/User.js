@@ -36,6 +36,15 @@ const UserSchema = new Schema(
         return { id: ret.id, type: "users", attributes: { ...rest } };
       },
     },
+    toObject: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        const { id, ...rest } = ret;
+        delete rest._id;
+        delete rest.__v;
+        return { id: ret.id, type: "users", attributes: { ...rest } };
+      },
+    },
   }
 );
 

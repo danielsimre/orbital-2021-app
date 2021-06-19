@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Switch, useRouteMatch, Route } from "react-router-dom";
@@ -26,7 +26,9 @@ const useStyles = makeStyles((theme) => ({
 
 function ClassMain(props) {
   const { classID } = useParams();
+
   const [classData, setClassData] = useState({});
+
   const [isRetrieving, setIsRetrieving] = useState(true);
   const { path } = useRouteMatch();
 
@@ -48,8 +50,7 @@ function ClassMain(props) {
 
   useEffect(() => {
     getClassData(classID);
-    console.log(classID);
-  }, [classID]);
+  }, [classID, setClassData]);
 
   return (
     isRetrieving || (
@@ -63,7 +64,11 @@ function ClassMain(props) {
               <p>Announcements</p>
             </Route>
             <Route path={`${path}/users`}>
-              <UserList />
+              <UserList
+                curUserRole={classData.role}
+                queriedUserList={classData.users}
+                refreshClassData={getClassData}
+              />
             </Route>
             <Route path={`${path}/tasks`}>
               <p>Tasks</p>

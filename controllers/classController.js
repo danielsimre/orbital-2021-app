@@ -14,6 +14,7 @@ import {
 
 export const getInfo = (req, res) => {
   Class.findById(req.params.id)
+    .lean()
     .populate({
       path: "users",
       match: { userId: req.user.id },
@@ -22,15 +23,21 @@ export const getInfo = (req, res) => {
       },
     })
     // Verify that the user can view this class
-    .then((curClass) => validateGetClassInfo(res, curClass))
+    .then((curClass) => validateGetClassInfo(res, curClass).users[0].role)
     // Query the class, now with info of ALL users involved in the class
-    .then(() =>
-      Class.findById(req.params.id).populate({
-        path: "users",
-        populate: {
-          path: "userId",
-        },
-      })
+    .then((classRole) =>
+      Class.findById(req.params.id)
+        .populate({
+          path: "users",
+          populate: {
+            path: "userId",
+          },
+        })
+        .then((curClass) => {
+          const classObj = curClass.toObject();
+          classObj.attributes.role = classRole;
+          return classObj;
+        })
     )
     .then((curClass) => res.json(curClass))
     .catch((err) => console.log(err));

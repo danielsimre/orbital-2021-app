@@ -36,17 +36,25 @@ const useStyles = makeStyles({
   },
 });
 
-function UserList() {
+function UserList(props) {
   const { classID } = useParams();
-  // Form
+  // Form values
   const [userEmails, setUserEmails] = useState("");
   const [newUserRole, setNewUserRole] = useState("STUDENT");
 
-  const [isRetrieving, setIsRetrieving] = useState(true);
+  // Queried values
+  const { curUserRole, queriedUserList, refreshClassData } = props;
+
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [queriedUserList, setQueriedUserList] = useState([]);
 
   const styles = useStyles();
+
+  const userRows = queriedUserList.reduce((cols, key, index) => {
+    return (
+      (index % 2 === 0 ? cols.push([key]) : cols[cols.length - 1].push(key)) &&
+      cols
+    );
+  }, []);
 
   const handleDialogOpen = () => {
     setDialogOpen(true);
@@ -73,84 +81,70 @@ function UserList() {
         { withCredentials: true }
       )
       .then((response) => {
-        console.log(response);
+        console.log(response.data);
+        setUserEmails("");
         handleDialogClose();
       })
+      .then(() => refreshClassData(classID))
       .catch((err) => console.log(err));
   };
-
-  const queryUserList = () => {
-    axios
-      .get(`/api/v1/classes/${classID}`, {
-        withCredentials: true,
-      })
-      .then((response) => {
-        setQueriedUserList(response.data.attributes.users);
-      })
-      .then(() => setIsRetrieving(false))
-      .catch((err) => console.log(err));
-  };
-
-  useEffect(() => queryUserList(), []);
-
-  const userRows = queriedUserList.reduce((cols, key, index) => {
-    return (
-      (index % 2 === 0 ? cols.push([key]) : cols[cols.length - 1].push(key)) &&
-      cols
-    );
-  }, []);
 
   return (
-    isRetrieving || (
-      <div>
-        <div className={styles.tableHeader}>
-          <h2 className={styles.tableTitle}>Users</h2>
-          <Button className={styles.button} onClick={handleDialogOpen}>
-            <AddIcon />
-          </Button>
-          <Dialog open={dialogOpen} onClose={handleDialogClose}>
-            <DialogTitle id="form-dialog-title">Add Users</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Add user(s) by typing in their emails.
-              </DialogContentText>
-              <TextField
-                autoFocus
-                id="email"
-                label="Email Address"
-                type="email"
-                fullWidth
-                value={userEmails}
-                onChange={(event) => setUserEmails(event.target.value)}
-              />
-              <Select
-                value={newUserRole}
-                onChange={(event) => setNewUserRole(event.target.value)}
-                label="New User Role"
-              >
-                <MenuItem value={"STUDENT"}>Student</MenuItem>
-                <MenuItem value={"MENTOR"}>Mentor</MenuItem>
-              </Select>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleDialogClose}>Cancel</Button>
-              <Button onClick={handleSubmit}>Add</Button>
-            </DialogActions>
-          </Dialog>
-        </div>
-        <table className={styles.table}>
-          <tbody align="center">
-            {userRows.map((curRow) => (
-              <tr>
-                {curRow.map((curUser) => (
-                  <td>{curUser.userId.attributes.username}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div>
+      <div className={styles.tableHeader}>
+        <h2 className={styles.tableTitle}>Users</h2>
+        {
+          // If user is a mentor, render the add users button
+          curUserRole === "STUDENT" || (
+            <>
+              <Button className={styles.button} onClick={handleDialogOpen}>
+                <AddIcon />
+              </Button>
+              <Dialog open={dialogOpen} onClose={handleDialogClose}>
+                <DialogTitle id="form-dialog-title">Add Users</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    Add user(s) by typing in their emails.
+                  </DialogContentText>
+                  <TextField
+                    autoFocus
+                    id="email"
+                    label="Email Address"
+                    type="email"
+                    fullWidth
+                    value={userEmails}
+                    onChange={(event) => setUserEmails(event.target.value)}
+                  />
+                  <Select
+                    value={newUserRole}
+                    onChange={(event) => setNewUserRole(event.target.value)}
+                    label="New User Role"
+                  >
+                    <MenuItem value={"STUDENT"}>Student</MenuItem>
+                    <MenuItem value={"MENTOR"}>Mentor</MenuItem>
+                  </Select>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleDialogClose}>Cancel</Button>
+                  <Button onClick={handleSubmit}>Add</Button>
+                </DialogActions>
+              </Dialog>
+            </>
+          )
+        }
       </div>
-    )
+      <table className={styles.table}>
+        <tbody align="center">
+          {userRows.map((curRow) => (
+            <tr>
+              {curRow.map((curUser) => (
+                <td>{curUser.userId.attributes.username}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

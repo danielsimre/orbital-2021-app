@@ -7,6 +7,7 @@ const router = express.Router();
 
 // @route GET api/v1/classes/:id
 // @desc Get the information of the class (User must be a part of the class)
+//       Also gets the role of the user for this class
 // @access Private
 router.get("/:id", ensureAuthenticated, classController.getInfo);
 
