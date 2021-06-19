@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 
 const useStyles = makeStyles({
   table: {
-    minWidth: 650,
+    minWidth: 500,
   },
 });
 
@@ -38,7 +38,7 @@ function DashboardTasks(props) {
             <TableCell align="right">{task.dueDate}</TableCell>
             <TableCell align="right">
               <Button component={Link} to={`/tasks/${task.id}`}>
-                See More {" >>"}
+                Details
               </Button>
             </TableCell>
           </TableRow>

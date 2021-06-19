@@ -20,7 +20,7 @@ function DashboardAnnouncements(props) {
   return (
     <div>
       {userAnnouncementList.map((ann) => (
-        <Card className={classes.root}>
+        <Card variant="outlined" className={classes.root}>
           <CardContent>
             <Typography className={classes.title}>{ann.title}</Typography>
             <Typography className={classes.text}>{ann.content}</Typography>

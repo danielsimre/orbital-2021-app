@@ -24,10 +24,18 @@ function Dashboard() {
     setUserAnnouncementList([
       {
         createdBy: "Mr A",
-        creationDate: "1 Jun 2021",
+        creationDate: "4 Jun 2021",
         title: "Reminder: Task due tomorrow",
         content:
           "Please be reminded that your task 1 is due tomorrow 2359. Late submissions will not be tolerated. Thank you.",
+        class: "Class A",
+      },
+      {
+        createdBy: "Mr A",
+        creationDate: "1 Jun 2021",
+        title: "Correction: Question 5",
+        content:
+          "Please take note that there is an error in Question 5 of Assignment 1. 'for all' should be 'there exists'. Apologies.",
         class: "Class A",
       },
     ]);
@@ -46,12 +54,17 @@ function Dashboard() {
             <Typography variant="h5">Tasks Due</Typography>
             <DashboardTasks userTaskList={userTaskList} />
           </CustomBox>
-          <CustomBox>
-            <Typography variant="h5">Announcements</Typography>
-            <DashboardAnnouncements
-              userAnnouncementList={userAnnouncementList}
-            />
-          </CustomBox>
+          <div>
+            <CustomBox>
+              <Typography variant="h5">Announcements</Typography>
+              <DashboardAnnouncements
+                userAnnouncementList={userAnnouncementList}
+              />
+            </CustomBox>
+            <CustomBox>
+              <Typography variant="h5">Comments</Typography>
+            </CustomBox>
+          </div>
         </div>
       </div>
     )
