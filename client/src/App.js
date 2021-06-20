@@ -96,13 +96,13 @@ function App() {
         />
 
         <ProtectedRoute
-          path="/my_classes/:classID"
+          path="/classes/:classID"
           component={ClassMainPage}
           isAuthenticated={isAuthenticated}
         />
 
         <ProtectedRoute
-          path="/my_classes"
+          path="/classes"
           component={MyClassesPage}
           isAuthenticated={isAuthenticated}
         />

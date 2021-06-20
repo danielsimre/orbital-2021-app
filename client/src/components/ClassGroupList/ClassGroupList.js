@@ -121,7 +121,7 @@ function ClassGroupList(props) {
   }, [classID]);
 
   function getGroupURL(classID, groupID) {
-    return `/my_classes/${classID}/groups/${groupID}`;
+    return `/classes/${classID}/groups/${groupID}`;
   }
 
   // If the user is a mentor, display the add groups button + all groups this mentor is mentoring

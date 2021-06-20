@@ -47,7 +47,7 @@ function GroupList(props) {
   useEffect(() => queryGroupList(), []);
 
   function getGroupURL(classID, groupID) {
-    return `my_classes/${classID}/groups/${groupID}`;
+    return `classes/${classID}/groups/${groupID}`;
   }
 
   const groupList = tabIndex === 0 ? memberGroupList : mentorGroupList;
