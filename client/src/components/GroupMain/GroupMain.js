@@ -32,8 +32,19 @@ function GroupMain(props) {
     isRetrieving || (
       <div>
         <h2>Group name: {groupData.name}</h2>
-        <p>Tasks: </p>
-        <p>Users: </p>
+        <p>Tasks: {groupData.tasks}</p>
+        <p>
+          Users:{" "}
+          {groupData.groupMembers.map((member) => (
+            <>{member.attributes.username} </>
+          ))}
+        </p>
+        <p>
+          Mentors:{" "}
+          {groupData.mentoredBy.map((mentor) => (
+            <>{mentor.attributes.username} </>
+          ))}
+        </p>
       </div>
     )
   );

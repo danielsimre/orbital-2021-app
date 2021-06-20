@@ -13,6 +13,8 @@ import AddIcon from "@material-ui/icons/Add";
 import { Link, Redirect, useParams } from "react-router-dom";
 import axios from "axios";
 
+import AddUserDialog from "../AddUserDialog";
+
 const useStyles = makeStyles({
   tableHeader: {
     display: "flex",
@@ -77,6 +79,27 @@ function ClassGroupList(props) {
         handleDialogClose();
       })
       .then(() => getGroupData(classID))
+      .catch((err) => console.log(err));
+  };
+
+  // Current only handles adding 1 at a time
+  const handleAddUsersToGroups = (groupID, userEmails, newUserRole) => {
+    // Edit this when adding group leaders are implemented
+    if (newUserRole === "STUDENT") {
+      newUserRole = "GROUPMEMBER";
+    }
+    axios
+      .post(
+        `/api/v1/groups/${groupID}/users`,
+        {
+          userEmails: [userEmails],
+          newUserRole: newUserRole,
+        },
+        { withCredentials: true }
+      )
+      .then((response) => {
+        console.log(response.data);
+      })
       .catch((err) => console.log(err));
   };
 
@@ -148,6 +171,17 @@ function ClassGroupList(props) {
                   >
                     View Group
                   </Button>
+                </td>
+                <td>
+                  <AddUserDialog
+                    handleAddUsers={(userEmails, newUserRole) =>
+                      handleAddUsersToGroups(
+                        curGroup.id,
+                        userEmails,
+                        newUserRole
+                      )
+                    }
+                  />
                 </td>
               </tr>
             ))}

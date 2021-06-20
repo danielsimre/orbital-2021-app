@@ -21,6 +21,8 @@ export const getInfo = (req, res) => {
       },
     ],
   })
+    .populate({ path: "groupMembers", select: "username" })
+    .populate({ path: "mentoredBy", select: "username" })
     .then((curGroup) => validateGetGroupInfo(res, curGroup))
     .then((curGroup) => res.json(curGroup))
     .catch((err) => console.log(err));
@@ -84,7 +86,7 @@ export const addUsers = (req, res) => {
           }
           // If mentors are being added, check if mentor is already in charge of this group
           if (newUserRole === GroupRoles.MENTOR) {
-            if (curGroup.mentoredBy.include(curUser.id)) {
+            if (curGroup.mentoredBy.includes(curUser.id)) {
               alreadyHasGroupArr.push(userEmail);
               return;
             }
