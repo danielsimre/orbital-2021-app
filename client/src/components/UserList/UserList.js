@@ -71,8 +71,8 @@ function UserList(props) {
       </div>
       <table className={styles.table}>
         <tbody align="center">
-          {userRows.map((curRow) => (
-            <tr>
+          {userRows.map((curRow, index) => (
+            <tr key={index + 1}>
               {curRow.map((curUser) => (
                 <td>{curUser.userId.attributes.username}</td>
               ))}

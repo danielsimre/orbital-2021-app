@@ -5,6 +5,11 @@ import ensureAuthenticated from "../config/auth.js";
 
 const router = express.Router();
 
+// @route GET api/v1/groups/
+// @desc Get all groups that the user is involved in (both as a student and as a mentor)
+// @access Private
+router.get("/", ensureAuthenticated, groupController.getAllInfo);
+
 // @route GET api/v1/groups/:id
 // @desc Get the information of the group (User must be a part of the group, either as a student or mentor)
 // @access Private

@@ -162,7 +162,7 @@ function ClassGroupList(props) {
         <table className={styles.table}>
           <tbody align="center">
             {queriedGroupList.map((curGroup) => (
-              <tr>
+              <tr key={curGroup.id}>
                 <td>Group Name: {curGroup.attributes.name}</td>
                 <td>
                   <Button

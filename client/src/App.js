@@ -8,7 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import NewClassPage from "./pages/NewClassPage";
 import MyClassesPage from "./pages/MyClassesPage";
-//import MyGroupsPage from "./pages/MyGroupsPage";
+import MyGroupsPage from "./pages/MyGroupsPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import ClassMainPage from "./pages/ClassMainPage";
 import Page404 from "./pages/Page404";
@@ -107,11 +107,11 @@ function App() {
           isAuthenticated={isAuthenticated}
         />
 
-        {/*<ProtectedRoute
+        <ProtectedRoute
           path="/groups"
           component={MyGroupsPage}
           isAuthenticated={isAuthenticated}
-        />*/}
+        />
 
         <Route path="*" component={Page404} />
       </Switch>

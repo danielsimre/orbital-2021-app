@@ -28,6 +28,23 @@ export const getInfo = (req, res) => {
     .catch((err) => console.log(err));
 };
 
+export const getAllInfo = (req, res) => {
+  Promise.all([
+    Group.find({ groupMembers: req.user.id }, "name classId").populate({
+      path: "classId",
+      select: "name",
+    }),
+    Group.find({ mentoredBy: req.user.id }, "name classId").populate({
+      path: "classId",
+      select: "name",
+    }),
+  ])
+    .then((groupArray) =>
+      res.json({ memberOf: groupArray[0], mentorOf: groupArray[1] })
+    )
+    .catch((err) => console.log(err));
+};
+
 // Can add users as group members or mentors
 export const addUsers = (req, res) => {
   Group.findOne({
