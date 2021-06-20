@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Switch, useRouteMatch, Route } from "react-router-dom";
@@ -6,6 +6,8 @@ import { makeStyles } from "@material-ui/core";
 
 import ClassSidebar from "../ClassSidebar";
 import UserList from "../UserList";
+import ClassGroupList from "../ClassGroupList";
+import GroupMain from "../GroupMain";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -73,8 +75,11 @@ function ClassMain(props) {
             <Route path={`${path}/tasks`}>
               <p>Tasks</p>
             </Route>
+            <Route path={`${path}/groups/:groupsID`}>
+              <GroupMain />
+            </Route>
             <Route path={`${path}/groups`}>
-              <p>Groups</p>
+              <ClassGroupList curUserRole={classData.role} />
             </Route>
             <Route path={`${path}`}>
               <h1>Class Main Page for {classData.name}</h1>
