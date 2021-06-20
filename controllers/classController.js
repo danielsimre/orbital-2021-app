@@ -195,9 +195,13 @@ export const createGroups = (req, res) => {
       const nameConflictArr = [];
 
       // Remove duplicated names, and add them to the error array
+      // Also filter out empty strings
       const uniqueGroupNames = groupNames.filter((groupName, index, self) => {
         if (self.indexOf(groupName) !== index) {
           dupeInRequestArr.push(groupName);
+          return false;
+        }
+        if (groupName === "") {
           return false;
         }
         return true;
