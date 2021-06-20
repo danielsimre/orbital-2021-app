@@ -9,11 +9,13 @@ function GroupMain(props) {
   const [isRetrieving, setIsRetrieving] = useState(true);
 
   function getGroupData(groupID) {
+    console.log(groupID);
     axios
       .get(`/api/v1/groups/${groupID}`, {
         withCredentials: true,
       })
       .then(function (response) {
+        console.log(response);
         setGroupData(response.data.attributes);
       })
       .catch(function (error) {

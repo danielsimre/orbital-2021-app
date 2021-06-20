@@ -10,7 +10,7 @@ import {
   makeStyles,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
-import { useParams } from "react-router-dom";
+import { Link, Redirect, useParams } from "react-router-dom";
 import axios from "axios";
 
 const useStyles = makeStyles({
@@ -97,6 +97,10 @@ function ClassGroupList(props) {
     getGroupData(classID);
   }, [classID]);
 
+  function getGroupURL(classID, groupID) {
+    return `/my_classes/${classID}/groups/${groupID}`;
+  }
+
   // If the user is a mentor, display the add groups button + all groups this mentor is mentoring
   // Else, if the user is a student, redirect them directly to their group page if they have a group,
   // and display a message if they are not.
@@ -136,14 +140,24 @@ function ClassGroupList(props) {
           <tbody align="center">
             {queriedGroupList.map((curGroup) => (
               <tr>
-                <td>{curGroup.attributes.name}</td>
+                <td>Group Name: {curGroup.attributes.name}</td>
+                <td>
+                  <Button
+                    component={Link}
+                    to={getGroupURL(classID, curGroup.id)}
+                  >
+                    View Group
+                  </Button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+    ) : queriedGroupList.length !== 0 ? (
+      <Redirect to={getGroupURL(classID, queriedGroupList[0].id)} />
     ) : (
-      <div>Student</div> //redirect to?
+      <h2> Not in a group! Wait for your teachers to add you to one. </h2>
     ))
   );
 }

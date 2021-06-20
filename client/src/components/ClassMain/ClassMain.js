@@ -75,7 +75,7 @@ function ClassMain(props) {
             <Route path={`${path}/tasks`}>
               <p>Tasks</p>
             </Route>
-            <Route path={`${path}/groups/:groupsID`}>
+            <Route path={`${path}/groups/:groupID`}>
               <GroupMain />
             </Route>
             <Route path={`${path}/groups`}>
