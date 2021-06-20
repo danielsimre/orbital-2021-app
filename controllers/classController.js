@@ -209,7 +209,10 @@ export const createGroups = (req, res) => {
 
       await Promise.all(
         uniqueGroupNames.map(async (groupName) => {
-          const group = await Group.findOne({ name: groupName });
+          const group = await Group.findOne({
+            name: groupName,
+            classId: req.params.id,
+          });
           if (successfulFindOneQuery(group)) {
             nameConflictArr.push(groupName);
             return;
