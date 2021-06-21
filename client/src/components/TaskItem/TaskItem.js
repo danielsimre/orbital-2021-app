@@ -2,25 +2,37 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Button,
   Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControlLabel,
+  Paper,
   Typography,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  TextField,
 } from "@material-ui/core/";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { useState } from "react";
 
-import CustomBox from "../CustomBox";
-
-// This component is in charge of rendering the task
-// and its subtasks. The logic handling the checkboxes and stuff should be in tasklist probably
+// This component is in charge of rendering the task and its subtasks.
+// The logic handling the checkboxes and submission should be done in tasklist
 
 function TaskItem(props) {
   // pass in a task json object
   const { taskObject } = props;
+  const [formOpen, setFormOpen] = useState(false);
+
+  const handleClose = () => {
+    setFormOpen(false);
+  };
 
   return (
     <Accordion>
@@ -52,14 +64,33 @@ function TaskItem(props) {
         </Table>
       </AccordionSummary>
       <AccordionDetails>
-        <Typography variant="h5" display="inline">
-          Description
-        </Typography>
-        <div>
-          <Typography variant="body" display="inline">
+        <Paper>
+          <Typography variant="h5" align="left" gutterBottom>
+            Description
+          </Typography>
+          <Typography variant="body" display="block">
             {taskObject.desc}
           </Typography>
-        </div>
+        </Paper>
+        <Button onClick={() => setFormOpen(true)}>Add subtask</Button>
+        <Dialog open={formOpen} onClose={() => setFormOpen(false)}>
+          <DialogTitle>Add subtask</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Enter the task name and provide detailed instructions for the
+              task.
+            </DialogContentText>
+            <TextField></TextField>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleClose} color="primary">
+              Add subtask
+            </Button>
+          </DialogActions>
+        </Dialog>
       </AccordionDetails>
     </Accordion>
   );

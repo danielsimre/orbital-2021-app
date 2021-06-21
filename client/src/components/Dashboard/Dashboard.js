@@ -74,7 +74,7 @@ function Dashboard() {
               />
             </CustomBox>
             <CustomBox>
-              <Typography variant="h5">Comments</Typography>
+              <Typography variant="h5">Recent Comments</Typography>
               <DashboardComments userCommentList={userCommentList} />
             </CustomBox>
           </div>
