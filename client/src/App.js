@@ -8,9 +8,9 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import NewClassPage from "./pages/NewClassPage";
 import MyClassesPage from "./pages/MyClassesPage";
+import MyGroupsPage from "./pages/MyGroupsPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import ClassMainPage from "./pages/ClassMainPage";
-import GroupMainPage from "./pages/GroupMainPage";
 import Page404 from "./pages/Page404";
 
 /* CURRENT STRUCTURE (pages -> components under them)
@@ -108,8 +108,8 @@ function App() {
         />
 
         <ProtectedRoute
-          path="/groups/:groupID"
-          component={GroupMainPage}
+          path="/groups"
+          component={MyGroupsPage}
           isAuthenticated={isAuthenticated}
         />
 

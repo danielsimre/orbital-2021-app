@@ -39,7 +39,7 @@ function ClassList(props) {
   useEffect(() => queryClassList(), []);
 
   function getClassURL(classID) {
-    return "classes/" + classID;
+    return `/classes/${classID}`;
   }
 
   return (

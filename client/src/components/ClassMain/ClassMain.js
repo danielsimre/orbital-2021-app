@@ -6,6 +6,8 @@ import axios from "axios";
 import ClassSidebar from "../ClassSidebar";
 import TaskItem from "../TaskItem";
 import UserList from "../UserList";
+import ClassGroupList from "../ClassGroupList";
+import GroupMain from "../GroupMain";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,7 +36,9 @@ const dummyTestTaskObject = {
 
 function ClassMain(props) {
   const { classID } = useParams();
+
   const [classData, setClassData] = useState({});
+
   const [isRetrieving, setIsRetrieving] = useState(true);
   const { path } = useRouteMatch();
 
@@ -56,8 +60,7 @@ function ClassMain(props) {
 
   useEffect(() => {
     getClassData(classID);
-    console.log(classID);
-  }, [classID]);
+  }, [classID, setClassData]);
 
   return (
     isRetrieving || (
@@ -71,7 +74,11 @@ function ClassMain(props) {
               <p>Announcements</p>
             </Route>
             <Route path={`${path}/users`}>
-              <UserList />
+              <UserList
+                curUserRole={classData.role}
+                queriedUserList={classData.users}
+                refreshClassData={getClassData}
+              />
             </Route>
             <Route path={`${path}/tasks`}>
               <Typography variant="h4" textAlign="center">
@@ -80,8 +87,11 @@ function ClassMain(props) {
               <TaskItem taskObject={dummyTestTaskObject} />
               <TaskItem taskObject={dummyTestTaskObject} />
             </Route>
+            <Route path={`${path}/groups/:groupID`}>
+              <GroupMain />
+            </Route>
             <Route path={`${path}/groups`}>
-              <p>Groups</p>
+              <ClassGroupList curUserRole={classData.role} />
             </Route>
             <Route path={`${path}`}>
               <h1>Class Main Page for {classData.name}</h1>

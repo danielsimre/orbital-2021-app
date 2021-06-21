@@ -90,6 +90,9 @@ function HeaderBar(props) {
               <Button component={Link} to="/classes" color="default">
                 View My Classes
               </Button>
+              <Button component={Link} to="/groups" color="default">
+                View My Groups
+              </Button>
             </Typography>
             <ProfileMenuButton setIsAuthenticated={setIsAuthenticated} />
           </Toolbar>

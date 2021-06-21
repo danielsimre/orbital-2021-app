@@ -7,6 +7,7 @@ const router = express.Router();
 
 // @route GET api/v1/classes/:id
 // @desc Get the information of the class (User must be a part of the class)
+//       Also gets the role of the user for this class
 // @access Private
 router.get("/:id", ensureAuthenticated, classController.getInfo);
 
@@ -34,5 +35,10 @@ router.get("/:id/groups", ensureAuthenticated, classController.getGroups);
 //       the groups they create
 // @access Private
 router.post("/:id/groups", ensureAuthenticated, classController.createGroups);
+
+// @route POST api/v1/classes/:id/tasks
+// @desc Propagate tasks to all groups in this class
+// @access Private
+router.post("/:id/tasks", ensureAuthenticated, classController.createTasks);
 
 export default router;

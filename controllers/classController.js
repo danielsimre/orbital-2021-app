@@ -2,11 +2,13 @@ import User from "../models/User.js";
 import Class from "../models/Class.js";
 import ClassRole from "../models/ClassRole.js";
 import Group from "../models/Group.js";
+import { ParentTask } from "../models/BaseTask.js";
 import { ClassRoles } from "../utils/enums.js";
 import {
   validateGetClassInfo,
   validateAddUsersToClass,
   validateAddGroupsToClass,
+  validateAddTasksToClass,
   validateFieldsPresent,
   validateValueInEnum,
   successfulFindOneQuery,
@@ -14,6 +16,7 @@ import {
 
 export const getInfo = (req, res) => {
   Class.findById(req.params.id)
+    .lean()
     .populate({
       path: "users",
       match: { userId: req.user.id },
@@ -22,15 +25,21 @@ export const getInfo = (req, res) => {
       },
     })
     // Verify that the user can view this class
-    .then((curClass) => validateGetClassInfo(res, curClass))
+    .then((curClass) => validateGetClassInfo(res, curClass).users[0].role)
     // Query the class, now with info of ALL users involved in the class
-    .then(() =>
-      Class.findById(req.params.id).populate({
-        path: "users",
-        populate: {
-          path: "userId",
-        },
-      })
+    .then((classRole) =>
+      Class.findById(req.params.id)
+        .populate({
+          path: "users",
+          populate: {
+            path: "userId",
+          },
+        })
+        .then((curClass) => {
+          const classObj = curClass.toObject();
+          classObj.attributes.role = classRole;
+          return classObj;
+        })
     )
     .then((curClass) => res.json(curClass))
     .catch((err) => console.log(err));
@@ -171,7 +180,7 @@ export const createGroups = (req, res) => {
     // Verify that the user can add groups to the class
     .then((curClass) => validateGetClassInfo(res, curClass))
     .then((curClass) => validateAddGroupsToClass(res, curClass))
-    // Add user(s) to the class
+    // Add groups to the class
     .then(async (curClass) => {
       const { groupNames } = req.body;
 
@@ -188,9 +197,13 @@ export const createGroups = (req, res) => {
       const nameConflictArr = [];
 
       // Remove duplicated names, and add them to the error array
+      // Also filter out empty strings
       const uniqueGroupNames = groupNames.filter((groupName, index, self) => {
         if (self.indexOf(groupName) !== index) {
           dupeInRequestArr.push(groupName);
+          return false;
+        }
+        if (groupName === "") {
           return false;
         }
         return true;
@@ -198,7 +211,10 @@ export const createGroups = (req, res) => {
 
       await Promise.all(
         uniqueGroupNames.map(async (groupName) => {
-          const group = await Group.findOne({ name: groupName });
+          const group = await Group.findOne({
+            name: groupName,
+            classId: req.params.id,
+          });
           if (successfulFindOneQuery(group)) {
             nameConflictArr.push(groupName);
             return;
@@ -223,6 +239,57 @@ export const createGroups = (req, res) => {
         successfullyAdded: successArr,
       });
       curClass.save();
+    })
+    .catch((err) => console.log(err));
+};
+
+export const createTasks = (req, res) => {
+  Class.findById(req.params.id)
+    .populate({
+      path: "users",
+      match: { userId: req.user.id },
+      populate: {
+        path: "userId",
+      },
+    })
+    // Verify that the user can add tasks to the class
+    .then((curClass) => validateGetClassInfo(res, curClass))
+    .then((curClass) => validateAddTasksToClass(res, curClass))
+    // Add tasks to the class
+    .then(async (curClass) => {
+      // taskArr is an array of objects with attributes names, desc, dueDate and isMilestone
+      const { taskArray } = req.body;
+
+      validateFieldsPresent(
+        res,
+        "Please add an array of tasks for attribute taskArray",
+        taskArray
+      );
+
+      const groups = await Group.find({ classId: req.params.id });
+
+      await Promise.all(
+        taskArray.map(async (taskObject) => {
+          groups.forEach((group) => {
+            const newTask = new ParentTask({
+              name: taskObject.name,
+              desc: taskObject.desc,
+              dueDate: taskObject.dueDate,
+              isMilestone: taskObject.isMilestone,
+              assignedTo: group.groupMembers,
+              className: curClass.name,
+            });
+            newTask.save();
+            group.tasks.push(newTask.id);
+          });
+        })
+      );
+
+      await groups.forEach((group) => group.save());
+
+      res.json({
+        msg: "Successfully created tasks",
+      });
     })
     .catch((err) => console.log(err));
 };

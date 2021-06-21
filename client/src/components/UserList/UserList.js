@@ -1,19 +1,8 @@
-import { useState, useEffect } from "react";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  TextField,
-  Select,
-  MenuItem,
-  makeStyles,
-} from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
+import { makeStyles } from "@material-ui/core";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+
+import AddUserDialog from "../AddUserDialog";
 
 const useStyles = makeStyles({
   tableHeader: {
@@ -36,32 +25,22 @@ const useStyles = makeStyles({
   },
 });
 
-function UserList() {
+function UserList(props) {
   const { classID } = useParams();
-  // Form
-  const [userEmails, setUserEmails] = useState("");
-  const [newUserRole, setNewUserRole] = useState("STUDENT");
 
-  const [isRetrieving, setIsRetrieving] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [queriedUserList, setQueriedUserList] = useState([]);
+  // Queried values
+  const { curUserRole, queriedUserList, refreshClassData } = props;
 
   const styles = useStyles();
 
-  const handleDialogOpen = () => {
-    setDialogOpen(true);
-  };
+  const userRows = queriedUserList.reduce((cols, key, index) => {
+    return (
+      (index % 2 === 0 ? cols.push([key]) : cols[cols.length - 1].push(key)) &&
+      cols
+    );
+  }, []);
 
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    handleAddUsers(userEmails, newUserRole);
-  };
-
-  // Current only handles adding 1 at a time, and only students
+  // Current only handles adding 1 at a time
   const handleAddUsers = (userEmails, newUserRole) => {
     axios
       .post(
@@ -73,84 +52,35 @@ function UserList() {
         { withCredentials: true }
       )
       .then((response) => {
-        console.log(response);
-        handleDialogClose();
+        console.log(response.data);
       })
+      .then(() => refreshClassData(classID))
       .catch((err) => console.log(err));
   };
-
-  const queryUserList = () => {
-    axios
-      .get(`/api/v1/classes/${classID}`, {
-        withCredentials: true,
-      })
-      .then((response) => {
-        setQueriedUserList(response.data.attributes.users);
-      })
-      .then(() => setIsRetrieving(false))
-      .catch((err) => console.log(err));
-  };
-
-  useEffect(() => queryUserList(), []);
-
-  const userRows = queriedUserList.reduce((cols, key, index) => {
-    return (
-      (index % 2 === 0 ? cols.push([key]) : cols[cols.length - 1].push(key)) &&
-      cols
-    );
-  }, []);
 
   return (
-    isRetrieving || (
-      <div>
-        <div className={styles.tableHeader}>
-          <h2 className={styles.tableTitle}>Users</h2>
-          <Button className={styles.button} onClick={handleDialogOpen}>
-            <AddIcon />
-          </Button>
-          <Dialog open={dialogOpen} onClose={handleDialogClose}>
-            <DialogTitle id="form-dialog-title">Add Users</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Add user(s) by typing in their emails.
-              </DialogContentText>
-              <TextField
-                autoFocus
-                id="email"
-                label="Email Address"
-                type="email"
-                fullWidth
-                value={userEmails}
-                onChange={(event) => setUserEmails(event.target.value)}
-              />
-              <Select
-                value={newUserRole}
-                onChange={(event) => setNewUserRole(event.target.value)}
-                label="New User Role"
-              >
-                <MenuItem value={"STUDENT"}>Student</MenuItem>
-                <MenuItem value={"MENTOR"}>Mentor</MenuItem>
-              </Select>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleDialogClose}>Cancel</Button>
-              <Button onClick={handleSubmit}>Add</Button>
-            </DialogActions>
-          </Dialog>
-        </div>
-        <table className={styles.table}>
-          <tbody align="center">
-            {userRows.map((curRow) => (
-              <tr>
-                {curRow.map((curUser) => (
-                  <td>{curUser.userId.attributes.username}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div>
+      <div className={styles.tableHeader}>
+        <h2 className={styles.tableTitle}>Users</h2>
+        {
+          // If user is a mentor, render the add users button
+          curUserRole === "STUDENT" || (
+            <AddUserDialog handleAddUsers={handleAddUsers} />
+          )
+        }
       </div>
-    )
+      <table className={styles.table}>
+        <tbody align="center">
+          {userRows.map((curRow, index) => (
+            <tr key={index + 1}>
+              {curRow.map((curUser) => (
+                <td>{curUser.userId.attributes.username}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

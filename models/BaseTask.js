@@ -65,7 +65,9 @@ const BaseTask = mongoose.model("BaseTask", BaseTaskSchema);
 // 2nd parameter is another schema: discriminator returns a union of both schemas provided
 const ParentTask = BaseTask.discriminator(
   "ParentTask",
-  new mongoose.Schema({ subtasks: [BaseTask] })
+  new mongoose.Schema({
+    subtasks: [{ type: Schema.Types.ObjectId, ref: "BaseTask" }],
+  })
 );
 
 export { BaseTask, ParentTask };
