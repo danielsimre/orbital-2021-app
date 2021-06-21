@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Button, TextField, IconButton } from "@material-ui/core";
+import { Button, TextField, Snackbar } from "@material-ui/core";
 import { Alert, AlertTitle } from "@material-ui/lab";
-import CloseIcon from "@material-ui/icons/Close";
 
 import styles from "./NewClassForm.module.css";
 import axios from "axios";
@@ -91,28 +90,16 @@ function NewClassForm(props) {
           </Button>
         </fieldset>
       </form>
-      <div>
-        {displayAlert && (
-          <Alert
-            severity={alertState}
-            action={
-              <IconButton
-                aria-label="close"
-                color="inherit"
-                size="small"
-                onClick={() => {
-                  setDisplayAlert(false);
-                }}
-              >
-                <CloseIcon fontSize="inherit" />
-              </IconButton>
-            }
-          >
-            <AlertTitle>{alertTitleText}</AlertTitle>
-            {alertText}
-          </Alert>
-        )}
-      </div>
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        open={displayAlert}
+        onClose={() => setDisplayAlert(false)}
+      >
+        <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+          <AlertTitle>{alertTitleText}</AlertTitle>
+          {alertText}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
