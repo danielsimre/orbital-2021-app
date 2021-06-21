@@ -1,4 +1,10 @@
-import { makeStyles } from "@material-ui/core";
+import {
+  makeStyles,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@material-ui/core";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
@@ -31,7 +37,7 @@ function UserList(props) {
   // Queried values
   const { curUserRole, queriedUserList, refreshClassData } = props;
 
-  const styles = useStyles();
+  const classes = useStyles();
 
   const userRows = queriedUserList.reduce((cols, key, index) => {
     return (
@@ -60,8 +66,8 @@ function UserList(props) {
 
   return (
     <div>
-      <div className={styles.tableHeader}>
-        <h2 className={styles.tableTitle}>Users</h2>
+      <div className={classes.tableHeader}>
+        <h2 className={classes.tableTitle}>Users</h2>
         {
           // If user is a mentor, render the add users button
           curUserRole === "STUDENT" || (
@@ -69,17 +75,19 @@ function UserList(props) {
           )
         }
       </div>
-      <table className={styles.table}>
-        <tbody align="center">
+      <Table className={classes.table}>
+        <TableBody align="center">
           {userRows.map((curRow, index) => (
-            <tr key={index + 1}>
+            <TableRow>
               {curRow.map((curUser) => (
-                <td>{curUser.userId.attributes.username}</td>
+                <TableCell key={curUser.userId.attributes.username}>
+                  {curUser.userId.attributes.username}
+                </TableCell>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

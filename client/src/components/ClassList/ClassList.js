@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
-import { Button } from "@material-ui/core";
+import {
+  Button,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Typography,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
 const useStyles = makeStyles({
-  tableTitle: {
-    textAlign: "center",
-  },
   table: {
     margin: "0 auto",
     width: "100%",
@@ -18,7 +23,7 @@ const useStyles = makeStyles({
 function ClassList(props) {
   const [isRetrieving, setIsRetrieving] = useState(true);
   const [queriedClassList, setQueriedClassList] = useState([]);
-  const styles = useStyles();
+  const classes = useStyles();
 
   async function queryClassList() {
     try {
@@ -45,32 +50,36 @@ function ClassList(props) {
   return (
     isRetrieving || (
       <div>
-        <h2 className={styles.tableTitle}>Class List</h2>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>Name</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody align="center">
+        <Typography variant="h5" align="center">
+          Class List
+        </Typography>
+        <Table className={classes.table}>
+          <TableHead>
+            <TableRow>
+              <TableCell>No.</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody align="center">
             {queriedClassList.map((curClass, index) => (
-              <tr key={curClass.classId.id}>
-                <td>{index + 1}</td>
-                <td>
+              <TableRow key={index} hover>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{curClass.classId.attributes.name}</TableCell>
+                <TableCell>{curClass.classId.attributes.desc}</TableCell>
+                <TableCell align="right">
                   <Button
                     component={Link}
                     to={getClassURL(curClass.classId.id)}
                   >
-                    {curClass.classId.attributes.name}
+                    Details
                   </Button>
-                </td>
-                <td>{curClass.classId.attributes.desc}</td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     )
   );

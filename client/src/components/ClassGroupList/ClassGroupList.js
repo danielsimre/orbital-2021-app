@@ -8,6 +8,10 @@ import {
   DialogTitle,
   TextField,
   makeStyles,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import { Link, Redirect, useParams } from "react-router-dom";
@@ -159,20 +163,20 @@ function ClassGroupList(props) {
             </Dialog>
           </>
         </div>
-        <table className={styles.table}>
-          <tbody align="center">
+        <Table className={styles.table}>
+          <TableBody align="center">
             {queriedGroupList.map((curGroup) => (
-              <tr key={curGroup.id}>
-                <td>Group Name: {curGroup.attributes.name}</td>
-                <td>
+              <TableRow key={curGroup.id}>
+                <TableCell>Group Name: {curGroup.attributes.name}</TableCell>
+                <TableCell>
                   <Button
                     component={Link}
                     to={getGroupURL(classID, curGroup.id)}
                   >
                     View Group
                   </Button>
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   <AddUserDialog
                     handleAddUsers={(userEmails, newUserRole) =>
                       handleAddUsersToGroups(
@@ -182,11 +186,11 @@ function ClassGroupList(props) {
                       )
                     }
                   />
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     ) : queriedGroupList.length !== 0 ? (
       <Redirect to={getGroupURL(classID, queriedGroupList[0].id)} />
