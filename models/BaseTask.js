@@ -51,8 +51,9 @@ const BaseTaskSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    className: {
-      type: String,
+    classId: {
+      type: Schema.Types.ObjectId,
+      ref: "Class",
       required: true,
     },
   },

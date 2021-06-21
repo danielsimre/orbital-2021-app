@@ -1,6 +1,6 @@
-import LoginForm from "../components/LoginForm";
 import { Redirect, Link } from "react-router-dom";
 import { Button } from "@material-ui/core";
+import LoginForm from "../components/LoginForm";
 
 function LoginPage(props) {
   const { isAuthenticated, setIsAuthenticated } = props;
