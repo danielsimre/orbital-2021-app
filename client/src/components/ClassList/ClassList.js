@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import {
   Button,
+  Modal,
+  Paper,
   Table,
   TableHead,
   TableBody,
@@ -12,17 +14,32 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
+import NewClassForm from "../NewClassForm/NewClassForm";
+
 const useStyles = makeStyles({
+  header: {
+    padding: "12px",
+  },
   table: {
     margin: "0 auto",
     width: "100%",
     border: "1px solid black",
+  },
+  button: {
+    float: "right",
+  },
+  paper: {
+    width: "20%",
+    margin: "0 auto",
+    padding: "16px",
   },
 });
 
 function ClassList(props) {
   const [isRetrieving, setIsRetrieving] = useState(true);
   const [queriedClassList, setQueriedClassList] = useState([]);
+  const [formModalOpen, setFormModalOpen] = useState(false);
+
   const classes = useStyles();
 
   async function queryClassList() {
@@ -41,7 +58,7 @@ function ClassList(props) {
     }
   }
 
-  useEffect(() => queryClassList(), []);
+  useEffect(() => queryClassList(), [queriedClassList]);
 
   function getClassURL(classID) {
     return `/classes/${classID}`;
@@ -50,9 +67,20 @@ function ClassList(props) {
   return (
     isRetrieving || (
       <div>
-        <Typography variant="h5" align="center">
+        <Typography variant="h5" align="left" className={classes.header}>
           Class List
+          <Button
+            onClick={() => setFormModalOpen(true)}
+            className={classes.button}
+          >
+            Create New Class
+          </Button>
         </Typography>
+        <Modal open={formModalOpen} onClose={() => setFormModalOpen(false)}>
+          <Paper elevation={1} className={classes.paper}>
+            <NewClassForm />
+          </Paper>
+        </Modal>
         <Table className={classes.table}>
           <TableHead>
             <TableRow>
