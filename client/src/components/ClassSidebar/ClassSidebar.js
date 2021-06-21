@@ -21,7 +21,7 @@ function ClassSidebar(props) {
           button
           className={classes.option}
           component={Link}
-          to={`/my_classes/${classID}`}
+          to={`/classes/${classID}`}
         >
           <ListItemText primary="Main Page" />
         </ListItem>
@@ -29,7 +29,7 @@ function ClassSidebar(props) {
           button
           className={classes.option}
           component={Link}
-          to={`/my_classes/${classID}/announcements`}
+          to={`/classes/${classID}/announcements`}
         >
           <ListItemText primary="Announcements" />
         </ListItem>
@@ -37,7 +37,7 @@ function ClassSidebar(props) {
           button
           className={classes.option}
           component={Link}
-          to={`/my_classes/${classID}/users`}
+          to={`/classes/${classID}/users`}
         >
           <ListItemText primary="Users" />
         </ListItem>
@@ -45,7 +45,7 @@ function ClassSidebar(props) {
           button
           className={classes.option}
           component={Link}
-          to={`/my_classes/${classID}/tasks`}
+          to={`/classes/${classID}/tasks`}
         >
           <ListItemText primary="Class Tasks" />
         </ListItem>
@@ -53,7 +53,7 @@ function ClassSidebar(props) {
           button
           className={classes.option}
           component={Link}
-          to={`/my_classes/${classID}/groups`}
+          to={`/classes/${classID}/groups`}
         >
           <ListItemText primary="Project Groups" />
         </ListItem>

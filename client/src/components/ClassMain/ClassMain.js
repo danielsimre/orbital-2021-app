@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Switch, useRouteMatch, Route, useParams } from "react-router-dom";
+import { makeStyles, Typography } from "@material-ui/core";
 import axios from "axios";
-import { Switch, useRouteMatch, Route } from "react-router-dom";
-import { makeStyles } from "@material-ui/core";
 
 import ClassSidebar from "../ClassSidebar";
+import TaskItem from "../TaskItem";
 import UserList from "../UserList";
 
 const useStyles = makeStyles((theme) => ({
@@ -23,6 +23,14 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
   },
 }));
+
+// for testing purposes, please delete after
+const dummyTestTaskObject = {
+  name: "Create cover page for report",
+  desc: "Cover page should include title and group member names. Use a nice template online.",
+  dueDate: "21 Jun 2021",
+  assignedTo: "User 1",
+};
 
 function ClassMain(props) {
   const { classID } = useParams();
@@ -66,7 +74,11 @@ function ClassMain(props) {
               <UserList />
             </Route>
             <Route path={`${path}/tasks`}>
-              <p>Tasks</p>
+              <Typography variant="h4" textAlign="center">
+                Tasks
+              </Typography>
+              <TaskItem taskObject={dummyTestTaskObject} />
+              <TaskItem taskObject={dummyTestTaskObject} />
             </Route>
             <Route path={`${path}/groups`}>
               <p>Groups</p>

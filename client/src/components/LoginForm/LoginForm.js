@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Button, TextField } from "@material-ui/core";
+import { Button, IconButton, TextField } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
+import CloseIcon from "@material-ui/icons/Close";
+
 import styles from "./LoginForm.module.css";
 import axios from "axios";
 
@@ -7,6 +10,18 @@ function LoginForm(props) {
   const [logInEmail, setLogInEmail] = useState("");
   const [logInPassword, setLogInPassword] = useState("");
   const { setIsAuthenticated } = props;
+
+  // for the alert
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
+
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
+  }
 
   function handleLogIn(event) {
     event.preventDefault();
@@ -31,45 +46,70 @@ function LoginForm(props) {
       .catch(function (error) {
         console.log("Error with email: " + userEmail);
         console.log(error);
+        handleAlert("Failed to login", "Incorrect email or password", "error");
+        setDisplayAlert(true);
       });
   }
 
   return (
-    <form className={styles.loginForm} onSubmit={handleLogIn}>
-      <fieldset>
-        <legend>Sign in</legend>
-        <div>
-          <TextField
-            id="email"
-            label="Email"
-            variant="outlined"
-            type="email"
-            value={logInEmail}
-            onChange={(event) => setLogInEmail(event.target.value)}
-          />
-        </div>
-        <div>
-          <TextField
-            id="password"
-            label="Password"
-            variant="outlined"
-            type="password"
-            value={logInPassword}
-            onChange={(event) => setLogInPassword(event.target.value)}
-          />
-        </div>
-        <div>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            style={{ margin: "0 auto", display: "flex" }}
+    <>
+      <form className={styles.loginForm} onSubmit={handleLogIn}>
+        <fieldset>
+          <legend>Sign in</legend>
+          <div>
+            <TextField
+              id="email"
+              label="Email"
+              variant="outlined"
+              type="email"
+              value={logInEmail}
+              onChange={(event) => setLogInEmail(event.target.value)}
+            />
+          </div>
+          <div>
+            <TextField
+              id="password"
+              label="Password"
+              variant="outlined"
+              type="password"
+              value={logInPassword}
+              onChange={(event) => setLogInPassword(event.target.value)}
+            />
+          </div>
+          <div>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              style={{ margin: "0 auto", display: "flex" }}
+            >
+              Log In
+            </Button>
+          </div>
+        </fieldset>
+      </form>
+      <div>
+        {displayAlert && (
+          <Alert
+            severity={alertState}
+            action={
+              <IconButton
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setDisplayAlert(false);
+                }}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
           >
-            Log In
-          </Button>
-        </div>
-      </fieldset>
-    </form>
+            <AlertTitle>{alertTitleText}</AlertTitle>
+            {alertText}
+          </Alert>
+        )}
+      </div>
+    </>
   );
 }
 export default LoginForm;
