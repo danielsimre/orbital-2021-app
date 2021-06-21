@@ -84,9 +84,6 @@ function HeaderBar(props) {
               Home
             </Button>
             <Typography className={classes.title}>
-              <Button component={Link} to="/new_class" color="default">
-                Create New Class
-              </Button>
               <Button component={Link} to="/classes" color="default">
                 View My Classes
               </Button>
