@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import Class from "../models/Class.js";
 import ClassRole from "../models/ClassRole.js";
 import Group from "../models/Group.js";
+import { Announcement } from "../models/BaseText.js";
 import { ParentTask } from "../models/BaseTask.js";
 import { ClassRoles } from "../utils/enums.js";
 import {
@@ -12,6 +13,7 @@ import {
   validateFieldsPresent,
   validateValueInEnum,
   successfulFindOneQuery,
+  validateMakeAnnouncementsToClass,
 } from "../utils/validation.js";
 
 export const getInfo = (req, res) => {
@@ -323,6 +325,64 @@ export const getGroups = (req, res) => {
     )
     .then((groupsObj) => {
       res.json(groupsObj);
+    })
+    .catch((err) => console.log(err));
+};
+
+export const makeAnnouncement = (req, res) => {
+  Class.findById(req.params.id)
+    .populate({
+      path: "users",
+      match: { userId: req.user.id },
+      populate: {
+        path: "userId",
+      },
+    })
+    // Verify that the user can add groups to the class
+    .then((curClass) => validateGetClassInfo(res, curClass))
+    .then((curClass) => validateMakeAnnouncementsToClass(res, curClass))
+    // Add groups to the class
+    .then((curClass) => {
+      const { title, content } = req.body;
+
+      validateFieldsPresent(
+        res,
+        "Please ensure all fields are filled",
+        title,
+        content
+      );
+
+      const newAnnouncement = new Announcement({
+        createdBy: req.user.id,
+        title,
+        content,
+        classId: req.params.id,
+      });
+
+      newAnnouncement.save();
+    })
+    .then(() => res.json({ msg: "Successfully created announcement" }));
+};
+
+export const getAnnouncements = (req, res) => {
+  Class.findById(req.params.id)
+    .populate({
+      path: "users",
+      match: { userId: req.user.id },
+      populate: {
+        path: "userId",
+      },
+    })
+    // Verify that the user can access the class
+    .then((curClass) => validateGetClassInfo(res, curClass))
+    // Return a object with announcements
+    .then((curClass) =>
+      Announcement.find({
+        classId: req.params.id,
+      }).sort({ creation_date: "desc" })
+    )
+    .then((announcement) => {
+      res.json(announcement);
     })
     .catch((err) => console.log(err));
 };

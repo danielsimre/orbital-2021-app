@@ -102,6 +102,13 @@ export const validateAddTasksToClass = (res, curClass) => {
   return curClass;
 };
 
+export const validateMakeAnnouncementsToClass = (res, curClass) => {
+  if (curClass.users[0].role !== ClassRoles.MENTOR) {
+    sendJsonErrMessage(res, 403, "Not authorized to add groups to class");
+  }
+  return curClass;
+};
+
 export const validateDueDate = (res, dueDate) => {
   if (!(dueDate instanceof Date) || dueDate <= new Date()) {
     sendJsonErrMessage(res, 400, "Please enter a valid date");
