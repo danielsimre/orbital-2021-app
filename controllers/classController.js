@@ -379,7 +379,7 @@ export const getAnnouncements = (req, res) => {
     .then((curClass) =>
       Announcement.find({
         classId: req.params.id,
-      }).sort({ creation_date: "desc" })
+      }).sort({ creationDate: "desc" })
     )
     .then((announcement) => {
       res.json(announcement);
