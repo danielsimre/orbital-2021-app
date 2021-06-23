@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Typography } from "@material-ui/core";
+import axios from "axios";
 
 import CustomBox from "../CustomBox";
 import DashboardTasks from "./DashboardTasks";
@@ -13,8 +14,16 @@ function Dashboard() {
   const [userCommentList, setUserCommentList] = useState([]);
 
   // conduct query for users tasks
-  function getAllUserTasks() {
+  function getAllUserDashInfo() {
     //query user stuff
+    axios
+      .get("/api/v1/announcements", { withCredentials: true })
+      .then((res) => {
+        console.log(res);
+        setUserAnnouncementList(res.data);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setIsRetrieving(false));
 
     // dummy task list for now
     setUserTaskList([
@@ -23,25 +32,7 @@ function Dashboard() {
       { name: "Task 5", desc: "dummdee", id: 3, dueDate: "20 Jul 2021" },
     ]);
 
-    setUserAnnouncementList([
-      {
-        createdBy: "Mr A",
-        creationDate: "4 Jun 2021",
-        title: "Reminder: Task due tomorrow",
-        content:
-          "Please be reminded that your task 1 is due tomorrow 2359. Late submissions will not be tolerated. Thank you.",
-        class: "Class A",
-      },
-      {
-        createdBy: "Mr A",
-        creationDate: "1 Jun 2021",
-        title: "Correction: Question 5",
-        content:
-          "Please take note that there is an error in Question 5 of Assignment 1. 'for all' should be 'there exists'. Apologies.",
-        class: "Class A",
-      },
-    ]);
-
+    // dummy comment list for now
     setUserCommentList([
       {
         createdBy: "User 2",
@@ -51,11 +42,9 @@ function Dashboard() {
           "need to add an extra sentence explaining the cause in front i think",
       },
     ]);
-
-    setIsRetrieving(false);
   }
 
-  useEffect(() => getAllUserTasks(), []);
+  useEffect(() => getAllUserDashInfo(), []);
 
   return (
     isRetrieving || (
@@ -68,7 +57,7 @@ function Dashboard() {
           </CustomBox>
           <div>
             <CustomBox>
-              <Typography variant="h5">Announcements</Typography>
+              <Typography variant="h5">Recent Announcements</Typography>
               <DashboardAnnouncements
                 userAnnouncementList={userAnnouncementList}
               />

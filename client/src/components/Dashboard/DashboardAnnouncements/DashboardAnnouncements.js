@@ -17,15 +17,26 @@ function DashboardAnnouncements(props) {
 
   const classes = useStyles();
 
-  return (
+  return userAnnouncementList.length === 0 ? (
+    <Typography>No announcements!</Typography>
+  ) : (
     <div>
       {userAnnouncementList.map((ann) => (
-        <Card variant="outlined" className={classes.root} key={ann.title}>
+        <Card
+          variant="outlined"
+          className={classes.root}
+          key={ann.attributes.title}
+        >
           <CardContent>
-            <Typography className={classes.title}>{ann.title}</Typography>
-            <Typography className={classes.text}>{ann.content}</Typography>
+            <Typography className={classes.title}>
+              {ann.attributes.title}
+            </Typography>
+            <Typography className={classes.text}>
+              {ann.attributes.content}
+            </Typography>
             <Typography variant="caption">
-              Made By: {ann.createdBy} on {ann.creationDate}
+              Made By: {ann.attributes.createdBy} on{" "}
+              {ann.attributes.creationDate}
             </Typography>
           </CardContent>
         </Card>
