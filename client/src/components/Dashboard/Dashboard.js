@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Typography } from "@material-ui/core";
+import { Typography, makeStyles } from "@material-ui/core";
 import axios from "axios";
 
 import CustomBox from "../CustomBox";
@@ -7,11 +7,27 @@ import DashboardTasks from "./DashboardTasks";
 import DashboardAnnouncements from "./DashboardAnnouncements";
 import DashboardComments from "./DashboardComments";
 
+const useStyles = makeStyles({
+  container: {
+    display: "flex",
+  },
+
+  left: {
+    width: "50%",
+  },
+
+  right: {
+    width: "50%",
+  },
+});
+
 function Dashboard() {
   const [isRetrieving, setIsRetrieving] = useState(true);
   const [userTaskList, setUserTaskList] = useState([]);
   const [userAnnouncementList, setUserAnnouncementList] = useState([]);
   const [userCommentList, setUserCommentList] = useState([]);
+
+  const classes = useStyles();
 
   // conduct query for users tasks
   function getAllUserDashInfo() {
@@ -49,13 +65,16 @@ function Dashboard() {
   return (
     isRetrieving || (
       <div>
-        <h1 style={{ textAlign: "center" }}>Dashboard</h1>
-        <div style={{ display: "flex" }}>
-          <CustomBox>
-            <Typography variant="h5">Tasks Due</Typography>
-            <DashboardTasks userTaskList={userTaskList} />
-          </CustomBox>
-          <div>
+        <h1 style={{ textAlign: "center" }}>Dashboard</h1>{" "}
+        {/* change to Typography */}
+        <div className={classes.container}>
+          <div className={classes.left}>
+            <CustomBox>
+              <Typography variant="h5">Tasks Due</Typography>
+              <DashboardTasks userTaskList={userTaskList} />
+            </CustomBox>
+          </div>
+          <div className={classes.right}>
             <CustomBox>
               <Typography variant="h5">Recent Announcements</Typography>
               <DashboardAnnouncements

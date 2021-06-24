@@ -15,9 +15,9 @@ const getAllAnnouncements = (req, res) => {
     .then((arr) => arr.map((obj) => obj.classId))
     .then((arr) => {
       console.log(arr);
-      Announcement.find({ classId: { $in: arr } }).then((result) =>
-        res.json(result)
-      );
+      Announcement.find({ classId: { $in: arr } })
+        .sort({ creationDate: "desc" })
+        .then((result) => res.json(result));
     });
 };
 

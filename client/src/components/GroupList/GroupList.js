@@ -64,7 +64,7 @@ function GroupList(props) {
   return (
     isRetrieving || (
       <div>
-        <h2 className={classes.tableTitle}>Class List</h2>
+        <h2 className={classes.tableTitle}>Group List</h2>
         <Tabs value={tabIndex} onChange={handleChange} centered>
           <Tab label="Member" />
           <Tab label="Mentor" />

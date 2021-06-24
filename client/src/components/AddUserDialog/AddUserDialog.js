@@ -52,7 +52,7 @@ function AddUserDialog(props) {
         <AddIcon />
       </Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
-        <DialogTitle id="form-dialog-title">Add Users</DialogTitle>
+        <DialogTitle>Add Users</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Add user(s) by typing in their emails.

@@ -56,10 +56,10 @@ function ProfileMenuButton(props) {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem component={Link} to="/profile">
+        <MenuItem component={Link} to="/">
           Profile
         </MenuItem>
-        <MenuItem component={Link} to="/settings">
+        <MenuItem component={Link} to="/">
           Options
         </MenuItem>
         <MenuItem onClick={handleLogout} className={classes.text}>
