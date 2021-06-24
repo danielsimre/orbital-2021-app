@@ -6,20 +6,26 @@ import {
   Modal,
   Paper,
   Typography,
+  Tooltip,
   makeStyles,
 } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
 import axios from "axios";
-
 import AnnouncementForm from "./AnnouncementForm";
 
 const useStyles = makeStyles({
   root: {
     minWidth: 275,
   },
-  title: {
+  header: {
+    padding: "16px",
+    marginRight: "0.5em",
+    flex: "0 1",
+  },
+  announceTitle: {
     fontSize: 18,
   },
-  text: {
+  announceText: {
     fontSize: 14,
   },
   paper: {
@@ -27,22 +33,35 @@ const useStyles = makeStyles({
     margin: "0 auto",
     padding: "16px",
   },
+  button: {
+    border: "1px solid black",
+    alignSelf: "center",
+    flex: "0 0",
+  },
 });
 
 function ClassAnnouncements(props) {
+  // Queried values
   const { curUserRole, classID } = props;
   const [announcementList, setAnnouncementList] = useState([]);
+
+  // Form values
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [isRetrieving, setIsRetrieving] = useState(true);
+
   const classes = useStyles();
 
-  function isMentor(role) {
+  const isMentor = (role) => {
     return role === "MENTOR";
-  }
+  };
 
-  function openForm() {
+  const openForm = () => {
     setFormModalOpen(true);
-  }
+  };
+
+  const closeForm = () => {
+    setFormModalOpen(false);
+  };
 
   function getClassAnnouncements(classId) {
     axios
@@ -59,13 +78,17 @@ function ClassAnnouncements(props) {
   return (
     isRetrieving || (
       <div>
-        <Typography variant="h5">
+        <Typography variant="h5" className={classes.header}>
           Announcements
           {isMentor(curUserRole) && (
-            <Button onClick={openForm}>Make Announcement</Button>
+            <Tooltip title="Make an announcement to the class" placement="top">
+              <Button className={classes.button} onClick={openForm}>
+                <AddIcon />
+              </Button>
+            </Tooltip>
           )}
         </Typography>
-        <Modal open={formModalOpen} onClose={() => setFormModalOpen(false)}>
+        <Modal open={formModalOpen} onClose={closeForm}>
           <Paper elevation={1} className={classes.paper}>
             <AnnouncementForm
               classID={classID}
@@ -80,10 +103,10 @@ function ClassAnnouncements(props) {
             announcementList.map((ann) => (
               <Card variant="outlined" className={classes.root} key={ann.id}>
                 <CardContent>
-                  <Typography className={classes.title}>
+                  <Typography className={classes.announceTitle}>
                     {ann.attributes.title}
                   </Typography>
-                  <Typography className={classes.text}>
+                  <Typography className={classes.announceText}>
                     {ann.attributes.content}
                   </Typography>
                   <Typography variant="caption">
