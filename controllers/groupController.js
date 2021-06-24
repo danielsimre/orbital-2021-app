@@ -11,6 +11,7 @@ import {
   successfulFindQuery,
   validateValueInEnum,
 } from "../utils/validation.js";
+import { ParentTask } from "../models/BaseTask.js";
 
 export const getInfo = (req, res) => {
   Group.findOne({
@@ -136,6 +137,12 @@ export const addUsers = (req, res) => {
             curGroup.mentoredBy.push(curUser.id);
           } else {
             curGroup.groupMembers.push(curUser.id);
+            // Add this new group member to all parent tasks in this group
+            // (Parent tasks are assigned to all group members)
+            await ParentTask.updateMany(
+              { classId: curGroup.classId },
+              { $push: { assignedTo: curUser.id } }
+            );
           }
         })
       );

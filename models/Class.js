@@ -18,6 +18,14 @@ const ClassSchema = new Schema(
       default: false,
     },
     groups: [{ type: Schema.Types.ObjectId, ref: "Group" }],
+    taskFramework: [
+      {
+        name: { type: String, required: true },
+        desc: { type: String, required: true },
+        dueDate: { type: Date, required: true },
+        isMilestone: { type: Boolean, required: true, default: false },
+      },
+    ],
     created_by: {
       type: Schema.Types.ObjectId,
       ref: "User",

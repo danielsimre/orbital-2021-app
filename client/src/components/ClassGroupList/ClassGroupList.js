@@ -138,7 +138,7 @@ function ClassGroupList(props) {
               <AddIcon />
             </Button>
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
-              <DialogTitle id="form-dialog-title">Add Groups</DialogTitle>
+              <DialogTitle>Add Groups</DialogTitle>
               <DialogContent>
                 <DialogContentText>
                   Add groups by typing in group names.

@@ -2,7 +2,7 @@ import User from "../models/User.js";
 import Class from "../models/Class.js";
 import ClassRole from "../models/ClassRole.js";
 import Group from "../models/Group.js";
-import { ParentTask } from "../models/BaseTask.js";
+import { BaseTask, ParentTask } from "../models/BaseTask.js";
 import { ClassRoles } from "../utils/enums.js";
 import {
   validateGetClassInfo,
@@ -11,6 +11,8 @@ import {
   validateAddTasksToClass,
   validateFieldsPresent,
   validateValueInEnum,
+  validateSameTaskFramework,
+  validateDueDate,
   successfulFindOneQuery,
 } from "../utils/validation.js";
 
@@ -215,6 +217,7 @@ export const createGroups = (req, res) => {
             name: groupName,
             classId: req.params.id,
           });
+
           if (successfulFindOneQuery(group)) {
             nameConflictArr.push(groupName);
             return;
@@ -230,6 +233,19 @@ export const createGroups = (req, res) => {
           curClass.groups.push(newGroup.id);
           // Add whoever created this group as a mentor for the group
           newGroup.mentoredBy.push(req.user.id);
+          // Add the propagated tasks from this class to the new group (if present)
+          curClass.taskFramework.forEach((taskObject) => {
+            const newTask = new ParentTask({
+              name: taskObject.name,
+              desc: taskObject.desc,
+              dueDate: taskObject.dueDate,
+              isMilestone: taskObject.isMilestone,
+              assignedTo: newGroup.groupMembers,
+              classId: curClass.id,
+            });
+            newTask.save();
+            newGroup.tasks.push(newTask.id);
+          });
           newGroup.save();
         })
       );
@@ -257,16 +273,56 @@ export const createTasks = (req, res) => {
     .then((curClass) => validateAddTasksToClass(res, curClass))
     // Add tasks to the class
     .then(async (curClass) => {
-      // taskArr is an array of objects with attributes names, desc, dueDate and isMilestone
+      // taskArray is an array of objects with attributes name, desc, dueDate and isMilestone
       const { taskArray } = req.body;
 
+      // Check if the task array is present
       validateFieldsPresent(
         res,
         "Please add an array of tasks for attribute taskArray",
         taskArray
       );
 
+      // Check if all attributes for each task are present/valid
+      taskArray.forEach((taskObject) => {
+        validateFieldsPresent(
+          res,
+          "Task is missing one of the following attributes: name, desc, dueDate and isMilestone",
+          taskObject.name,
+          taskObject.desc,
+          taskObject.dueDate,
+          taskObject.isMilestone
+        );
+        validateDueDate(res, new Date(taskObject.dueDate));
+      });
+
+      // Sort the input array by dueDate (earliest due date is first)
+      taskArray.sort((task1, task2) => {
+        if (task1.dueDate < task2.dueDate) {
+          return -1;
+        }
+        if (task1.dueDate > task2.dueDate) {
+          return 1;
+        }
+        return 0;
+      });
+
+      // Compare new task framework with the current one. If they are the same, throw an error
+      validateSameTaskFramework(res, taskArray, curClass.taskFramework);
+
       const groups = await Group.find({ classId: req.params.id });
+
+      // Clear the old tasks from all groups and the database
+      await BaseTask.deleteMany({ classId: req.params.id });
+      groups.map((group) => {
+        const newGroup = group;
+        newGroup.tasks = [];
+        return newGroup;
+      });
+
+      // Override the old task framework in the class
+      curClass.taskFramework = taskArray;
+      curClass.save();
 
       await Promise.all(
         taskArray.map(async (taskObject) => {
@@ -277,20 +333,20 @@ export const createTasks = (req, res) => {
               dueDate: taskObject.dueDate,
               isMilestone: taskObject.isMilestone,
               assignedTo: group.groupMembers,
-              className: curClass.name,
+              classId: curClass.id,
             });
             newTask.save();
             group.tasks.push(newTask.id);
           });
         })
       );
-
       await groups.forEach((group) => group.save());
-
+    })
+    .then(() =>
       res.json({
         msg: "Successfully created tasks",
-      });
-    })
+      })
+    )
     .catch((err) => console.log(err));
 };
 
