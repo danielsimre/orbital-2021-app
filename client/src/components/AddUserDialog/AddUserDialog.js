@@ -7,6 +7,7 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
+  Tooltip,
   Select,
   MenuItem,
   makeStyles,
@@ -48,9 +49,11 @@ function AddUserDialog(props) {
 
   return (
     <>
-      <Button className={styles.button} onClick={handleDialogOpen}>
-        <AddIcon />
-      </Button>
+      <Tooltip title="Add users to class" placement="top">
+        <Button className={styles.button} onClick={handleDialogOpen}>
+          <AddIcon />
+        </Button>
+      </Tooltip>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
         <DialogTitle>Add Users</DialogTitle>
         <DialogContent>

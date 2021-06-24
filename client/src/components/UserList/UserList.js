@@ -1,9 +1,12 @@
 import {
   makeStyles,
+  Card,
+  CardContent,
   Table,
   TableBody,
   TableRow,
   TableCell,
+  Typography,
 } from "@material-ui/core";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -18,6 +21,7 @@ const useStyles = makeStyles({
   tableTitle: {
     flex: "0 1",
     marginRight: "0.5em",
+    padding: "16px",
   },
   table: {
     margin: "0 auto",
@@ -67,7 +71,9 @@ function UserList(props) {
   return (
     <div>
       <div className={classes.tableHeader}>
-        <h2 className={classes.tableTitle}>Users</h2>
+        <Typography variant="h5" className={classes.tableTitle}>
+          Users
+        </Typography>
         {
           // If user is a mentor, render the add users button
           curUserRole === "STUDENT" || (
@@ -81,7 +87,19 @@ function UserList(props) {
             <TableRow>
               {curRow.map((curUser) => (
                 <TableCell key={curUser.userId.attributes.username}>
-                  {curUser.userId.attributes.username}
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography variant="h6">
+                        {curUser.userId.attributes.username}
+                      </Typography>
+                      <Typography variant="caption" display="block">
+                        Role: {curUser.role}
+                      </Typography>
+                      <Typography variant="caption" display="block">
+                        Email: {curUser.userId.attributes.email}
+                      </Typography>
+                    </CardContent>
+                  </Card>
                 </TableCell>
               ))}
             </TableRow>
