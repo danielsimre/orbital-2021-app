@@ -13,6 +13,7 @@ import {
   TableRow,
   TableCell,
   Typography,
+  Tooltip,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import { Link, Redirect, useParams } from "react-router-dom";
@@ -146,9 +147,11 @@ function ClassGroupList(props) {
             Groups
           </Typography>
           <>
-            <Button className={classes.button} onClick={handleDialogOpen}>
-              <AddIcon />
-            </Button>
+            <Tooltip title="Create groups for this class" placement="top">
+              <Button className={classes.button} onClick={handleDialogOpen}>
+                <AddIcon />
+              </Button>
+            </Tooltip>
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
               <DialogTitle>Add Groups</DialogTitle>
               <DialogContent>

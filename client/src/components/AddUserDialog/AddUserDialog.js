@@ -49,7 +49,7 @@ function AddUserDialog(props) {
 
   return (
     <>
-      <Tooltip title="Add users to class" placement="top">
+      <Tooltip title="Add users" placement="top">
         <Button className={styles.button} onClick={handleDialogOpen}>
           <AddIcon />
         </Button>
