@@ -34,9 +34,6 @@ const BaseTaskSchema = new Schema(
       type: Date,
       required: true,
     },
-    submissions: {
-      type: [String],
-    },
     assignedTo: {
       // users tasked to complete this task
       type: [{ type: Schema.Types.ObjectId, ref: "User" }],
@@ -60,6 +57,19 @@ const BaseTaskSchema = new Schema(
   baseOptions
 );
 
+// Cannot use arrow notation in this case, due to usage of 'this'
+function formatData(next) {
+  this.sort({ dueDate: 1 })
+    .populate({ path: "classId", select: "name" })
+    .populate({
+      path: "comments",
+      model: "ParentTask",
+    });
+  next();
+}
+
+BaseTaskSchema.pre("findOne", formatData).pre("find", formatData);
+
 const BaseTask = mongoose.model("BaseTask", BaseTaskSchema);
 
 // 2nd parameter is another schema: discriminator returns a union of both schemas provided
@@ -67,6 +77,10 @@ const ParentTask = BaseTask.discriminator(
   "ParentTask",
   new mongoose.Schema({
     subtasks: [{ type: Schema.Types.ObjectId, ref: "BaseTask" }],
+    submissions: {
+      type: [String],
+    },
+    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   })
 );
 

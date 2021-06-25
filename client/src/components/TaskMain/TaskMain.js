@@ -61,6 +61,7 @@ function TaskMain(props) {
   );
   const [newTaskFramework, setNewTaskFramework] = useState(taskFramework);
 
+  // Misc values
   const [propagateDialogOpen, setPropagateDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const classes = useStyles();

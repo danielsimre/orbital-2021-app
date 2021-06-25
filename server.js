@@ -12,6 +12,7 @@ import passportConfig from "./config/passport.js";
 import users from "./routes/users.js";
 import classes from "./routes/classes.js";
 import groups from "./routes/groups.js";
+import tasks from "./routes/tasks.js";
 
 const app = express();
 dotenv.config();
@@ -58,6 +59,7 @@ mongoose
 app.use("/api/v1/users", users);
 app.use("/api/v1/classes", classes);
 app.use("/api/v1/groups", groups);
+app.use("/api/v1/tasks", tasks);
 
 const port = process.env.PORT || 5000;
 

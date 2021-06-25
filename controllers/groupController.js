@@ -24,6 +24,12 @@ export const getInfo = (req, res) => {
   })
     .populate({ path: "groupMembers", select: "username" })
     .populate({ path: "mentoredBy", select: "username" })
+    .populate({
+      path: "tasks",
+      populate: {
+        path: "comments",
+      },
+    })
     .then((curGroup) => validateGetGroupInfo(res, curGroup))
     .then((curGroup) => res.json(curGroup))
     .catch((err) => console.log(err));

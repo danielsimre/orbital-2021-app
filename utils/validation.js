@@ -48,12 +48,12 @@ export const validateRegistration = (req, res, queriedUser) => {
 };
 
 export const validateGetClassInfo = (res, curClass) => {
-  if (!successfulFindOneQuery(curClass)) {
-    sendJsonErrMessage(res, 404, "Class does not exist");
-  }
   // If the users array is empty, then the logged in user's id was not found in this class
-  if (!curClass.users.length) {
-    sendJsonErrMessage(res, 403, "Not authorized to view this class");
+  if (
+    !successfulFindOneQuery(curClass) ||
+    (curClass.users !== undefined && !curClass.users.length)
+  ) {
+    sendJsonErrMessage(res, 404, "Failed to get class");
   }
   return curClass;
 };

@@ -41,4 +41,9 @@ router.post("/:id/groups", ensureAuthenticated, classController.createGroups);
 // @access Private
 router.post("/:id/tasks", ensureAuthenticated, classController.createTasks);
 
+// @route GET api/v1/classes/:id/tasks
+// @desc Get all tasks from this class that are assigned to this user
+// @access Private
+router.get("/:id/tasks", ensureAuthenticated, classController.getTasks);
+
 export default router;

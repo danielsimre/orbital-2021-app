@@ -18,7 +18,6 @@ import {
 
 export const getInfo = (req, res) => {
   Class.findById(req.params.id)
-    .lean()
     .populate({
       path: "users",
       match: { userId: req.user.id },
@@ -375,6 +374,26 @@ export const getGroups = (req, res) => {
             $or: [{ groupMembers: req.user.id }, { mentoredBy: req.user.id }],
           },
         ],
+      })
+    )
+    .then((groupsObj) => {
+      res.json(groupsObj);
+    })
+    .catch((err) => console.log(err));
+};
+
+// If the user is not a part of the class, do not return anything
+// If the user is a part of the class as a mentor, do not return anything (mentors do not have tasks)
+// If the user is a part of the class as a student, return all tasks from this class that are
+// assigned to this user
+export const getTasks = (req, res) => {
+  ClassRole.findOne({ classId: req.params.id, userId: req.user.id })
+    // Verify that the user can access the class
+    .then((curClass) => validateGetClassInfo(res, curClass))
+    .then(() =>
+      ParentTask.find({
+        classId: req.params.id,
+        assignedTo: req.user.id,
       })
     )
     .then((groupsObj) => {
