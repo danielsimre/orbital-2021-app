@@ -174,34 +174,38 @@ function ClassGroupList(props) {
             </Dialog>
           </>
         </div>
-        <Table className={classes.table}>
-          <TableBody align="center">
-            {queriedGroupList.map((curGroup) => (
-              <TableRow key={curGroup.id}>
-                <TableCell>Group Name: {curGroup.attributes.name}</TableCell>
-                <TableCell>
-                  <Button
-                    component={Link}
-                    to={getGroupURL(classID, curGroup.id)}
-                  >
-                    View Group
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <AddUserDialog
-                    handleAddUsers={(userEmails, newUserRole) =>
-                      handleAddUsersToGroups(
-                        curGroup.id,
-                        userEmails,
-                        newUserRole
-                      )
-                    }
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {queriedGroupList.length === 0 ? (
+          <Typography variant="h5">No groups yet! Create one now!</Typography>
+        ) : (
+          <Table className={classes.table}>
+            <TableBody align="center">
+              {queriedGroupList.map((curGroup) => (
+                <TableRow key={curGroup.id}>
+                  <TableCell>Group Name: {curGroup.attributes.name}</TableCell>
+                  <TableCell>
+                    <Button
+                      component={Link}
+                      to={getGroupURL(classID, curGroup.id)}
+                    >
+                      View Group
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <AddUserDialog
+                      handleAddUsers={(userEmails, newUserRole) =>
+                        handleAddUsersToGroups(
+                          curGroup.id,
+                          userEmails,
+                          newUserRole
+                        )
+                      }
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
     ) : queriedGroupList.length !== 0 ? (
       <Redirect to={getGroupURL(classID, queriedGroupList[0].id)} />
