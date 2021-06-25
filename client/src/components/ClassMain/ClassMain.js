@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Switch, useRouteMatch, Route, useParams } from "react-router-dom";
-import { makeStyles, Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 import axios from "axios";
 
 import ClassSidebar from "../ClassSidebar";
-import TaskItem from "../TaskItem";
 import UserList from "../UserList";
 import ClassGroupList from "../ClassGroupList";
 import GroupMain from "../GroupMain";
+import ClassAnnouncements from "./ClassAnnouncements/ClassAnnouncements";
+import TaskMain from "../TaskMain";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,14 +26,6 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
   },
 }));
-
-// for testing purposes, please delete after
-const dummyTestTaskObject = {
-  name: "Create cover page for report",
-  desc: "Cover page should include title and group member names. Use a nice template online.",
-  dueDate: "21 Jun 2021",
-  assignedTo: "User 1",
-};
 
 function ClassMain(props) {
   const { classID } = useParams();
@@ -71,7 +64,10 @@ function ClassMain(props) {
         <div className={classes.info}>
           <Switch>
             <Route path={`${path}/announcements`}>
-              <p>Announcements</p>
+              <ClassAnnouncements
+                curUserRole={classData.role}
+                classID={classID}
+              />
             </Route>
             <Route path={`${path}/users`}>
               <UserList
@@ -81,11 +77,11 @@ function ClassMain(props) {
               />
             </Route>
             <Route path={`${path}/tasks`}>
-              <Typography variant="h4" textAlign="center">
-                Tasks
-              </Typography>
-              <TaskItem taskObject={dummyTestTaskObject} />
-              <TaskItem taskObject={dummyTestTaskObject} />
+              <TaskMain
+                curUserRole={classData.role}
+                taskFramework={classData.taskFramework}
+                refreshClassData={getClassData}
+              />
             </Route>
             <Route path={`${path}/groups/:groupID`}>
               <GroupMain />

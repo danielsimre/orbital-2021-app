@@ -1,14 +1,22 @@
 import { useState } from "react";
-import { Button, TextField, Snackbar } from "@material-ui/core";
+import { Button, TextField, Snackbar, makeStyles } from "@material-ui/core";
 import { Alert, AlertTitle } from "@material-ui/lab";
 
-import styles from "./NewClassForm.module.css";
 import axios from "axios";
 
-function NewClassForm(props) {
-  // for the form
-  const [className, setClassName] = useState("");
-  const [classDescription, setClassDescription] = useState("");
+const useStyles = makeStyles({
+  announcementForm: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
+
+function AnnouncementForm(props) {
+  const { classID, getClassAnnouncements } = props;
+
+  const [announceTitle, setAnnounceTitle] = useState("");
+  const [announceBody, setAnnounceBody] = useState("");
 
   // for the alert
   const [displayAlert, setDisplayAlert] = useState(false);
@@ -16,26 +24,28 @@ function NewClassForm(props) {
   const [alertTitleText, setAlertTitleText] = useState("");
   const [alertState, setAlertState] = useState("");
 
+  const classes = useStyles();
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    handleNewClass(className, classDescription);
+    handleMakeAnnouncement(announceTitle, announceBody, classID);
   };
 
-  function handleNewClass(name, desc) {
+  function handleMakeAnnouncement(title, content, classId) {
     axios
       .post(
-        "/api/v1/classes/",
+        `/api/v1/classes/${classId}/announcement`,
         {
-          name: name,
-          desc: desc,
+          title: title,
+          content: content,
         },
         { withCredentials: true }
       )
       .then(
         (res) =>
           handleAlert(
-            "Class Created!",
-            "The class has been created successfully!",
+            "Announcement Made!",
+            "Your announcement has been made!",
             "success"
           ),
         (err) =>
@@ -45,7 +55,9 @@ function NewClassForm(props) {
             "error"
           )
       )
-      .then(() => setDisplayAlert(true));
+      .then(() => setDisplayAlert(true))
+      .then(() => getClassAnnouncements(classId))
+      .catch((err) => console.log(err));
   }
 
   function handleAlert(title, message, severity) {
@@ -56,28 +68,28 @@ function NewClassForm(props) {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className={styles.newClassForm}>
+      <form onSubmit={handleSubmit} className={classes.announcementForm}>
         <fieldset>
-          <legend>Create New Class</legend>
+          <legend>Announcement</legend>
           <div>
             <TextField
-              id="class_name"
-              label="Class Name"
+              id="announcement_title"
+              label="Announcement Title"
               variant="outlined"
               required
-              value={className}
-              onChange={(event) => setClassName(event.target.value)}
+              value={announceTitle}
+              onChange={(event) => setAnnounceTitle(event.target.value)}
             />
           </div>
           <div>
             <TextField
-              id="class_descrption"
-              label="Class Description"
+              id="announcement_body"
+              label="Announcement Text"
               variant="outlined"
               multiline
               required
-              value={classDescription}
-              onChange={(event) => setClassDescription(event.target.value)}
+              value={announceBody}
+              onChange={(event) => setAnnounceBody(event.target.value)}
             />
           </div>
           <Button
@@ -86,7 +98,7 @@ function NewClassForm(props) {
             color="primary"
             style={{ margin: "0 auto", display: "flex" }}
           >
-            Create New Class
+            Make Announcement
           </Button>
         </fieldset>
       </form>
@@ -104,4 +116,4 @@ function NewClassForm(props) {
   );
 }
 
-export default NewClassForm;
+export default AnnouncementForm;

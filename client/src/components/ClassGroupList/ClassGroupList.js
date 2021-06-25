@@ -8,6 +8,12 @@ import {
   DialogTitle,
   TextField,
   makeStyles,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  Typography,
+  Tooltip,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import { Link, Redirect, useParams } from "react-router-dom";
@@ -23,6 +29,7 @@ const useStyles = makeStyles({
   tableTitle: {
     flex: "0 1",
     marginRight: "0.5em",
+    padding: "16px",
   },
   table: {
     margin: "0 auto",
@@ -33,6 +40,10 @@ const useStyles = makeStyles({
     border: "1px solid black",
     alignSelf: "center",
     flex: "0 0",
+  },
+  nogroup: {
+    padding: "16px",
+    margin: "0 auto",
   },
 });
 
@@ -48,7 +59,7 @@ function ClassGroupList(props) {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const styles = useStyles();
+  const classes = useStyles();
 
   const handleDialogOpen = () => {
     setDialogOpen(true);
@@ -131,14 +142,18 @@ function ClassGroupList(props) {
     isRetrieving ||
     (curUserRole === "MENTOR" ? (
       <div>
-        <div className={styles.tableHeader}>
-          <h2 className={styles.tableTitle}>Groups</h2>
+        <div className={classes.tableHeader}>
+          <Typography variant="h5" className={classes.tableTitle}>
+            Groups
+          </Typography>
           <>
-            <Button className={styles.button} onClick={handleDialogOpen}>
-              <AddIcon />
-            </Button>
+            <Tooltip title="Create groups for this class" placement="top">
+              <Button className={classes.button} onClick={handleDialogOpen}>
+                <AddIcon />
+              </Button>
+            </Tooltip>
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
-              <DialogTitle id="form-dialog-title">Add Groups</DialogTitle>
+              <DialogTitle>Add Groups</DialogTitle>
               <DialogContent>
                 <DialogContentText>
                   Add groups by typing in group names.
@@ -159,39 +174,45 @@ function ClassGroupList(props) {
             </Dialog>
           </>
         </div>
-        <table className={styles.table}>
-          <tbody align="center">
-            {queriedGroupList.map((curGroup) => (
-              <tr key={curGroup.id}>
-                <td>Group Name: {curGroup.attributes.name}</td>
-                <td>
-                  <Button
-                    component={Link}
-                    to={getGroupURL(classID, curGroup.id)}
-                  >
-                    View Group
-                  </Button>
-                </td>
-                <td>
-                  <AddUserDialog
-                    handleAddUsers={(userEmails, newUserRole) =>
-                      handleAddUsersToGroups(
-                        curGroup.id,
-                        userEmails,
-                        newUserRole
-                      )
-                    }
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {queriedGroupList.length === 0 ? (
+          <Typography variant="h5">No groups yet! Create one now!</Typography>
+        ) : (
+          <Table className={classes.table}>
+            <TableBody align="center">
+              {queriedGroupList.map((curGroup) => (
+                <TableRow key={curGroup.id}>
+                  <TableCell>Group Name: {curGroup.attributes.name}</TableCell>
+                  <TableCell>
+                    <Button
+                      component={Link}
+                      to={getGroupURL(classID, curGroup.id)}
+                    >
+                      View Group
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <AddUserDialog
+                      handleAddUsers={(userEmails, newUserRole) =>
+                        handleAddUsersToGroups(
+                          curGroup.id,
+                          userEmails,
+                          newUserRole
+                        )
+                      }
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
     ) : queriedGroupList.length !== 0 ? (
       <Redirect to={getGroupURL(classID, queriedGroupList[0].id)} />
     ) : (
-      <h2> Not in a group! Wait for your teachers to add you to one. </h2>
+      <Typography variant="h5" className={classes.nogroup}>
+        Not in a group! Wait for your teachers to add you to one.{" "}
+      </Typography>
     ))
   );
 }

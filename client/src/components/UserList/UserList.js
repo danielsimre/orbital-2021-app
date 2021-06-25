@@ -1,4 +1,13 @@
-import { makeStyles } from "@material-ui/core";
+import {
+  makeStyles,
+  Card,
+  CardContent,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  Typography,
+} from "@material-ui/core";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
@@ -12,6 +21,7 @@ const useStyles = makeStyles({
   tableTitle: {
     flex: "0 1",
     marginRight: "0.5em",
+    padding: "16px",
   },
   table: {
     margin: "0 auto",
@@ -31,7 +41,7 @@ function UserList(props) {
   // Queried values
   const { curUserRole, queriedUserList, refreshClassData } = props;
 
-  const styles = useStyles();
+  const classes = useStyles();
 
   const userRows = queriedUserList.reduce((cols, key, index) => {
     return (
@@ -60,8 +70,10 @@ function UserList(props) {
 
   return (
     <div>
-      <div className={styles.tableHeader}>
-        <h2 className={styles.tableTitle}>Users</h2>
+      <div className={classes.tableHeader}>
+        <Typography variant="h5" className={classes.tableTitle}>
+          Users
+        </Typography>
         {
           // If user is a mentor, render the add users button
           curUserRole === "STUDENT" || (
@@ -69,17 +81,31 @@ function UserList(props) {
           )
         }
       </div>
-      <table className={styles.table}>
-        <tbody align="center">
+      <Table className={classes.table}>
+        <TableBody align="center">
           {userRows.map((curRow, index) => (
-            <tr key={index + 1}>
+            <TableRow>
               {curRow.map((curUser) => (
-                <td>{curUser.userId.attributes.username}</td>
+                <TableCell key={curUser.userId.attributes.username}>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography variant="h6">
+                        {curUser.userId.attributes.username}
+                      </Typography>
+                      <Typography variant="caption" display="block">
+                        Role: {curUser.role}
+                      </Typography>
+                      <Typography variant="caption" display="block">
+                        Email: {curUser.userId.attributes.email}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </TableCell>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

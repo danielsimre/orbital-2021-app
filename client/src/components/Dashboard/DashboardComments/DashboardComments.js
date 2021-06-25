@@ -20,7 +20,7 @@ function DashboardComments(props) {
   return (
     <div>
       {userCommentList.map((comment) => (
-        <Card variant="outlined">
+        <Card variant="outlined" key={comment.title}>
           <CardContent>
             <Typography className={classes.title}>{comment.title}</Typography>
             <Typography className={classes.text}>{comment.content}</Typography>

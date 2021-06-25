@@ -10,7 +10,7 @@ import {
   DialogContentText,
   DialogTitle,
   FormControlLabel,
-  Paper,
+  Card,
   Typography,
   Table,
   TableBody,
@@ -18,24 +18,67 @@ import {
   TableHead,
   TableRow,
   TextField,
+  makeStyles,
 } from "@material-ui/core/";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { useState } from "react";
 
-// This component is in charge of rendering the task and its subtasks.
-// The logic handling the checkboxes and submission should be done in tasklist
-
+const useStyles = makeStyles({
+  accordion: {
+    width: "100%",
+  },
+  detail: {
+    width: "100%",
+  },
+  detailBox: {
+    padding: "16px",
+  },
+});
 function TaskItem(props) {
   // pass in a task json object
   const { taskObject } = props;
-  const [formOpen, setFormOpen] = useState(false);
 
-  const handleClose = () => {
-    setFormOpen(false);
+  // Form values
+  const [subtaskFormOpen, setSubtaskFormOpen] = useState(false);
+  const [submissionURL, setSubmissionURL] = useState("");
+
+  // Regex for determining valid submission link taken from
+  // https://gist.github.com/dperini/729294
+  const isValidURL = (url) => {
+    try {
+      const test = new URL(url);
+      return true;
+    } catch (err) {
+      console.log(err);
+    } finally {
+      return false;
+    }
   };
 
+  // Handle dialog opening and closing
+  const handleSubtaskOpen = () => {
+    setSubtaskFormOpen(true);
+  };
+
+  const handleSubtaskClose = () => {
+    setSubtaskFormOpen(false);
+  };
+
+  // Allow user to only check the main task as done after all subtasks are done
+  const allSubtasksCompleted = (subtaskArr) =>
+    subtaskArr.every((subtask) => subtask.isCompleted);
+
+  const handleLinkSubmit = (event) => {
+    event.preventDefault();
+    if (isValidURL(submissionURL)) {
+      // PUT request here
+    }
+  };
+
+  const classes = useStyles();
+
   return (
-    <Accordion>
+    <Accordion className={classes.accordion}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Table size="small">
           <TableHead>
@@ -55,7 +98,12 @@ function TaskItem(props) {
                 <FormControlLabel
                   onClick={(event) => event.stopPropagation()}
                   onFocus={(event) => event.stopPropagation()}
-                  control={<Checkbox />}
+                  control={
+                    <Checkbox
+                      color="primary"
+                      disabled={!allSubtasksCompleted(taskObject.subtasks)}
+                    />
+                  }
                   color="primary"
                 />
               </TableCell>
@@ -64,33 +112,60 @@ function TaskItem(props) {
         </Table>
       </AccordionSummary>
       <AccordionDetails>
-        <Paper>
-          <Typography variant="h5" align="left" gutterBottom>
-            Description
-          </Typography>
-          <Typography variant="body" display="block">
-            {taskObject.desc}
-          </Typography>
-        </Paper>
-        <Button onClick={() => setFormOpen(true)}>Add subtask</Button>
-        <Dialog open={formOpen} onClose={() => setFormOpen(false)}>
-          <DialogTitle>Add subtask</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Enter the task name and provide detailed instructions for the
-              task.
-            </DialogContentText>
-            <TextField></TextField>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleClose} color="primary">
-              Add subtask
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <div className={classes.detail}>
+          {/*Description of task*/}
+          <div className={classes.detailBox}>
+            <Card variant="outlined">
+              <Typography variant="h5" align="left">
+                Description
+              </Typography>
+              <Typography variant="body" display="block">
+                {taskObject.desc}
+              </Typography>
+            </Card>
+          </div>
+          {/*Subtask List*/}
+          <div className={classes.detailBox}>
+            <Card variant="outlined">
+              <Typography variant="h5" align="left">
+                Subtasks
+                <Button onClick={handleSubtaskOpen}>Add subtask</Button>
+              </Typography>
+            </Card>
+          </div>
+          <Dialog open={subtaskFormOpen} onClose={handleSubtaskClose}>
+            <DialogTitle>Add subtask</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Enter the task name and provide detailed instructions for the
+                task.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleSubtaskClose} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={handleSubtaskClose} color="primary">
+                Add subtask
+              </Button>
+            </DialogActions>
+          </Dialog>
+          {/*Area to submit work as a link*/}
+          <div className={classes.detailBox}>
+            <Card variant="outlined">
+              <Typography variant="h5" align="left">
+                Submit Work
+              </Typography>
+              <TextField
+                label="Link (with https)"
+                variant="outlined"
+                size="small"
+                onChange={(event) => setSubmissionURL(event.target.value)}
+              />
+              <Button onClick={handleLinkSubmit}>Submit</Button>
+            </Card>
+          </div>
+        </div>
       </AccordionDetails>
     </Accordion>
   );

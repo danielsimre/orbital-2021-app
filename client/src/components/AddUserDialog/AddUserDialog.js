@@ -7,6 +7,7 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
+  Tooltip,
   Select,
   MenuItem,
   makeStyles,
@@ -48,11 +49,13 @@ function AddUserDialog(props) {
 
   return (
     <>
-      <Button className={styles.button} onClick={handleDialogOpen}>
-        <AddIcon />
-      </Button>
+      <Tooltip title="Add users" placement="top">
+        <Button className={styles.button} onClick={handleDialogOpen}>
+          <AddIcon />
+        </Button>
+      </Tooltip>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
-        <DialogTitle id="form-dialog-title">Add Users</DialogTitle>
+        <DialogTitle>Add Users</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Add user(s) by typing in their emails.

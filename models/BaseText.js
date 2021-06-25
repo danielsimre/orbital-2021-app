@@ -46,13 +46,15 @@ const BaseText = mongoose.model("Text", BaseTextSchema);
 
 const Announcement = BaseText.discriminator(
   "Announcement",
-  new Schema({ class: { type: mongoose.Schema.Types.ObjectId, ref: "Class" } })
+  new Schema({
+    classId: { type: mongoose.Schema.Types.ObjectId, ref: "Class" },
+  })
 );
 
 const Comment = BaseText.discriminator(
   "Comment",
   new Schema({
-    task: { type: mongoose.Schema.Types.ObjectId, ref: "BaseTask" },
+    taskId: { type: mongoose.Schema.Types.ObjectId, ref: "BaseTask" },
   })
 );
 

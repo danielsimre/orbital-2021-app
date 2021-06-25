@@ -12,6 +12,7 @@ import passportConfig from "./config/passport.js";
 import users from "./routes/users.js";
 import classes from "./routes/classes.js";
 import groups from "./routes/groups.js";
+import announcements from "./routes/announcements.js";
 
 const app = express();
 dotenv.config();
@@ -48,6 +49,8 @@ mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useCreateIndex: true,
+    useFindAndModify: false,
+    useUnifiedTopology: true,
   })
   .then(() => console.log("MongoDB Connected..."))
   .catch((err) => console.log(err));
@@ -56,6 +59,7 @@ mongoose
 app.use("/api/v1/users", users);
 app.use("/api/v1/classes", classes);
 app.use("/api/v1/groups", groups);
+app.use("/api/v1/announcements", announcements);
 
 const port = process.env.PORT || 5000;
 

@@ -11,7 +11,7 @@ export const successfulFindQuery = (queriedObjects) => queriedObjects.length;
 export const successfulFindOneQuery = (queriedObject) => queriedObject;
 
 export const validateFieldsPresent = (res, msg, ...fields) => {
-  if (!fields.every((field) => field)) {
+  if (!fields.every((field) => field !== undefined && field !== "")) {
     sendJsonErrMessage(res, 400, msg);
   }
 };
@@ -102,6 +102,13 @@ export const validateAddTasksToClass = (res, curClass) => {
   return curClass;
 };
 
+export const validateMakeAnnouncementsToClass = (res, curClass) => {
+  if (curClass.users[0].role !== ClassRoles.MENTOR) {
+    sendJsonErrMessage(res, 403, "Not authorized to add groups to class");
+  }
+  return curClass;
+};
+
 export const validateDueDate = (res, dueDate) => {
   if (!(dueDate instanceof Date) || dueDate <= new Date()) {
     sendJsonErrMessage(res, 400, "Please enter a valid date");
@@ -111,5 +118,32 @@ export const validateDueDate = (res, dueDate) => {
 export const validateValueInEnum = (res, msg, enumType, value) => {
   if (!Object.values(enumType).includes(value)) {
     sendJsonErrMessage(res, 400, msg);
+  }
+};
+
+export const validateSameTaskFramework = (
+  res,
+  newTaskFramework,
+  oldTaskFramework
+) => {
+  if (newTaskFramework.length === oldTaskFramework.length) {
+    for (let i = 0; i < newTaskFramework.length; i += 1) {
+      const newTask = newTaskFramework[i];
+      const oldTask = oldTaskFramework[i];
+      // If there is at least 1 difference, the framework is treated as different
+      if (
+        newTask.name !== oldTask.name ||
+        newTask.desc !== oldTask.desc ||
+        new Date(newTask.dueDate).getTime() !== oldTask.dueDate.getTime() ||
+        newTask.isMilestone !== oldTask.isMilestone
+      ) {
+        return;
+      }
+    }
+    sendJsonErrMessage(
+      res,
+      400,
+      "New task framework is identical to old framework"
+    );
   }
 };
