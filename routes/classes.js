@@ -46,4 +46,22 @@ router.post("/:id/tasks", ensureAuthenticated, classController.createTasks);
 // @access Private
 router.get("/:id/tasks", ensureAuthenticated, classController.getTasks);
 
+// @route GET api/v1/classes/:id/announcements
+// @desc Get all announcements made to the class
+// @access Private
+router.get(
+  "/:id/announcements",
+  ensureAuthenticated,
+  classController.getAnnouncements
+);
+
+// @route POST api/v1/classes/:id/announcements
+// @desc Makes an announcement to the class
+// @access Private
+router.post(
+  "/:id/announcements",
+  ensureAuthenticated,
+  classController.makeAnnouncement
+);
+
 export default router;

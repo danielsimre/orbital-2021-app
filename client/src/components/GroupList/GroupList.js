@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
-import { Button, Tabs, Tab } from "@material-ui/core";
+import {
+  Button,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHead,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -25,7 +34,7 @@ function GroupList(props) {
     setTabIndex(newValue);
   };
 
-  const styles = useStyles();
+  const classes = useStyles();
 
   async function queryGroupList() {
     try {
@@ -55,24 +64,24 @@ function GroupList(props) {
   return (
     isRetrieving || (
       <div>
-        <h2 className={styles.tableTitle}>Group List</h2>
+        <h2 className={classes.tableTitle}>Group List</h2>
         <Tabs value={tabIndex} onChange={handleChange} centered>
           <Tab label="Member" />
           <Tab label="Mentor" />
         </Tabs>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>Group Name</th>
-              <th>Class</th>
-            </tr>
-          </thead>
-          <tbody align="center">
+        <Table className={classes.table}>
+          <TableHead>
+            <TableRow>
+              <TableCell>No.</TableCell>
+              <TableCell>Group Name</TableCell>
+              <TableCell>Class</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody align="center">
             {groupList.map((curGroup, index) => (
-              <tr key={curGroup.id}>
-                <td>{index + 1}</td>
-                <td>
+              <TableRow key={curGroup.id}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>
                   <Button
                     component={Link}
                     to={getGroupURL(
@@ -82,12 +91,14 @@ function GroupList(props) {
                   >
                     {curGroup.attributes.name}
                   </Button>
-                </td>
-                <td>{curGroup.attributes.classId.attributes.name}</td>
-              </tr>
+                </TableCell>
+                <TableCell>
+                  {curGroup.attributes.classId.attributes.name}
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     )
   );

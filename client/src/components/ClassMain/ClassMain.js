@@ -7,6 +7,7 @@ import ClassSidebar from "../ClassSidebar";
 import UserList from "../UserList";
 import ClassGroupList from "../ClassGroupList";
 import GroupMain from "../GroupMain";
+import ClassAnnouncements from "./ClassAnnouncements/ClassAnnouncements";
 import TaskMain from "../TaskMain";
 
 const useStyles = makeStyles((theme) => ({
@@ -63,7 +64,10 @@ function ClassMain(props) {
         <div className={classes.info}>
           <Switch>
             <Route path={`${path}/announcements`}>
-              <p>Announcements</p>
+              <ClassAnnouncements
+                curUserRole={classData.role}
+                classID={classID}
+              />
             </Route>
             <Route path={`${path}/users`}>
               <UserList

@@ -13,12 +13,15 @@ import {
   TableRow,
   TableHead,
   TextField,
+  Snackbar,
   makeStyles,
 } from "@material-ui/core";
-import axios from "axios";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import { useParams } from "react-router-dom";
+import axios from "axios";
 
 import TaskFrameworkEntry from "./TaskFrameworkEntry";
+import TaskItem from "../TaskItem";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -60,10 +63,12 @@ function TaskMain(props) {
     new Date().toISOString().slice(0, 10)
   );
   const [newTaskFramework, setNewTaskFramework] = useState(taskFramework);
+  const [displayAlert, setDisplayAlert] = useState(false);
 
   // Misc values
   const [propagateDialogOpen, setPropagateDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
   const classes = useStyles();
 
   const handlePropDialogOpen = () => {
@@ -86,7 +91,23 @@ function TaskMain(props) {
     setConfirmDialogOpen(false);
   };
 
-  function handleAddTask() {
+  // dummy task constant; delete after
+  const dummyTestTaskObject = {
+    name: "Create cover page for report",
+    desc: "Cover page should include title and group member names. Use a nice template online.",
+    dueDate: "21 Jun 2021",
+    assignedTo: "User 1",
+    subtasks: [],
+    isCompleted: false,
+  };
+
+  function handleAddTask(event) {
+    event.preventDefault();
+    if (new Date(taskDueDate) < Date.now()) {
+      setDisplayAlert(true);
+      return;
+    }
+
     if (taskName !== "" && taskDesc !== "") {
       // Add new task and slot it into the framework based on its due date
       setNewTaskFramework(
@@ -194,7 +215,7 @@ function TaskMain(props) {
             />
             <DialogActions>
               <Button onClick={handlePropDialogClose}>Cancel</Button>
-              <Button type="submit" onClick={handleAddTask}>
+              <Button type="submit" onClick={(event) => handleAddTask(event)}>
                 Add Task
               </Button>
               <Button onClick={handleConfirmDialogOpen}>Save Framework</Button>
@@ -241,9 +262,19 @@ function TaskMain(props) {
           </TableBody>
         </Table>
       </Box>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={displayAlert}
+        onClose={() => setDisplayAlert(false)}
+      >
+        <Alert onClose={() => setDisplayAlert(false)} severity="error">
+          <AlertTitle>Invalid date</AlertTitle>
+          Your selected due date is invalid.
+        </Alert>
+      </Snackbar>
     </div>
   ) : (
-    <div>Student view</div>
+    <TaskItem taskObject={dummyTestTaskObject} />
   );
 }
 
