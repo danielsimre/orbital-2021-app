@@ -18,9 +18,13 @@ const useStyles = makeStyles({
     minWidth: 275,
   },
   header: {
-    padding: "16px",
-    marginRight: "0.5em",
+    display: "flex",
+    justifyContent: "center",
+  },
+  title: {
     flex: "0 1",
+    marginRight: "0.5em",
+    padding: "16px",
   },
   announceTitle: {
     fontSize: 18,
@@ -78,8 +82,10 @@ function ClassAnnouncements(props) {
   return (
     isRetrieving || (
       <div>
-        <Typography variant="h5" className={classes.header}>
-          Announcements
+        <div className={classes.header}>
+          <Typography variant="h5" className={classes.title}>
+            Announcements
+          </Typography>
           {isMentor(curUserRole) && (
             <Tooltip title="Make an announcement to the class" placement="top">
               <Button className={classes.button} onClick={openForm}>
@@ -87,15 +93,15 @@ function ClassAnnouncements(props) {
               </Button>
             </Tooltip>
           )}
-        </Typography>
-        <Modal open={formModalOpen} onClose={closeForm}>
-          <Paper elevation={1} className={classes.paper}>
-            <AnnouncementForm
-              classID={classID}
-              getClassAnnouncements={getClassAnnouncements}
-            />
-          </Paper>
-        </Modal>
+          <Modal open={formModalOpen} onClose={closeForm}>
+            <Paper elevation={1} className={classes.paper}>
+              <AnnouncementForm
+                classID={classID}
+                getClassAnnouncements={getClassAnnouncements}
+              />
+            </Paper>
+          </Modal>
+        </div>
         <div>
           {announcementList.length === 0 ? (
             <Typography>No announcements yet!</Typography>
