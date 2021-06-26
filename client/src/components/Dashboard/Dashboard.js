@@ -29,16 +29,15 @@ function Dashboard() {
 
   const classes = useStyles();
 
-  // conduct query for users tasks
+  // Query for user info (tasks, announcements, comments)
   function getAllUserDashInfo() {
-    //query user stuff
+    // Query announcements
     axios
       .get("/api/v1/announcements", { withCredentials: true })
       .then((res) => {
-        console.log(res);
         setUserAnnouncementList(res.data);
       })
-      .catch((err) => console.error(err))
+      .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
 
     // dummy task list for now
@@ -66,7 +65,6 @@ function Dashboard() {
     isRetrieving || (
       <div>
         <h1 style={{ textAlign: "center" }}>Dashboard</h1>{" "}
-        {/* change to Typography */}
         <div className={classes.container}>
           <div className={classes.left}>
             <CustomBox>

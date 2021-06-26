@@ -2,6 +2,17 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
+const baseOptions = {
+  toJSON: {
+    transform: (doc, ret) => {
+      const groupId = ret._id;
+      delete ret._id;
+      delete ret.__v;
+      return { id: groupId, type: "groups", attributes: { ...ret } };
+    },
+  },
+};
+
 const GroupSchema = new Schema(
   {
     name: {
@@ -28,16 +39,7 @@ const GroupSchema = new Schema(
       select: false,
     },
   },
-  {
-    toJSON: {
-      transform: (doc, ret) => {
-        const groupId = ret._id;
-        delete ret._id;
-        delete ret.__v;
-        return { id: groupId, type: "groups", attributes: { ...ret } };
-      },
-    },
-  }
+  baseOptions
 );
 
 const Group = mongoose.model("Group", GroupSchema);

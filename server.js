@@ -8,7 +8,7 @@ import dotenv from "dotenv";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 
-import passportConfig from "./config/passport.js";
+import passportConfig from "./utils/config/passport.js";
 import users from "./routes/users.js";
 import classes from "./routes/classes.js";
 import groups from "./routes/groups.js";

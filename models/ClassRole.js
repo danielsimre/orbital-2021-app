@@ -2,6 +2,15 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
+const baseOptions = {
+  toJSON: {
+    transform: (doc, ret) => {
+      delete ret._id;
+      delete ret.__v;
+    },
+  },
+};
+
 const ClassRoleSchema = new Schema(
   {
     userId: {
@@ -21,14 +30,7 @@ const ClassRoleSchema = new Schema(
       default: "STUDENT",
     },
   },
-  {
-    toJSON: {
-      transform: (doc, ret) => {
-        delete ret._id;
-        delete ret.__v;
-      },
-    },
-  }
+  baseOptions
 );
 
 const ClassRole = mongoose.model("ClassRole", ClassRoleSchema);

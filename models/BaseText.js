@@ -41,10 +41,15 @@ const BaseTextSchema = new Schema(
 
 // Cannot use arrow notation in this case, due to usage of 'this'
 function formatData(next) {
-  this.sort({ creationDate: 1 }).populate({
-    path: "createdBy",
-    select: "username",
-  });
+  this.sort({ creationDate: -1 })
+    .populate({
+      path: "createdBy",
+      select: "username",
+    })
+    .populate({
+      path: "classId",
+      select: "name",
+    });
   next();
 }
 

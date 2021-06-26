@@ -1,3 +1,4 @@
+import ClassRole from "../models/ClassRole.js";
 import { ClassRoles } from "./enums.js";
 
 // Internal function to send json message + throw error for failed validation
@@ -47,70 +48,35 @@ export const validateRegistration = (req, res, queriedUser) => {
   }
 };
 
-export const validateGetClassInfo = (res, curClass) => {
-  // If the users array is empty, then the logged in user's id was not found in this class
-  if (
-    !successfulFindOneQuery(curClass) ||
-    (curClass.users !== undefined && !curClass.users.length)
-  ) {
-    sendJsonErrMessage(res, 404, "Failed to get class");
-  }
-  return curClass;
-};
+// Verify that the user can access the current class
+export const validateCanAccessClass = (req, res) =>
+  ClassRole.findOne({ classId: req.params.id, userId: req.user.id })
+    .populate({ path: "classId" })
+    .then((classRoleObj) => {
+      if (!successfulFindOneQuery(classRoleObj)) {
+        sendJsonErrMessage(res, 404, "Failed to get class data");
+      }
+      classRoleObj.classId.role = classRoleObj.role;
+      return classRoleObj.classId;
+    });
 
-export const validateGetGroupInfo = (res, curGroup) => {
+export const validateCanAccessGroup = (res, curGroup, msg) => {
   if (!successfulFindOneQuery(curGroup)) {
-    sendJsonErrMessage(
-      res,
-      400,
-      "Group does not exist or user is not authorized to access this group"
-    );
+    sendJsonErrMessage(res, 400, msg);
   }
   return curGroup;
 };
 
-// Checks if user has permissions to add users to class/groups
-export const validateAddUsersToClass = (res, curClass) => {
-  if (curClass.users[0].role !== ClassRoles.MENTOR) {
-    sendJsonErrMessage(res, 403, "Not authorized to add users to class");
-  }
-  return curClass;
-};
-
-export const validateAddUsersToGroup = (res, curGroup) => {
-  if (!successfulFindOneQuery(curGroup)) {
-    sendJsonErrMessage(
-      res,
-      400,
-      "Group does not exist or user is not authorized to add users to group"
-    );
-  }
-  return curGroup;
-};
-
-export const validateAddGroupsToClass = (res, curClass) => {
-  if (curClass.users[0].role !== ClassRoles.MENTOR) {
-    sendJsonErrMessage(res, 403, "Not authorized to add groups to class");
-  }
-  return curClass;
-};
-
-export const validateAddTasksToClass = (res, curClass) => {
-  if (curClass.users[0].role !== ClassRoles.MENTOR) {
-    sendJsonErrMessage(res, 403, "Not authorized to add tasks to class");
-  }
-  return curClass;
-};
-
-export const validateMakeAnnouncementsToClass = (res, curClass) => {
-  if (curClass.users[0].role !== ClassRoles.MENTOR) {
-    sendJsonErrMessage(res, 403, "Not authorized to add groups to class");
+// Only mentors can add groups/tasks/announcements to a class
+export const validateIsMentor = (res, curClass, msg) => {
+  if (curClass.role !== ClassRoles.MENTOR) {
+    sendJsonErrMessage(res, 403, msg);
   }
   return curClass;
 };
 
 export const validateDueDate = (res, dueDate) => {
-  if (!(dueDate instanceof Date) || dueDate <= new Date()) {
+  if (!(dueDate instanceof Date) || dueDate < new Date()) {
     sendJsonErrMessage(res, 400, "Please enter a valid date");
   }
 };

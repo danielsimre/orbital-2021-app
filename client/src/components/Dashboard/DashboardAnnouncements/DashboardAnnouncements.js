@@ -35,8 +35,10 @@ function DashboardAnnouncements(props) {
               {ann.attributes.content}
             </Typography>
             <Typography variant="caption">
-              Made By: {ann.attributes.createdBy} on{" "}
-              {ann.attributes.creationDate}
+              {`Made by ${ann.attributes.createdBy.attributes.username} in
+              ${ann.attributes.classId.attributes.name} on
+              ${ann.attributes.creationDate.slice(0, 10)}, 
+              ${ann.attributes.creationDate.slice(11, 19)}`}
             </Typography>
           </CardContent>
         </Card>

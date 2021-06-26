@@ -14,11 +14,10 @@ function GroupMain(props) {
       .get(`/api/v1/groups/${groupID}`, {
         withCredentials: true,
       })
-      .then(function (response) {
-        console.log(response);
-        setGroupData(response.data.attributes);
+      .then((res) => {
+        setGroupData(res.data.attributes);
       })
-      .catch(function (error) {
+      .catch((err) => {
         console.log(`Could not find group with ID: ${groupID}`);
       })
       .finally(() => setIsRetrieving(false));
@@ -32,7 +31,12 @@ function GroupMain(props) {
     isRetrieving || (
       <div>
         <h2>Group name: {groupData.name}</h2>
-        <p>Tasks: {groupData.tasks}</p>
+        <p>
+          Tasks:{" "}
+          {groupData.tasks.map((task) => (
+            <>{task.attributes.name} </>
+          ))}
+        </p>
         <p>
           Users:{" "}
           {groupData.groupMembers.map((member) => (
