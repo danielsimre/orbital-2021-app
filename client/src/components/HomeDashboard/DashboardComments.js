@@ -17,15 +17,24 @@ function DashboardComments(props) {
 
   const classes = useStyles();
 
-  return (
+  return userCommentList.length === 0 ? (
+    <Typography>No comments!</Typography>
+  ) : (
     <div>
       {userCommentList.map((comment) => (
-        <Card variant="outlined" key={comment.title}>
+        <Card variant="outlined" key={comment.attributes.title}>
           <CardContent>
-            <Typography className={classes.title}>{comment.title}</Typography>
-            <Typography className={classes.text}>{comment.content}</Typography>
+            <Typography className={classes.title}>
+              {comment.attributes.title}
+            </Typography>
+            <Typography className={classes.text}>
+              {comment.attributes.content}
+            </Typography>
             <Typography variant="caption">
-              Made By: {comment.createdBy} on {comment.creationDate}
+              {`Made by ${comment.attributes.createdBy.attributes.username} in
+              ${comment.attributes.classId.attributes.name} on
+              ${comment.attributes.creationDate.slice(0, 10)}, 
+              ${comment.attributes.creationDate.slice(11, 19)}`}
             </Typography>
           </CardContent>
         </Card>

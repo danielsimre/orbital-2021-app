@@ -35,30 +35,20 @@ function Dashboard() {
   function getAllUserDashInfo() {
     // Query announcements
     axios
-      .get("/api/v1/announcements", { withCredentials: true })
-      .then((res) => {
-        setUserAnnouncementList(res.data);
-      })
+      .all([
+        axios.get("/api/v1/announcements", { withCredentials: true }),
+        axios.get("/api/v1/tasks", { withCredentials: true }),
+        axios.get("/api/v1/comments", { withCredentials: true }),
+      ])
+      .then(
+        axios.spread((announcements, tasks, comments) => {
+          setUserAnnouncementList(announcements.data);
+          setUserTaskList(tasks.data.incompletedTasks);
+          setUserCommentList(comments.data);
+        })
+      )
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
-
-    // dummy task list for now
-    setUserTaskList([
-      { name: "Task 1", desc: "dummy task 1", id: 1, dueDate: "23 Jun 2021" },
-      { name: "Task 2", desc: "dummy task 3", id: 2, dueDate: "28 Jun 2021" },
-      { name: "Task 5", desc: "dummdee", id: 3, dueDate: "20 Jul 2021" },
-    ]);
-
-    // dummy comment list for now
-    setUserCommentList([
-      {
-        createdBy: "User 2",
-        creationDate: "3 Jun 2021",
-        title: "additional changes",
-        content:
-          "need to add an extra sentence explaining the cause in front i think",
-      },
-    ]);
   }
 
   useEffect(() => getAllUserDashInfo(), []);
@@ -70,7 +60,7 @@ function Dashboard() {
         <div className={classes.container}>
           <div className={classes.left}>
             <CustomBox>
-              <Typography variant="h5">Tasks Due</Typography>
+              <Typography variant="h5">Upcoming Tasks</Typography>
               <DashboardTasks userTaskList={userTaskList} />
             </CustomBox>
           </div>

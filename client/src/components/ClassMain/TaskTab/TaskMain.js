@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Box,
@@ -20,6 +20,7 @@ import axios from "axios";
 
 import TaskFrameworkEntry from "./TaskFrameworkEntry";
 import TaskItem from "./TaskItem";
+import { ClassRoles } from "../../../enums";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     maxHeight: "100%",
+    overflow: "auto",
   },
   button: {
     border: "1px solid black",
@@ -51,8 +53,9 @@ const useStyles = makeStyles((theme) => ({
 
 function TaskMain(props) {
   // Queried values
-  const { curUserRole, taskFramework, refreshClassData } = props;
   const { classID } = useParams();
+  const { curUserRole, taskFramework, refreshClassData } = props;
+  const [queriedTaskList, setQueriedTaskList] = useState([]);
 
   // Form values
   const [taskName, setTaskName] = useState("");
@@ -68,16 +71,6 @@ function TaskMain(props) {
   const [propagateDialogOpen, setPropagateDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const classes = useStyles();
-
-  // dummy task constant; delete after
-  const dummyTestTaskObject = {
-    name: "Create cover page for report",
-    desc: "Cover page should include title and group member names. Use a nice template online.",
-    dueDate: "21 Jun 2021",
-    assignedTo: "User 1",
-    subtasks: [],
-    isCompleted: false,
-  };
 
   function handlePropDialogOpen() {
     // Reset the unsaved task framework on dialog open
@@ -99,7 +92,7 @@ function TaskMain(props) {
     setConfirmDialogOpen(false);
   }
 
-  function handleAddTask(event) {
+  function handleAddTask() {
     setDateError(false);
     setDateHelperText("");
     if (new Date(taskDueDate) < Date.now()) {
@@ -145,7 +138,7 @@ function TaskMain(props) {
         { withCredentials: true }
       )
       .then((response) => {
-        console.log(response.data);
+        console.log(response);
       })
       .then(() => refreshClassData(classID))
       .catch((err) => console.log(err));
@@ -160,7 +153,20 @@ function TaskMain(props) {
     );
   }
 
-  return curUserRole === "MENTOR" ? (
+  useEffect(() => {
+    if (curUserRole === ClassRoles.STUDENT) {
+      axios
+        .get(`/api/v1/classes/${classID}/tasks`, {
+          withCredentials: true,
+        })
+        .then((response) => {
+          setQueriedTaskList(response.data);
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [curUserRole, classID]);
+
+  return curUserRole === ClassRoles.MENTOR ? (
     <div className={classes.root}>
       <Button onClick={handlePropDialogOpen} className={classes.button}>
         {" "}
@@ -266,7 +272,23 @@ function TaskMain(props) {
       </Box>
     </div>
   ) : (
-    <TaskItem taskObject={dummyTestTaskObject} />
+    <div className={classes.root}>
+      <Table size="small" className={classes.table}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Task</TableCell>
+            <TableCell>Due Date</TableCell>
+            <TableCell>Completed?</TableCell>
+            <TableCell></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {queriedTaskList.map((taskObject) => (
+            <TaskItem taskObject={taskObject.attributes} />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 

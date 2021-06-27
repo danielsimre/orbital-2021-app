@@ -8,11 +8,6 @@ import {
   Typography,
   makeStyles,
 } from "@material-ui/core";
-import { useParams } from "react-router-dom";
-import axios from "axios";
-
-import AddUserDialog from "./AddUserDialog";
-import { ClassRoles } from "../../../enums";
 
 const useStyles = makeStyles({
   root: {
@@ -21,6 +16,13 @@ const useStyles = makeStyles({
     flexDirection: "column",
     maxHeight: "100%",
     overflow: "auto",
+  },
+  tableHeader: {
+    display: "flex",
+    justifyContent: "center",
+  },
+  tableTitle: {
+    padding: "0.5em",
   },
   table: {
     margin: "0 auto",
@@ -33,14 +35,6 @@ const useStyles = makeStyles({
   tableCell: {
     border: "none",
   },
-  tableHeader: {
-    display: "flex",
-    justifyContent: "center",
-  },
-  tableTitle: {
-    flex: "0 1",
-    padding: "0.5em",
-  },
   button: {
     border: "1px solid black",
     alignSelf: "center",
@@ -48,70 +42,78 @@ const useStyles = makeStyles({
   },
 });
 
-function UserList(props) {
+function GroupUserList(props) {
   // Queried values
-  const { classID } = useParams();
-  const { curUserRole, queriedUserList, refreshClassData } = props;
+  const { groupMembers, mentors } = props;
 
   // Misc values
   const classes = useStyles();
-  const userRows = queriedUserList.reduce((cols, key, index) => {
+  const memberRows = groupMembers.reduce((cols, key, index) => {
+    return (
+      (index % 2 === 0 ? cols.push([key]) : cols[cols.length - 1].push(key)) &&
+      cols
+    );
+  }, []);
+  const mentorRows = mentors.reduce((cols, key, index) => {
     return (
       (index % 2 === 0 ? cols.push([key]) : cols[cols.length - 1].push(key)) &&
       cols
     );
   }, []);
 
-  // Current only handles adding 1 at a time
-  function handleAddUsers(userEmails, newUserRole) {
-    axios
-      .post(
-        `/api/v1/classes/${classID}/users`,
-        {
-          userEmails: [userEmails],
-          newUserRole: newUserRole,
-        },
-        { withCredentials: true }
-      )
-      .then((response) => {
-        console.log(response.data);
-      })
-      .then(() => refreshClassData(classID))
-      .catch((err) => console.log(err));
-  }
-
   return (
-    <div className={classes.root}>
+    <div>
       <div className={classes.tableHeader}>
         <Typography variant="h5" className={classes.tableTitle}>
-          Users
+          Group Members
         </Typography>
-        {
-          // If user is a mentor, render the add users button
-          curUserRole === ClassRoles.MENTOR && (
-            <AddUserDialog handleAddUsers={handleAddUsers} />
-          )
-        }
       </div>
       <Table className={classes.table}>
         <TableBody align="center">
-          {userRows.map((curRow, index) => (
+          {memberRows.map((curRow, index) => (
             <TableRow className={classes.tableRow}>
               {curRow.map((curUser) => (
                 <TableCell
                   className={classes.tableCell}
-                  key={curUser.userId.attributes.username}
+                  key={curUser.attributes.username}
                 >
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="h6">
-                        {curUser.userId.attributes.username}
+                        {curUser.attributes.username}
                       </Typography>
                       <Typography variant="caption" display="block">
-                        Role: {curUser.role}
+                        Email: {curUser.attributes.email}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <div className={classes.tableHeader}>
+        <Typography variant="h5" className={classes.tableTitle}>
+          Mentors
+        </Typography>
+      </div>
+      <Table className={classes.table}>
+        <TableBody align="center">
+          {mentorRows.map((curRow, index) => (
+            <TableRow className={classes.tableRow}>
+              {curRow.map((curUser) => (
+                <TableCell
+                  className={classes.tableCell}
+                  key={curUser.attributes.username}
+                >
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography variant="h6">
+                        {curUser.attributes.username}
                       </Typography>
                       <Typography variant="caption" display="block">
-                        Email: {curUser.userId.attributes.email}
+                        Email: {curUser.attributes.email}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -125,4 +127,4 @@ function UserList(props) {
   );
 }
 
-export default UserList;
+export default GroupUserList;

@@ -16,6 +16,9 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
+  headerBar: {
+    background: "#eba834",
+  },
 }));
 
 function HeaderBar(props) {
@@ -25,7 +28,7 @@ function HeaderBar(props) {
   return (
     isAuthenticated && (
       <div className={classes.root}>
-        <AppBar position="static">
+        <AppBar position="static" className={classes.headerBar}>
           <Toolbar>
             <Button component={Link} to="/home">
               Home

@@ -1,8 +1,13 @@
 import { BaseTask, ParentTask } from "../models/BaseTask.js";
 
 export const getAllInfo = (req, res) => {
-  BaseTask.find({ assignedTo: req.user.id })
-    .then((tasks) => res.json(tasks))
+  Promise.all([
+    BaseTask.find({ assignedTo: req.user.id, isCompleted: false }),
+    BaseTask.find({ assignedTo: req.user.id, isCompleted: true }),
+  ])
+    .then((tasks) =>
+      res.json({ incompletedTasks: tasks[0], completedTasks: tasks[1] })
+    )
     .catch((err) => console.log(err));
 };
 

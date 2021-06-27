@@ -2,6 +2,8 @@ import { useState } from "react";
 import {
   Box,
   Collapse,
+  Checkbox,
+  FormControlLabel,
   IconButton,
   Typography,
   Table,
@@ -15,25 +17,14 @@ import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 
 const useStyles = makeStyles({
-  root: {
-    "& > *": {
-      borderBottom: "unset",
-    },
-  },
-  collapse: {
+  accordion: {
     width: "100%",
   },
   detail: {
     width: "100%",
   },
-  tableCell: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-  },
-  box: {
-    borderTop: "1px solid black",
-    marginBottom: "0.5em",
+  detailBox: {
+    padding: "16px",
   },
 });
 
@@ -41,9 +32,46 @@ function TaskItem(props) {
   // Queried values
   const { taskObject } = props;
 
+  // Form values
+  const [submissionURL, setSubmissionURL] = useState("");
+
   // Misc values
-  const classes = useStyles();
   const [isOpen, setIsOpen] = useState(false);
+  const [subtaskFormOpen, setSubtaskFormOpen] = useState(false);
+  const classes = useStyles();
+
+  // new URL will throw an error if the url is invalid
+  const isValidURL = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch (err) {
+      console.log(err);
+    } finally {
+      return false;
+    }
+  };
+
+  // Handle dialog opening and closing
+  function handleSubtaskOpen() {
+    setSubtaskFormOpen(true);
+  }
+
+  function handleSubtaskClose() {
+    setSubtaskFormOpen(false);
+  }
+
+  // Allow user to only check the main task as done after all subtasks are done
+  function allSubtasksCompleted(subtaskArr) {
+    return subtaskArr.every((subtask) => subtask.isCompleted);
+  }
+
+  function handleLinkSubmit(event) {
+    event.preventDefault();
+    if (isValidURL(submissionURL)) {
+      // PUT request here
+    }
+  }
 
   return (
     <>
@@ -52,8 +80,18 @@ function TaskItem(props) {
         <TableCell className={classes.tableCell}>
           {taskObject.dueDate.slice(0, 10)}
         </TableCell>
-        <TableCell className={classes.tableCell}>
-          {taskObject.isCompleted ? "Yes" : "No"}
+        <TableCell>
+          <FormControlLabel
+            onClick={(event) => event.stopPropagation()}
+            onFocus={(event) => event.stopPropagation()}
+            control={
+              <Checkbox
+                color="primary"
+                disabled={!allSubtasksCompleted(taskObject.subtasks)}
+              />
+            }
+            color="primary"
+          />
         </TableCell>
         <TableCell>
           <IconButton size="small" onClick={() => setIsOpen(!isOpen)}>
@@ -62,7 +100,7 @@ function TaskItem(props) {
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
           <Collapse
             className={classes.collapse}
             in={isOpen}

@@ -64,6 +64,10 @@ function formatData(next) {
     .populate({
       path: "comments",
       model: "ParentTask",
+    })
+    .populate({
+      path: "subtasks",
+      model: "ParentTask",
     });
   next();
 }

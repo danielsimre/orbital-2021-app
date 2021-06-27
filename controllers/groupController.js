@@ -21,8 +21,8 @@ export const getInfo = (req, res) => {
       },
     ],
   })
-    .populate({ path: "groupMembers", select: "username" })
-    .populate({ path: "mentoredBy", select: "username" })
+    .populate({ path: "groupMembers", select: "username email" })
+    .populate({ path: "mentoredBy", select: "username email" })
     .populate({
       path: "tasks",
       populate: {

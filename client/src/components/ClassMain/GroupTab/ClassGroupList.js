@@ -23,6 +23,13 @@ import AddUserDialog from "../UserTab/AddUserDialog";
 import { ClassRoles } from "../../../enums";
 
 const useStyles = makeStyles({
+  root: {
+    textAlign: "center",
+    display: "flex",
+    flexDirection: "column",
+    maxHeight: "100%",
+    overflow: "auto",
+  },
   tableHeader: {
     display: "flex",
     justifyContent: "center",
@@ -35,7 +42,7 @@ const useStyles = makeStyles({
   table: {
     margin: "0 auto",
     width: "100%",
-    border: "1px solid black",
+    borderTop: "1px solid black",
   },
   button: {
     border: "1px solid black",
@@ -138,7 +145,7 @@ function ClassGroupList(props) {
   return (
     isRetrieving ||
     (curUserRole === "MENTOR" ? (
-      <div>
+      <div className={classes.root}>
         <div className={classes.tableHeader}>
           <Typography variant="h5" className={classes.tableTitle}>
             Groups
@@ -172,7 +179,7 @@ function ClassGroupList(props) {
           </>
         </div>
         {queriedGroupList.length === 0 ? (
-          <Typography variant="h5">No groups yet! Create one now!</Typography>
+          <Typography variant="h5">No groups yet.</Typography>
         ) : (
           <Table className={classes.table}>
             <TableBody align="center">

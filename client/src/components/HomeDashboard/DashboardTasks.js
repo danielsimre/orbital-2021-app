@@ -5,6 +5,7 @@ import {
   TableCell,
   TableRow,
   TableHead,
+  Typography,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
@@ -20,24 +21,29 @@ function DashboardTasks(props) {
 
   const classes = useStyles();
 
-  return (
+  return userTaskList.length === 0 ? (
+    <Typography> No tasks! </Typography>
+  ) : (
     <Table className={classes.table}>
       <TableHead>
         <TableRow>
           <TableCell>Task Name</TableCell>
-          <TableCell align="right">Description</TableCell>
-          <TableCell align="right">Due</TableCell>
+          <TableCell align="right">Due Date</TableCell>
           <TableCell align="right"></TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
         {userTaskList.map((task) => (
           <TableRow key={task.id}>
-            <TableCell>{task.name}</TableCell>
-            <TableCell align="right">{task.desc}</TableCell>
-            <TableCell align="right">{task.dueDate}</TableCell>
+            <TableCell>{task.attributes.name}</TableCell>
             <TableCell align="right">
-              <Button component={Link} to={`/tasks/${task.id}`}>
+              {task.attributes.dueDate.slice(0, 10)}
+            </TableCell>
+            <TableCell align="right">
+              <Button
+                component={Link}
+                to={`/classes/${task.attributes.classId.id}/groups`}
+              >
                 Details
               </Button>
             </TableCell>

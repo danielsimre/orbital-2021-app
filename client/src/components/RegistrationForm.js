@@ -13,6 +13,12 @@ const useStyles = makeStyles({
     justifyContent: "center",
     height: "100%",
   },
+  button: {
+    margin: "0 auto",
+    marginTop: "0.3em",
+    display: "flex",
+    background: "#eba834",
+  },
 });
 
 function RegistrationForm() {
@@ -147,8 +153,7 @@ function RegistrationForm() {
             <Button
               type="submit"
               variant="contained"
-              color="primary"
-              style={{ margin: "0 auto", display: "flex" }}
+              className={classes.button}
             >
               Register
             </Button>

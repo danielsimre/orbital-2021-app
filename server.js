@@ -14,6 +14,7 @@ import classes from "./routes/classes.js";
 import groups from "./routes/groups.js";
 import tasks from "./routes/tasks.js";
 import announcements from "./routes/announcements.js";
+import comments from "./routes/comments.js";
 
 const app = express();
 dotenv.config();
@@ -62,6 +63,7 @@ app.use("/api/v1/classes", classes);
 app.use("/api/v1/groups", groups);
 app.use("/api/v1/tasks", tasks);
 app.use("/api/v1/announcements", announcements);
+app.use("/api/v1/comments", comments);
 
 const port = process.env.PORT || 5000;
 

@@ -1,7 +1,7 @@
 import { Announcement } from "../models/BaseText.js";
 import ClassRole from "../models/ClassRole.js";
 
-const getAllAnnouncements = (req, res) => {
+const getAllInfo = (req, res) => {
   ClassRole.find({ userId: req.user.id })
     .select("classId")
     // Objects of { _id, classId } are returned, this map extracts the classIds into an array
@@ -11,4 +11,4 @@ const getAllAnnouncements = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-export default getAllAnnouncements;
+export default getAllInfo;
