@@ -3,12 +3,12 @@ import { Switch, useRouteMatch, Route, useParams } from "react-router-dom";
 import { makeStyles } from "@material-ui/core";
 import axios from "axios";
 
-import ClassSidebar from "../ClassSidebar";
-import UserList from "../UserList";
-import ClassGroupList from "../ClassGroupList";
-import GroupMain from "../GroupMain";
-import ClassAnnouncements from "./ClassAnnouncements/ClassAnnouncements";
-import TaskMain from "../TaskMain";
+import ClassSidebar from "./ClassSidebar";
+import UserList from "./UserTab/UserList";
+import ClassGroupList from "./GroupTab/ClassGroupList";
+import GroupMain from "./GroupTab/GroupMain";
+import ClassAnnouncements from "./AnnouncementTab/ClassAnnouncements";
+import TaskMain from "./TaskTab/TaskMain";
 
 const useStyles = makeStyles((theme) => ({
   root: {

@@ -1,4 +1,4 @@
-import ClassMain from "../components/ClassMain";
+import ClassMain from "../components/ClassMain/ClassMain";
 
 function ClassMainPage() {
   return <ClassMain />;

@@ -1,7 +1,7 @@
-import Home from "../components/Home";
+import Dashboard from "../components/HomeDashboard/Dashboard";
 
 function HomePage(props) {
-  return <Home />;
+  return <Dashboard />;
 }
 
 export default HomePage;
