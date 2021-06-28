@@ -7,7 +7,7 @@ import {
   makeStyles,
 } from "@material-ui/core";
 
-import TaskItem from "./TaskItem";
+import TaskItem from "./TaskItem/TaskEntry";
 
 const useStyles = makeStyles({
   root: {
@@ -20,10 +20,32 @@ const useStyles = makeStyles({
 });
 
 function GroupTaskList(props) {
-  const { queriedTaskList } = props;
+  const { queriedTaskList, refreshGroupData } = props;
   const classes = useStyles();
 
-  return <div className={classes.root}></div>;
+  return (
+    <div className={classes.root}>
+      <Table size="small" className={classes.table}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Task</TableCell>
+            <TableCell>Due Date</TableCell>
+            <TableCell>Assigned to</TableCell>
+            <TableCell>Completed</TableCell>
+            <TableCell></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {queriedTaskList.map((taskObject) => (
+            <TaskItem
+              taskObject={taskObject}
+              refreshGroupData={refreshGroupData}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 }
 
 export default GroupTaskList;

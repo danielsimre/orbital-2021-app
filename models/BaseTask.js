@@ -61,6 +61,7 @@ const BaseTaskSchema = new Schema(
 function formatData(next) {
   this.sort({ dueDate: 1 })
     .populate({ path: "classId", select: "name" })
+    .populate({ path: "assignedTo", select: "username" })
     .populate({
       path: "comments",
       model: "ParentTask",
@@ -81,9 +82,7 @@ const ParentTask = BaseTask.discriminator(
   "ParentTask",
   new mongoose.Schema({
     subtasks: [{ type: Schema.Types.ObjectId, ref: "BaseTask" }],
-    submissions: {
-      type: [String],
-    },
+    submissions: [{ type: String }],
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   })
 );

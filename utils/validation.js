@@ -1,4 +1,5 @@
 import ClassRole from "../models/ClassRole.js";
+import Group from "../models/Group.js";
 import { ClassRoles } from "./enums.js";
 
 // Internal function to send json message + throw error for failed validation
@@ -67,6 +68,23 @@ export const validateCanAccessGroup = (res, curGroup, msg) => {
   return curGroup;
 };
 
+// Check if the user can access the group the task belongs to (user must be a member or mentor of the group)
+// curTask must be a parent task for this function to work (validate will fail on subtasks)
+export const validateCanAccessTask = (res, curTask, userId, msg) =>
+  Group.find({
+    $and: [
+      { tasks: curTask.id },
+      {
+        $or: [{ groupMembers: userId }, { mentoredBy: userId }],
+      },
+    ],
+  }).then((groupObj) => {
+    if (!successfulFindQuery(groupObj)) {
+      sendJsonErrMessage(res, 400, msg);
+    }
+    return curTask;
+  });
+
 // Only mentors can add groups/tasks/announcements to a class
 export const validateIsMentor = (res, curClass, msg) => {
   if (curClass.role !== ClassRoles.MENTOR) {
@@ -85,6 +103,16 @@ export const validateValueInEnum = (res, msg, enumType, value) => {
   if (!Object.values(enumType).includes(value)) {
     sendJsonErrMessage(res, 400, msg);
   }
+};
+
+export const validateURLs = (res, submissionLinks) => {
+  submissionLinks.forEach((link) => {
+    try {
+      const url = new URL(link);
+    } catch (err) {
+      sendJsonErrMessage(res, 400, "Invalid submission link(s)");
+    }
+  });
 };
 
 export const validateSameTaskFramework = (

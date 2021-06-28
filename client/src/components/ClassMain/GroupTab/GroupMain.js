@@ -38,7 +38,6 @@ function GroupMain(props) {
   }
 
   function getGroupData(groupID) {
-    console.log(groupID);
     axios
       .get(`/api/v1/groups/${groupID}`, {
         withCredentials: true,
@@ -70,7 +69,10 @@ function GroupMain(props) {
           <Tab label="Users" />
         </Tabs>
         {tabIndex === 0 ? (
-          <GroupTaskList tasks={groupData.tasks} />
+          <GroupTaskList
+            queriedTaskList={groupData.tasks}
+            refreshGroupData={() => getGroupData(groupID)}
+          />
         ) : (
           <GroupUserList
             groupMembers={groupData.groupMembers}
