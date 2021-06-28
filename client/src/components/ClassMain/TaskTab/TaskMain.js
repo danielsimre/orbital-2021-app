@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -16,6 +17,7 @@ import {
   TextField,
   makeStyles,
 } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import axios from "axios";
 
 import TaskFrameworkEntry from "./TaskFrameworkEntry";
@@ -67,6 +69,12 @@ function TaskMain(props) {
   const [dateError, setDateError] = useState(false);
   const [dateHelperText, setDateHelperText] = useState("");
 
+  // Alert values
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
+
   // Misc values
   const [propagateDialogOpen, setPropagateDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -90,6 +98,12 @@ function TaskMain(props) {
 
   function handleConfirmDialogClose() {
     setConfirmDialogOpen(false);
+  }
+
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
   }
 
   function handleAddTask() {
@@ -137,11 +151,23 @@ function TaskMain(props) {
         },
         { withCredentials: true }
       )
-      .then((response) => {
-        console.log(response);
+      .then(() => {
+        handleAlert(
+          "Task Framework Propagated!",
+          "The task framework has been propagated successfully.",
+          "success"
+        );
       })
       .then(() => refreshClassData(classID))
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        handleAlert(
+          "Error!",
+          "One of the tasks has an invalid date or the framework is unchanged",
+          "error"
+        );
+      });
+    setDisplayAlert(true);
     handleConfirmDialogClose();
     handlePropDialogClose();
   }
@@ -270,6 +296,16 @@ function TaskMain(props) {
           </TableBody>
         </Table>
       </Box>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={displayAlert}
+        onClose={() => setDisplayAlert(false)}
+      >
+        <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+          <AlertTitle>{alertTitleText}</AlertTitle>
+          {alertText}
+        </Alert>
+      </Snackbar>
     </div>
   ) : (
     <div className={classes.root}>

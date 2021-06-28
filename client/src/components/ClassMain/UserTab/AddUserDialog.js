@@ -62,7 +62,7 @@ function AddUserDialog(props) {
         <DialogTitle>Add Users</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Add user(s) by typing in their emails.
+            Add a user by typing in their email.
           </DialogContentText>
           <TextField
             autoFocus

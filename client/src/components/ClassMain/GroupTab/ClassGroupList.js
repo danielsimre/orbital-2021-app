@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Snackbar,
   Table,
   TableBody,
   TableRow,
@@ -16,6 +17,7 @@ import {
   Typography,
   makeStyles,
 } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import AddIcon from "@material-ui/icons/Add";
 import axios from "axios";
 
@@ -64,6 +66,12 @@ function ClassGroupList(props) {
   // Form values
   const [groupNames, setGroupNames] = useState("");
 
+  // Alert values
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
+
   // Misc values
   const [isRetrieving, setIsRetrieving] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -82,6 +90,12 @@ function ClassGroupList(props) {
     handleAddGroups(groupNames);
   }
 
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
+  }
+
   // Current only handles adding 1 at a time
   function handleAddGroups(groupNames) {
     axios
@@ -93,11 +107,25 @@ function ClassGroupList(props) {
         { withCredentials: true }
       )
       .then((response) => {
-        console.log(response.data);
+        // Alert message current only handles one group
+        if (response.data.nameConflict.length !== 0) {
+          handleAlert(
+            "Error!",
+            "A group with this name already exists in this class.",
+            "error"
+          );
+        } else {
+          handleAlert(
+            "Group Added!",
+            "The group has been added successfully.",
+            "success"
+          );
+        }
         setGroupNames("");
         handleDialogClose();
       })
       .then(() => getGroupData(classID))
+      .then(() => setDisplayAlert(true))
       .catch((err) => console.log(err));
   }
 
@@ -118,7 +146,34 @@ function ClassGroupList(props) {
       )
       .then((response) => {
         console.log(response.data);
+        // Alert message current only handles one user
+        if (response.data.doesNotExist.length !== 0) {
+          handleAlert("Error!", "This user does not exist.", "error");
+        } else if (response.data.notInClass.length !== 0) {
+          handleAlert("Error!", "This user is not in the class.", "error");
+        } else if (response.data.alreadyHasGroup.length !== 0) {
+          handleAlert(
+            "Error!",
+            "This user already has a group or is already in this group.",
+            "error"
+          );
+        } else if (response.data.roleMismatch.length !== 0) {
+          handleAlert(
+            "Error!",
+            "This user cannot be added as that role. " +
+              "(Mentors in the class can only be added as group mentors, " +
+              "and students can only be added as group members)",
+            "error"
+          );
+        } else {
+          handleAlert(
+            "User Added!",
+            "The user has been added successfully.",
+            "success"
+          );
+        }
       })
+      .then(() => setDisplayAlert(true))
       .catch((err) => console.log(err));
   }
 
@@ -160,7 +215,7 @@ function ClassGroupList(props) {
               <DialogTitle>Add Groups</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  Add groups by typing in group names.
+                  Add a group by typing in a group name.
                 </DialogContentText>
                 <TextField
                   autoFocus
@@ -185,7 +240,7 @@ function ClassGroupList(props) {
             <TableBody align="center">
               {queriedGroupList.map((curGroup) => (
                 <TableRow key={curGroup.id}>
-                  <TableCell>Group Name: {curGroup.attributes.name}</TableCell>
+                  <TableCell>{curGroup.attributes.name}</TableCell>
                   <TableCell>
                     <Button
                       component={Link}
@@ -210,6 +265,16 @@ function ClassGroupList(props) {
             </TableBody>
           </Table>
         )}
+        <Snackbar
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          open={displayAlert}
+          onClose={() => setDisplayAlert(false)}
+        >
+          <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+            <AlertTitle>{alertTitleText}</AlertTitle>
+            {alertText}
+          </Alert>
+        </Snackbar>
       </div>
     ) : queriedGroupList.length !== 0 ? (
       <Redirect to={`/classes/${classID}/groups/${queriedGroupList[0].id}`} />

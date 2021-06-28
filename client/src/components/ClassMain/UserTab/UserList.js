@@ -1,6 +1,9 @@
+import { useState } from "react";
+import { useParams } from "react-router-dom";
 import {
   Card,
   CardContent,
+  Snackbar,
   Table,
   TableBody,
   TableRow,
@@ -8,7 +11,7 @@ import {
   Typography,
   makeStyles,
 } from "@material-ui/core";
-import { useParams } from "react-router-dom";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import axios from "axios";
 
 import AddUserDialog from "./AddUserDialog";
@@ -53,6 +56,12 @@ function UserList(props) {
   const { classID } = useParams();
   const { curUserRole, queriedUserList, refreshClassData } = props;
 
+  // Alert values
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
+
   // Misc values
   const classes = useStyles();
   const userRows = queriedUserList.reduce((cols, key, index) => {
@@ -61,6 +70,12 @@ function UserList(props) {
       cols
     );
   }, []);
+
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
+  }
 
   // Current only handles adding 1 at a time
   function handleAddUsers(userEmails, newUserRole) {
@@ -74,9 +89,21 @@ function UserList(props) {
         { withCredentials: true }
       )
       .then((response) => {
-        console.log(response.data);
+        // Alert message current only handles one user
+        if (response.data.doesNotExist.length !== 0) {
+          handleAlert("Error!", "The user does not exist.", "error");
+        } else if (response.data.alreadyAdded.length !== 0) {
+          handleAlert("Error!", "The user has already been added.", "error");
+        } else {
+          handleAlert(
+            "User Added!",
+            "The user has been added successfully.",
+            "success"
+          );
+        }
       })
       .then(() => refreshClassData(classID))
+      .then(() => setDisplayAlert(true))
       .catch((err) => console.log(err));
   }
 
@@ -121,6 +148,16 @@ function UserList(props) {
           ))}
         </TableBody>
       </Table>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={displayAlert}
+        onClose={() => setDisplayAlert(false)}
+      >
+        <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+          <AlertTitle>{alertTitleText}</AlertTitle>
+          {alertText}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
