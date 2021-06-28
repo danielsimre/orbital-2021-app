@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
-import ProtectedRoute from "./components/router/ProtectedRoute";
+import ProtectedRoute from "./components/Router/ProtectedRoute";
 import axios from "axios";
 
 import HeaderBar from "./components/HeaderBar/HeaderBar";

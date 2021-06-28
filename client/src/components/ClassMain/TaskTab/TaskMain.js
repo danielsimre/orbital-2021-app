@@ -106,7 +106,8 @@ function TaskMain(props) {
     setAlertState(severity);
   }
 
-  function handleAddTask() {
+  function handleAddTask(event) {
+    event.preventDefault();
     setDateError(false);
     setDateHelperText("");
     if (new Date(taskDueDate) < Date.now()) {
