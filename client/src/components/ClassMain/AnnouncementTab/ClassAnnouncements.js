@@ -96,6 +96,7 @@ function ClassAnnouncements(props) {
               <AnnouncementForm
                 classID={classID}
                 getClassAnnouncements={getClassAnnouncements}
+                closeForm={closeForm}
               />
             </Paper>
           </Modal>

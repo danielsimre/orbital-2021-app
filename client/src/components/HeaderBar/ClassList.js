@@ -44,6 +44,10 @@ function ClassList() {
   const [formModalOpen, setFormModalOpen] = useState(false);
   const classes = useStyles();
 
+  function closeForm() {
+    setFormModalOpen(false);
+  }
+
   function queryClassList() {
     axios
       .get("/api/v1/users?classes", {
@@ -72,7 +76,7 @@ function ClassList() {
         </Typography>
         <Modal open={formModalOpen} onClose={() => setFormModalOpen(false)}>
           <Paper elevation={1} className={classes.paper}>
-            <NewClassForm />
+            <NewClassForm closeForm={closeForm} />
           </Paper>
         </Modal>
         <Table className={classes.table}>

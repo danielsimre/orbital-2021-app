@@ -14,7 +14,7 @@ const useStyles = makeStyles({
 
 function AnnouncementForm(props) {
   // Queried values
-  const { classID, getClassAnnouncements } = props;
+  const { classID, getClassAnnouncements, closeForm } = props;
 
   // Form values
   const [announceTitle, setAnnounceTitle] = useState("");
@@ -60,7 +60,8 @@ function AnnouncementForm(props) {
       )
       .then(() => setDisplayAlert(true))
       .then(() => getClassAnnouncements(classId))
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
+      .finally(() => closeForm());
   }
 
   function handleAlert(title, message, severity) {

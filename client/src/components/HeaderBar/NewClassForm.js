@@ -12,7 +12,10 @@ const useStyles = makeStyles({
   },
 });
 
-function NewClassForm() {
+function NewClassForm(props) {
+  // Passed values
+  const { closeForm } = props;
+
   // Form values
   const [className, setClassName] = useState("");
   const [classDescription, setClassDescription] = useState("");
@@ -55,7 +58,8 @@ function NewClassForm() {
             "error"
           )
       )
-      .then(() => setDisplayAlert(true));
+      .then(() => setDisplayAlert(true))
+      .finally(() => closeForm());
   }
 
   function handleAlert(title, message, severity) {
