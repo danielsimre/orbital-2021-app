@@ -1,7 +1,7 @@
 import express from "express";
 
 import * as userController from "../controllers/userController.js";
-import ensureAuthenticated from "../config/auth.js";
+import ensureAuthenticated from "../utils/config/auth.js";
 
 const router = express.Router();
 

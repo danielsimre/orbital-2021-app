@@ -26,7 +26,7 @@ const BaseTextSchema = new Schema(
     creationDate: {
       type: Date,
       required: true,
-      default: Date(),
+      default: Date.now,
     },
     title: {
       type: String,
@@ -38,6 +38,22 @@ const BaseTextSchema = new Schema(
   },
   baseOptions
 );
+
+// Cannot use arrow notation in this case, due to usage of 'this'
+function formatData(next) {
+  this.sort({ creationDate: -1 })
+    .populate({
+      path: "createdBy",
+      select: "username",
+    })
+    .populate({
+      path: "classId",
+      select: "name",
+    });
+  next();
+}
+
+BaseTextSchema.pre("findOne", formatData).pre("find", formatData);
 
 const BaseText = mongoose.model("Text", BaseTextSchema);
 

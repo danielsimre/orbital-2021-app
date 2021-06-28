@@ -1,4 +1,4 @@
-import ClassList from "../components/ClassList";
+import ClassList from "../components/HeaderBar/ClassList";
 
 function MyClassesPage(props) {
   return <ClassList />;

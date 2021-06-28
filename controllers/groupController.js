@@ -1,17 +1,16 @@
-import Group from "../models/Group.js";
-import User from "../models/User.js";
 import ClassRole from "../models/ClassRole.js";
+import Group from "../models/Group.js";
+import { ParentTask } from "../models/BaseTask.js";
+import User from "../models/User.js";
 
-import { GroupRoles, ClassRoles } from "../utils/enums.js";
 import {
-  validateGetGroupInfo,
-  validateAddUsersToGroup,
+  validateCanAccessGroup,
   validateFieldsPresent,
+  validateValueInEnum,
   successfulFindOneQuery,
   successfulFindQuery,
-  validateValueInEnum,
 } from "../utils/validation.js";
-import { ParentTask } from "../models/BaseTask.js";
+import { GroupRoles, ClassRoles } from "../utils/enums.js";
 
 export const getInfo = (req, res) => {
   Group.findOne({
@@ -22,9 +21,21 @@ export const getInfo = (req, res) => {
       },
     ],
   })
-    .populate({ path: "groupMembers", select: "username" })
-    .populate({ path: "mentoredBy", select: "username" })
-    .then((curGroup) => validateGetGroupInfo(res, curGroup))
+    .populate({ path: "groupMembers", select: "username email" })
+    .populate({ path: "mentoredBy", select: "username email" })
+    .populate({
+      path: "tasks",
+      populate: {
+        path: "comments",
+      },
+    })
+    .then((curGroup) =>
+      validateCanAccessGroup(
+        res,
+        curGroup,
+        "Group does not exist or user is not authorized to access this group"
+      )
+    )
     .then((curGroup) => res.json(curGroup))
     .catch((err) => console.log(err));
 };
@@ -52,7 +63,13 @@ export const addUsers = (req, res) => {
     _id: req.params.id,
     mentoredBy: req.user.id,
   })
-    .then((curGroup) => validateAddUsersToGroup(res, curGroup))
+    .then((curGroup) =>
+      validateCanAccessGroup(
+        res,
+        curGroup,
+        "Group does not exist or user is not authorized to add users to group"
+      )
+    )
     .then(async (curGroup) => {
       const { userEmails, newUserRole } = req.body;
 
@@ -74,7 +91,7 @@ export const addUsers = (req, res) => {
       // Remove duplicate emails
       const uniqueUserEmails = [...new Set(userEmails)];
 
-      // These five arrays contain the user emails, split into three categories:
+      // These five arrays contain the user emails, split into five categories:
       // Successfully added users, emails that are not attached to a user,
       // users that are not in the class,
       // users that are already in the group (or other groups under this class, for group members)
@@ -125,12 +142,13 @@ export const addUsers = (req, res) => {
               return;
             }
 
-            // Check if there is a role mismatch for the user (user is not a student)
+            // Check if there is a role mismatch (user is not a student)
             if (classRole.role !== ClassRoles.STUDENT) {
               roleMismatchArr.push(userEmail);
               return;
             }
           }
+
           // Successfully added
           successArr.push(userEmail);
           if (newUserRole === GroupRoles.MENTOR) {

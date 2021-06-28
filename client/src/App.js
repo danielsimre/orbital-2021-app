@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
-import ProtectedRoute from "./components/router/ProtectedRoute";
+import ProtectedRoute from "./components/Router/ProtectedRoute";
 import axios from "axios";
 
-import HeaderBar from "./components/HeaderBar";
+import HeaderBar from "./components/HeaderBar/HeaderBar";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
-import NewClassPage from "./pages/NewClassPage";
 import MyClassesPage from "./pages/MyClassesPage";
 import MyGroupsPage from "./pages/MyGroupsPage";
 import RegistrationPage from "./pages/RegistrationPage";
@@ -87,11 +86,6 @@ function App() {
         <ProtectedRoute
           path="/home"
           component={HomePage}
-          isAuthenticated={isAuthenticated}
-        />
-        <ProtectedRoute
-          path="/new_class"
-          component={NewClassPage}
           isAuthenticated={isAuthenticated}
         />
 

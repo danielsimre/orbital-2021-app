@@ -1,37 +1,25 @@
-import User from "../models/User.js";
+import { Announcement } from "../models/BaseText.js";
+import { BaseTask, ParentTask } from "../models/BaseTask.js";
 import Class from "../models/Class.js";
 import ClassRole from "../models/ClassRole.js";
 import Group from "../models/Group.js";
-import { Announcement } from "../models/BaseText.js";
-import { BaseTask, ParentTask } from "../models/BaseTask.js";
-import { ClassRoles } from "../utils/enums.js";
+import User from "../models/User.js";
+
 import {
-  validateGetClassInfo,
-  validateAddUsersToClass,
-  validateAddGroupsToClass,
-  validateAddTasksToClass,
+  validateCanAccessClass,
+  validateIsMentor,
   validateFieldsPresent,
   validateValueInEnum,
   validateSameTaskFramework,
   validateDueDate,
   successfulFindOneQuery,
-  validateMakeAnnouncementsToClass,
 } from "../utils/validation.js";
+import { ClassRoles } from "../utils/enums.js";
 
 export const getInfo = (req, res) => {
-  Class.findById(req.params.id)
-    .lean()
-    .populate({
-      path: "users",
-      match: { userId: req.user.id },
-      populate: {
-        path: "userId",
-      },
-    })
-    // Verify that the user can view this class
-    .then((curClass) => validateGetClassInfo(res, curClass).users[0].role)
+  validateCanAccessClass(req, res)
     // Query the class, now with info of ALL users involved in the class
-    .then((classRole) =>
+    .then((classRoleObj) =>
       Class.findById(req.params.id)
         .populate({
           path: "users",
@@ -41,11 +29,48 @@ export const getInfo = (req, res) => {
         })
         .then((curClass) => {
           const classObj = curClass.toObject();
-          classObj.attributes.role = classRole;
+          classObj.attributes.role = classRoleObj.role;
           return classObj;
         })
     )
     .then((curClass) => res.json(curClass))
+    .catch((err) => console.log(err));
+};
+
+// If the user is not a part of the class, return an error
+// If the user is a part of the class as a student, return their group (if they have one)
+// If the user is a part of the class as a mentor, return all groups they are mentoring
+export const getGroups = (req, res) => {
+  validateCanAccessClass(req, res)
+    // Return a object with attributes groups, which contains an array of all groups
+    // Mentors can have multiple groups in the array, students have at most one
+    .then(() =>
+      Group.find({
+        $and: [
+          { classId: req.params.id },
+          {
+            $or: [{ groupMembers: req.user.id }, { mentoredBy: req.user.id }],
+          },
+        ],
+      })
+    )
+    .then((groupsObj) => {
+      res.json(groupsObj);
+    })
+    .catch((err) => console.log(err));
+};
+
+// Get announcements sorted by order of when the announcement was made, starting from the latest one
+export const getAnnouncements = (req, res) => {
+  validateCanAccessClass(req, res)
+    .then(() =>
+      Announcement.find({
+        classId: req.params.id,
+      })
+    )
+    .then((announcements) => {
+      res.json(announcements);
+    })
     .catch((err) => console.log(err));
 };
 
@@ -90,7 +115,6 @@ export const create = (req, res) => {
       };
     })
     .then((classRoleInfo) => {
-      console.log(classRoleInfo);
       res.json(classRoleInfo);
     })
     .catch((err) => console.log(err));
@@ -98,17 +122,14 @@ export const create = (req, res) => {
 
 // Can add users as group members or mentors
 export const addUsers = (req, res) => {
-  Class.findById(req.params.id)
-    .populate({
-      path: "users",
-      match: { userId: req.user.id },
-      populate: {
-        path: "userId",
-      },
-    })
-    // Verify that the user can add users to the Class
-    .then((curClass) => validateGetClassInfo(res, curClass))
-    .then((curClass) => validateAddUsersToClass(res, curClass))
+  validateCanAccessClass(req, res)
+    .then((classRoleObj) =>
+      validateIsMentor(
+        res,
+        classRoleObj,
+        "Not authorized to add users to class"
+      )
+    )
     // Add user(s) to the class
     .then(async () => {
       const { userEmails, newUserRole } = req.body;
@@ -145,11 +166,11 @@ export const addUsers = (req, res) => {
             return;
           }
           // Check if user is already in class
-          const classRole = await ClassRole.findOne({
+          const classRoleObj = await ClassRole.findOne({
             classId: req.params.id,
             userId: curUser.id,
           });
-          if (successfulFindOneQuery(classRole)) {
+          if (successfulFindOneQuery(classRoleObj)) {
             alreadyAddedArr.push(userEmail);
             return;
           }
@@ -173,17 +194,14 @@ export const addUsers = (req, res) => {
 };
 
 export const createGroups = (req, res) => {
-  Class.findById(req.params.id)
-    .populate({
-      path: "users",
-      match: { userId: req.user.id },
-      populate: {
-        path: "userId",
-      },
-    })
-    // Verify that the user can add groups to the class
-    .then((curClass) => validateGetClassInfo(res, curClass))
-    .then((curClass) => validateAddGroupsToClass(res, curClass))
+  validateCanAccessClass(req, res)
+    .then((classRoleObj) =>
+      validateIsMentor(
+        res,
+        classRoleObj,
+        "Not authorized to add groups to class"
+      )
+    )
     // Add groups to the class
     .then(async (curClass) => {
       const { groupNames } = req.body;
@@ -262,17 +280,14 @@ export const createGroups = (req, res) => {
 };
 
 export const createTasks = (req, res) => {
-  Class.findById(req.params.id)
-    .populate({
-      path: "users",
-      match: { userId: req.user.id },
-      populate: {
-        path: "userId",
-      },
-    })
-    // Verify that the user can add tasks to the class
-    .then((curClass) => validateGetClassInfo(res, curClass))
-    .then((curClass) => validateAddTasksToClass(res, curClass))
+  validateCanAccessClass(req, res)
+    .then((classRoleObj) =>
+      validateIsMentor(
+        res,
+        classRoleObj,
+        "Not authorized to add tasks to class"
+      )
+    )
     // Add tasks to the class
     .then(async (curClass) => {
       // taskArray is an array of objects with attributes name, desc, dueDate and isMilestone
@@ -352,58 +367,38 @@ export const createTasks = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-// If the user is not a part of the class, do not return anything
-// If the user is a part of the class as a student, return their group (if they have one)
-// If the user is a part of the class as a mentor, return all groups they are mentoring
-export const getGroups = (req, res) => {
-  Class.findById(req.params.id)
-    .populate({
-      path: "users",
-      match: { userId: req.user.id },
-      populate: {
-        path: "userId",
-      },
-    })
-    // Verify that the user can access the class
-    .then((curClass) => validateGetClassInfo(res, curClass))
-    // Return a object with attributes groups, which contains an array of all groups
-    // and an attribute user_role, which describes the user's role in the class
-    // Mentors can have multiple groups in the array, students have at most one
-    .then((curClass) =>
-      Group.find({
-        $and: [
-          { classId: curClass.id },
-          {
-            $or: [{ groupMembers: req.user.id }, { mentoredBy: req.user.id }],
-          },
-        ],
+// If the user is not a part of the class, return an error
+// If the user is a part of the class as a mentor, nothing will be returned (mentors do not have tasks)
+// If the user is a part of the class as a student, return all tasks from this class that are
+// assigned to this user
+export const getTasks = (req, res) => {
+  validateCanAccessClass(req, res)
+    .then(() =>
+      ParentTask.find({
+        classId: req.params.id,
+        assignedTo: req.user.id,
       })
     )
-    .then((groupsObj) => {
-      res.json(groupsObj);
-    })
+    .then((tasksObj) => res.json(tasksObj))
     .catch((err) => console.log(err));
 };
 
-export const makeAnnouncement = (req, res) => {
-  Class.findById(req.params.id)
-    .populate({
-      path: "users",
-      match: { userId: req.user.id },
-      populate: {
-        path: "userId",
-      },
-    })
-    // Verify that the user can add groups to the class
-    .then((curClass) => validateGetClassInfo(res, curClass))
-    .then((curClass) => validateMakeAnnouncementsToClass(res, curClass))
-    // Add groups to the class
-    .then((curClass) => {
+export const createAnnouncement = (req, res) => {
+  validateCanAccessClass(req, res)
+    .then((classRoleObj) =>
+      validateIsMentor(
+        res,
+        classRoleObj,
+        "Not authorized to add announcements to class"
+      )
+    )
+    // Add announcement to the class
+    .then(() => {
       const { title, content } = req.body;
 
       validateFieldsPresent(
         res,
-        "Please ensure all fields are filled",
+        "Please add a non-empty string for attributes title and content",
         title,
         content
       );
@@ -414,31 +409,8 @@ export const makeAnnouncement = (req, res) => {
         content,
         classId: req.params.id,
       });
-
       newAnnouncement.save();
     })
-    .then(() => res.json({ msg: "Successfully created announcement" }));
-};
-
-export const getAnnouncements = (req, res) => {
-  Class.findById(req.params.id)
-    .populate({
-      path: "users",
-      match: { userId: req.user.id },
-      populate: {
-        path: "userId",
-      },
-    })
-    // Verify that the user can access the class
-    .then((curClass) => validateGetClassInfo(res, curClass))
-    // Return a object with announcements
-    .then((curClass) =>
-      Announcement.find({
-        classId: req.params.id,
-      }).sort({ creationDate: "desc" })
-    )
-    .then((announcement) => {
-      res.json(announcement);
-    })
+    .then(() => res.json({ msg: "Successfully created announcement" }))
     .catch((err) => console.log(err));
 };

@@ -2,6 +2,27 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
+const baseOptions = {
+  toJSON: {
+    virtuals: true,
+    transform: (doc, ret) => {
+      const { id, ...rest } = ret;
+      delete rest._id;
+      delete rest.__v;
+      return { id: ret.id, type: "classes", attributes: { ...rest } };
+    },
+  },
+  toObject: {
+    virtuals: true,
+    transform: (doc, ret) => {
+      const { id, ...rest } = ret;
+      delete rest._id;
+      delete rest.__v;
+      return { id: ret.id, type: "classes", attributes: { ...rest } };
+    },
+  },
+};
+
 const ClassSchema = new Schema(
   {
     name: {
@@ -38,26 +59,7 @@ const ClassSchema = new Schema(
       select: false,
     },
   },
-  {
-    toJSON: {
-      virtuals: true,
-      transform: (doc, ret) => {
-        const { id, ...rest } = ret;
-        delete rest._id;
-        delete rest.__v;
-        return { id: ret.id, type: "classes", attributes: { ...rest } };
-      },
-    },
-    toObject: {
-      virtuals: true,
-      transform: (doc, ret) => {
-        const { id, ...rest } = ret;
-        delete rest._id;
-        delete rest.__v;
-        return { id: ret.id, type: "classes", attributes: { ...rest } };
-      },
-    },
-  }
+  baseOptions
 );
 
 // Virtual populate

@@ -1,7 +1,7 @@
 import express from "express";
 
 import * as groupController from "../controllers/groupController.js";
-import ensureAuthenticated from "../config/auth.js";
+import ensureAuthenticated from "../utils/config/auth.js";
 
 const router = express.Router();
 
