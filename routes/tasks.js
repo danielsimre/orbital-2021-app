@@ -21,4 +21,9 @@ router.put("/:id", ensureAuthenticated, taskController.update);
 // @access Private
 router.post("/:id/comments", ensureAuthenticated, taskController.createComment);
 
+// @route GET api/v1/tasks/:id/comments
+// @desc Get all comments under this task
+// @access Private
+router.get("/:id/comments", ensureAuthenticated, taskController.getComments);
+
 export default router;

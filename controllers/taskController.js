@@ -1,4 +1,5 @@
 import { BaseTask, ParentTask } from "../models/BaseTask.js";
+import { Comment } from "../models/BaseText.js";
 import {
   validateCanAccessTask,
   validateFieldsPresent,
@@ -81,12 +82,24 @@ export const createComment = (req, res) => {
         title,
         content,
         createdBy: req.user.id,
+        taskId: curTask.id,
       });
 
       newComment.save();
-      curTask.comments.push(newComment.id);
-      curTask.save();
+      // Might not be necessary: search comments collection instead
+      // curTask.comments.push(newComment.id);
+      // curTask.save();
     })
     .then(() => res.json({ msg: "Successfully created comment" }))
+    .catch((err) => console.log(err));
+};
+
+export const getComments = (req, res) => {
+  ParentTask.findOne({ _id: req.params.id })
+    .then((task) =>
+      validateCanAccessTask(res, task, req.user.id, "Cannot access this task")
+    )
+    .then((task) => Comment.find({ taskId: task.id }))
+    .then((comments) => res.json(comments))
     .catch((err) => console.log(err));
 };
