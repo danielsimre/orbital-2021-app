@@ -23,6 +23,6 @@ router.put("/:id", ensureAuthenticated, commentController.updateComment);
 // @route DELETE api/v1/comments/:id/
 // @desc Delete the specified comment
 // @access Private
-router.put("/:id", ensureAuthenticated, commentController.deleteComment);
+router.delete("/:id", ensureAuthenticated, commentController.deleteComment);
 
 export default router;

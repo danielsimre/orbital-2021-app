@@ -9,6 +9,7 @@ import {
   Paper,
   TextField,
   Typography,
+  Tooltip,
   makeStyles,
 } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -32,6 +33,13 @@ const useStyles = makeStyles({
     padding: "1rem",
     boxShadow: "0px 0px 5px 2px rgba(0, 0, 0, 0.2)",
   },
+  deleteButton: {
+    color: "red",
+  },
+  commentAction: {
+    display: "flex",
+    margin: "auto",
+  },
 });
 
 function AddCommentButton(props) {
@@ -49,8 +57,9 @@ function AddCommentButton(props) {
   // Misc values
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isRetriving, setIsRetrieving] = useState(true);
-  const [curCommentId, setcurCommentId] = useState(null);
+  const [curCommentId, setCurCommentId] = useState(null); // track which comment is in 'focus' for edit/delete
   const classes = useStyles();
 
   function queryComments() {
@@ -66,7 +75,9 @@ function AddCommentButton(props) {
       .then(
         axios.spread((comments, userData) => {
           setCommentList(comments.data);
-          setCurUserId(userData.id);
+          setCurUserId(userData.data.id);
+          console.log(comments.data);
+          console.log(userData.data.id);
         })
       )
       .catch((err) => console.error(err))
@@ -87,12 +98,22 @@ function AddCommentButton(props) {
     const commentToEdit = commentList[index];
     setEditTitle(commentToEdit.attributes.title);
     setEditText(commentToEdit.attributes.content);
-    setcurCommentId(commentToEdit.id);
+    setCurCommentId(commentToEdit.id);
     setEditDialogOpen(true);
   }
 
   function handleEditClose() {
     setEditDialogOpen(false);
+  }
+
+  function handleDeleteOpen(index) {
+    const commentToEdit = commentList[index];
+    setCurCommentId(commentToEdit.id);
+    setDeleteDialogOpen(true);
+  }
+
+  function handleDeleteClose() {
+    setDeleteDialogOpen(false);
   }
 
   // handles communication with backend
@@ -115,6 +136,7 @@ function AddCommentButton(props) {
       })
       .catch((err) => console.log(err))
       .finally(() => {
+        // clean up state
         setCommentText("");
         setCommentTitle("");
         queryComments();
@@ -137,19 +159,32 @@ function AddCommentButton(props) {
       })
       .catch((err) => console.log(err))
       .finally(() => {
+        // clean up state
         setEditText("");
         setEditTitle("");
+        setCurCommentId(null);
         queryComments();
       });
   }
 
-  function handleDeleteComment(index) {}
+  function handleDeleteComment(event) {
+    event.preventDefault();
+    axios
+      .delete(`/api/v1/comments/${curCommentId}/`, { withCredentials: true })
+      .then((res) => console.log(res.data.msg))
+      .catch((err) => console.log(err))
+      .finally(() => {
+        // clean up state
+        setCurCommentId(null);
+        queryComments();
+      });
+  }
 
   return (
     <>
       <Button onClick={handleDialogOpen} className={classes.button}>
         {" "}
-        Add Comment{" "}
+        View Comments{" "}
       </Button>
       {/* Start of Comment List Dialog */}
       <Dialog
@@ -181,12 +216,20 @@ function AddCommentButton(props) {
                 <Typography variant="caption" display="block">
                   Last Edited: {comment.attributes.lastEditDate}
                 </Typography>
-                <Button onClick={() => handleEditOpen(index)}>
-                  <EditIcon />
-                </Button>
-                <Button onClick={() => handleDeleteComment(index)}>
-                  <DeleteIcon />
-                </Button>
+                {curUserId === comment.attributes.createdBy.id && (
+                  <div className={classes.commentAction}>
+                    <Tooltip title="Edit comment" placement="top">
+                      <Button onClick={() => handleEditOpen(index)}>
+                        <EditIcon />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Delete comment" placement="top">
+                      <Button onClick={() => handleDeleteOpen(index)}>
+                        <DeleteIcon />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                )}
               </Paper>
             ))
           )}
@@ -262,6 +305,25 @@ function AddCommentButton(props) {
       </Dialog>
       {/* End of Edit Comment Dialog */}
       {/* Start of Delete Comment Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteClose}>
+        <DialogTitle>Delete Comment</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this comment? This action is
+            irreversible.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteClose}>Cancel</Button>
+          <Button
+            type="submit"
+            className={classes.deleteButton}
+            onClick={(event) => handleDeleteComment(event)}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
       {/* End of Delete Comment Dialog */}
     </>
   );
