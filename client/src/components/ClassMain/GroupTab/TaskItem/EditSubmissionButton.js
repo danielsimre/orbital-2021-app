@@ -49,6 +49,7 @@ function EditSubmissionButton(props) {
     }
     return true;
   }
+
   function handleSaveLinks(submissionLinks) {
     axios
       .put(

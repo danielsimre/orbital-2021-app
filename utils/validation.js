@@ -141,3 +141,13 @@ export const validateSameTaskFramework = (
     );
   }
 };
+
+export const validateAuthorOfComment = (res, curComment, userId, msg) => {
+  if (!successfulFindOneQuery(curComment)) {
+    sendJsonErrMessage(res, 404, "Failed to find comment");
+  }
+  if (!curComment.createdBy.equals(userId)) {
+    sendJsonErrMessage(res, 400, msg);
+  }
+  return curComment;
+};

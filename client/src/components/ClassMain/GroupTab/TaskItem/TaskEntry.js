@@ -19,6 +19,7 @@ import axios from "axios";
 
 import EditSubmissionButton from "./EditSubmissionButton";
 import AddSubtaskButton from "./AddSubtaskButton";
+import AddCommentButton from "./AddCommentButton";
 
 const useStyles = makeStyles({
   root: {
@@ -41,6 +42,11 @@ const useStyles = makeStyles({
     marginTop: "0.5em",
     marginLeft: "0.25em",
   },
+  addCommentButton: {
+    border: "1px solid black",
+    marginTop: "0.5em",
+    marginLeft: "0.25em",
+  },
   collapse: {
     width: "100%",
   },
@@ -57,6 +63,8 @@ const useStyles = makeStyles({
 function TaskItem(props) {
   // Queried values
   const { taskObject, refreshGroupData } = props;
+
+  // taskObject.attributes contains submission list and comment list
   const taskAttributes = taskObject.attributes;
 
   // Misc values
@@ -140,7 +148,7 @@ function TaskItem(props) {
                   <Typography variant="h5" align="left">
                     Description
                   </Typography>
-                  <Typography variant="body" display="block" align="left">
+                  <Typography variant="body1" display="block" align="left">
                     {taskAttributes.desc}
                   </Typography>
                   {taskAttributes.submissions.length === 0 || (
@@ -149,7 +157,7 @@ function TaskItem(props) {
                     </Typography>
                   )}
                   <Typography
-                    variant="body"
+                    variant="body1"
                     display="block"
                     style={{ whiteSpace: "pre" }}
                     align="left"
@@ -159,12 +167,17 @@ function TaskItem(props) {
                     ))}
                   </Typography>
                 </Box>
+
                 <EditSubmissionButton
                   submissionLinks={taskAttributes.submissions}
                   refreshGroupData={refreshGroupData}
                   taskId={taskObject.id}
                 />
                 <AddSubtaskButton className={classes.addSubtaskButton} />
+                <AddCommentButton
+                  className={classes.addCommentButton}
+                  taskId={taskObject.id}
+                />
               </Box>
               {/*Subtask List. If there are no subtasks, do not render this part*/}
               {(taskAttributes.subtasks !== undefined &&
