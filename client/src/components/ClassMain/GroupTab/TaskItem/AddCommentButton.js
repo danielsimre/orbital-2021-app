@@ -163,6 +163,7 @@ function AddCommentButton(props) {
         setEditText("");
         setEditTitle("");
         setCurCommentId(null);
+        setEditDialogOpen(false);
         queryComments();
       });
   }
@@ -176,6 +177,7 @@ function AddCommentButton(props) {
       .finally(() => {
         // clean up state
         setCurCommentId(null);
+        setDeleteDialogOpen(false);
         queryComments();
       });
   }
