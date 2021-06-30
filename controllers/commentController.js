@@ -5,7 +5,7 @@ import { validateAuthorOfComment } from "../utils/validation.js";
 export const getAllInfo = (req, res) => {
   BaseTask.find({ assignedTo: req.user.id })
     .select("_id")
-    .then((arr) => Comment.find({ classId: { $in: arr } }))
+    .then((arr) => Comment.find({ taskId: { $in: arr } }))
     .then((comments) => res.json(comments))
     .catch((err) => console.log(err));
 };
