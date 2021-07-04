@@ -271,7 +271,7 @@ function AddCommentButton(props) {
       {/* End of Comment List Dialog */}
       {/* Start of Comment Edit Dialog */}
       <Dialog open={editDialogOpen} onClose={handleEditClose}>
-        <DialogTitle>Edit comment</DialogTitle>
+        <DialogTitle>Edit Comment</DialogTitle>
         <DialogContent>
           <Paper className={classes.box}>
             <form>
