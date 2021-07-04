@@ -16,7 +16,6 @@ const useStyles = makeStyles({
   button: {
     border: "1px solid black",
     alignSelf: "center",
-    marginLeft: "auto",
   },
 });
 
@@ -49,6 +48,7 @@ function EditSubmissionButton(props) {
     }
     return true;
   }
+
   function handleSaveLinks(submissionLinks) {
     axios
       .put(

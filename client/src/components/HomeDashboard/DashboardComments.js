@@ -32,7 +32,9 @@ function DashboardComments(props) {
             </Typography>
             <Typography variant="caption">
               {`Made by ${comment.attributes.createdBy.attributes.username} in
-              ${comment.attributes.classId.attributes.name} on
+              ${comment.attributes.taskId.attributes.name} (Class ${
+                comment.attributes.taskId.attributes.classId.attributes.name
+              }) on
               ${comment.attributes.creationDate.slice(0, 10)}, 
               ${comment.attributes.creationDate.slice(11, 19)}`}
             </Typography>

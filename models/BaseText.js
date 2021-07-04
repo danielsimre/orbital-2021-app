@@ -28,6 +28,10 @@ const BaseTextSchema = new Schema(
       required: true,
       default: Date.now,
     },
+    lastEditDate: {
+      type: Date,
+      default: Date.now,
+    },
     title: {
       type: String,
       required: true,
@@ -49,6 +53,10 @@ function formatData(next) {
     .populate({
       path: "classId",
       select: "name",
+    })
+    .populate({
+      path: "taskId",
+      select: "name classId",
     });
   next();
 }
