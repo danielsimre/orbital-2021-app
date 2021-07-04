@@ -11,7 +11,6 @@ import MyGroupsPage from "./pages/MyGroupsPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import ClassMainPage from "./pages/ClassMainPage";
 import Page404 from "./pages/Page404";
-import TestPage from "./pages/TestPage";
 
 /* CURRENT STRUCTURE (pages -> components under them)
   - Login Page
