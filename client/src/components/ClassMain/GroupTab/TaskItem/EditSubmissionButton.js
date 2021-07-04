@@ -16,7 +16,6 @@ const useStyles = makeStyles({
   button: {
     border: "1px solid black",
     alignSelf: "center",
-    marginLeft: "auto",
   },
 });
 

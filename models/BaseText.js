@@ -53,6 +53,10 @@ function formatData(next) {
     .populate({
       path: "classId",
       select: "name",
+    })
+    .populate({
+      path: "taskId",
+      select: "name classId",
     });
   next();
 }
