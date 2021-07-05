@@ -72,6 +72,7 @@ function GroupMain(props) {
           <GroupTaskList
             queriedTaskList={groupData.tasks}
             refreshGroupData={() => getGroupData(groupID)}
+            groupMembers={groupData.groupMembers}
           />
         ) : (
           <GroupUserList

@@ -158,7 +158,10 @@ export const addUsers = (req, res) => {
             // Add this new group member to all parent tasks in this group
             // (Parent tasks are assigned to all group members)
             await ParentTask.updateMany(
-              { classId: curGroup.classId },
+              {
+                _id: { $in: curGroup.tasks },
+                isMilestone: true,
+              },
               { $push: { assignedTo: curUser.id } }
             );
           }

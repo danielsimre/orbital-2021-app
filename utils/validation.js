@@ -1,5 +1,6 @@
 import ClassRole from "../models/ClassRole.js";
 import Group from "../models/Group.js";
+import User from "../models/User.js";
 import { ClassRoles } from "./enums.js";
 
 // Internal function to send json message + throw error for failed validation
@@ -70,8 +71,11 @@ export const validateCanAccessGroup = (res, curGroup, msg) => {
 
 // Check if the user can access the group the task belongs to (user must be a member or mentor of the group)
 // curTask must be a parent task for this function to work (validate will fail on subtasks)
-export const validateCanAccessTask = (res, curTask, userId, msg) =>
-  Group.find({
+export const validateCanAccessTask = (res, curTask, userId, msg) => {
+  if (curTask === null) {
+    return sendJsonErrMessage(res, 400, "Task object is null");
+  }
+  return Group.find({
     $and: [
       { tasks: curTask.id },
       {
@@ -84,6 +88,7 @@ export const validateCanAccessTask = (res, curTask, userId, msg) =>
     }
     return curTask;
   });
+};
 
 // Only mentors can add groups/tasks/announcements to a class
 export const validateIsMentor = (res, curClass, msg) => {
@@ -94,7 +99,7 @@ export const validateIsMentor = (res, curClass, msg) => {
 };
 
 export const validateDueDate = (res, dueDate) => {
-  if (!(dueDate instanceof Date) || dueDate < new Date()) {
+  if (!(dueDate instanceof Date) || Number.isNaN(dueDate.getTime())) {
     sendJsonErrMessage(res, 400, "Please enter a valid date");
   }
 };
@@ -150,4 +155,62 @@ export const validateAuthorOfComment = (res, curComment, userId, msg) => {
     sendJsonErrMessage(res, 400, msg);
   }
   return curComment;
+};
+
+export const validateIsSubtask = (res, task) => {
+  // If task with this id cannot be found, or this task is a milestone (parent task)
+  if (!successfulFindOneQuery(task) || task.isMilestone) {
+    sendJsonErrMessage(res, 404, "Subtask with this id does not exist");
+  }
+  return task;
+};
+
+export const validateSubtaskData = (res, task, dueDate, assignedTo) => {
+  // Check that the due date of the subtask is not after the due date of the parent task
+  if (new Date(dueDate) > task.dueDate) {
+    return sendJsonErrMessage(
+      res,
+      400,
+      "Due date of the subtask cannot be after the due date of the parent task"
+    );
+  }
+  // Check that for all the usernames in the assignedTo array, they are group members in the
+  // group that this task belongs to
+  return User.find({ username: { $in: assignedTo } })
+    .then((userArray) => {
+      // If lengths differ, then some users either do not exist or are not a part of this group
+      if (userArray.length !== assignedTo.length) {
+        sendJsonErrMessage(res, 400, "Some users in assignedTo are invalid");
+      }
+      return userArray.map((user) => user.id);
+    })
+    .then((userIdArray) => {
+      if (userIdArray.length === 0) {
+        return Group.findOne({ tasks: task.id });
+      }
+      return Group.findOne({
+        tasks: task.id,
+        groupMembers: { $all: userIdArray },
+      });
+    })
+    .then((group) => {
+      if (!successfulFindOneQuery(group)) {
+        sendJsonErrMessage(
+          res,
+          400,
+          "Some users in assignedTo are not group members of this group"
+        );
+      }
+      return task;
+    });
+};
+
+export const validateCompleteParentTask = (res, task) => {
+  if (!task.subtasks.every((subtask) => subtask.isCompleted)) {
+    sendJsonErrMessage(
+      res,
+      400,
+      "Must mark subtasks as completed before marking parent task as completed"
+    );
+  }
 };

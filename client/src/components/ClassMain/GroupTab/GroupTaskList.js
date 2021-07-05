@@ -20,7 +20,7 @@ const useStyles = makeStyles({
 });
 
 function GroupTaskList(props) {
-  const { queriedTaskList, refreshGroupData } = props;
+  const { queriedTaskList, refreshGroupData, groupMembers } = props;
   const classes = useStyles();
 
   return (
@@ -30,7 +30,7 @@ function GroupTaskList(props) {
           <TableRow>
             <TableCell>Task</TableCell>
             <TableCell>Due Date</TableCell>
-            <TableCell>Assigned to</TableCell>
+            <TableCell>Assigned To</TableCell>
             <TableCell>Completed</TableCell>
             <TableCell></TableCell>
           </TableRow>
@@ -40,6 +40,7 @@ function GroupTaskList(props) {
             <TaskItem
               taskObject={taskObject}
               refreshGroupData={refreshGroupData}
+              groupMembers={groupMembers}
             />
           ))}
         </TableBody>
