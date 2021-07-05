@@ -32,7 +32,7 @@ function AddSubtaskButton(props) {
 
   // Misc values
   const [dialogOpen, setDialogOpen] = useState(false);
-  const styles = useStyles();
+  const classes = useStyles();
 
   function handleDialogOpen() {
     setDialogOpen(true);
@@ -44,7 +44,7 @@ function AddSubtaskButton(props) {
 
   return (
     <>
-      <Button className={styles.button} onClick={handleDialogOpen}>
+      <Button className={classes.button} onClick={handleDialogOpen}>
         Add Subtask
       </Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
@@ -54,7 +54,7 @@ function AddSubtaskButton(props) {
             Create subtasks to manage your work better.
           </DialogContentText>
           <form>
-            <div className={styles.root}>
+            <div className={classes.root}>
               <TextField
                 id="subtask name"
                 label="Name"

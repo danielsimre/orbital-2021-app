@@ -34,7 +34,7 @@ function AddUserDialog(props) {
 
   // Misc values
   const [dialogOpen, setDialogOpen] = useState(false);
-  const styles = useStyles();
+  const classes = useStyles();
 
   function handleDialogOpen() {
     setDialogOpen(true);
@@ -54,7 +54,7 @@ function AddUserDialog(props) {
   return (
     <>
       <Tooltip title="Add Users" placement="top">
-        <Button className={styles.button} onClick={handleDialogOpen}>
+        <Button className={classes.button} onClick={handleDialogOpen}>
           <AddIcon />
         </Button>
       </Tooltip>
