@@ -1,17 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
-  Button,
   Collapse,
   Checkbox,
   FormControlLabel,
   IconButton,
   Paper,
   Typography,
-  TextField,
-  Table,
-  TableBody,
-  TableHead,
   TableCell,
   TableRow,
   makeStyles,
@@ -86,10 +81,8 @@ function TaskItem(props) {
   const taskAttributes = taskObject.attributes;
 
   // arrays from taskAttributes
-  const [subtaskList, setSubtaskList] = useState(taskAttributes.subtasks);
-  const [submissionsList, setSubmissionsList] = useState(
-    taskAttributes.submissions
-  );
+  const subtaskList = taskAttributes.subtasks;
+  const submissionsList = taskAttributes.submissions;
 
   // Misc values
   const [isOpen, setIsOpen] = useState(false);
