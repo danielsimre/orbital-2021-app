@@ -4,6 +4,7 @@ import { Comment } from "../models/BaseText.js";
 import User from "../models/User.js";
 import {
   validateCanAccessTask,
+  validateCompleteParentTask,
   validateFieldsPresent,
   validateURLs,
   validateDueDate,
@@ -52,6 +53,7 @@ export const update = (req, res) => {
     // api/v1/tasks/:id?isCompleted is to edit the isCompleted status of a task
   } else if (req.query.isCompleted === "") {
     ParentTask.findById(req.params.id)
+      .populate({ path: "subtasks", select: "isCompleted" })
       .then((task) =>
         validateCanAccessTask(
           res,
@@ -67,6 +69,9 @@ export const update = (req, res) => {
           "Please add a boolean value for attribute isCompleted",
           isCompleted
         );
+        if (isCompleted) {
+          validateCompleteParentTask(res, task);
+        }
         task.isCompleted = isCompleted;
         task.save();
       })
@@ -94,7 +99,7 @@ export const update = (req, res) => {
         const { dueDate, assignedTo } = req.body;
         // Check variables depending on what inputs are given in req.body
         if (dueDate !== undefined) {
-          await validateDueDate(res, new Date(dueDate));
+          validateDueDate(res, new Date(dueDate));
           if (assignedTo !== undefined) {
             await validateSubtaskData(res, task, dueDate, assignedTo);
           } else {
@@ -218,6 +223,8 @@ export const createSubtask = (req, res) => {
             classId: task.classId,
           });
           task.subtasks.push(newSubtask);
+          // Set the parent task to false, as a new subtask that is incompleted has been added
+          task.isCompleted = false;
           task.save();
           newSubtask.save();
         });

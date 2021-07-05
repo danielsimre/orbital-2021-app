@@ -204,3 +204,13 @@ export const validateSubtaskData = (res, task, dueDate, assignedTo) => {
       return task;
     });
 };
+
+export const validateCompleteParentTask = (res, task) => {
+  if (!task.subtasks.every((subtask) => subtask.isCompleted)) {
+    sendJsonErrMessage(
+      res,
+      400,
+      "Must mark subtasks as completed before marking parent task as completed"
+    );
+  }
+};
