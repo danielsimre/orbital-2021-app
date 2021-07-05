@@ -66,8 +66,6 @@ function TaskMain(props) {
     new Date().toISOString().slice(0, 10)
   );
   const [newTaskFramework, setNewTaskFramework] = useState(taskFramework);
-  const [dateError, setDateError] = useState(false);
-  const [dateHelperText, setDateHelperText] = useState("");
 
   // Alert values
   const [displayAlert, setDisplayAlert] = useState(false);
@@ -108,14 +106,6 @@ function TaskMain(props) {
 
   function handleAddTask(event) {
     event.preventDefault();
-    setDateError(false);
-    setDateHelperText("");
-    if (new Date(taskDueDate) < Date.now()) {
-      setDateError(true);
-      setDateHelperText("Invalid due date");
-      return;
-    }
-
     if (taskName !== "" && taskDesc !== "") {
       // Add new task and slot it into the framework based on its due date
       setNewTaskFramework(
@@ -240,8 +230,6 @@ function TaskMain(props) {
               label="Due Date"
               type="date"
               required
-              error={dateError}
-              helperText={dateHelperText}
               value={taskDueDate}
               className={classes.textField}
               onChange={(event) => setTaskDueDate(event.target.value)}
