@@ -214,26 +214,27 @@ function TaskMain(props) {
             Add new tasks to the framework, which can be saved and propagated to
             all groups.
           </DialogContentText>
-          <form>
-            <div className={classes.root}>
-              <TextField
-                id="task name"
-                label="Task Name"
-                variant="outlined"
-                required
-                value={taskName}
-                onChange={(event) => setTaskName(event.target.value)}
-              />
-              <TextField
-                id="task description"
-                label="Task Description"
-                variant="outlined"
-                multiline
-                required
-                value={taskDesc}
-                onChange={(event) => setTaskDesc(event.target.value)}
-              />
-            </div>
+          <form
+            className={classes.root}
+            onSubmit={(event) => handleAddTask(event)}
+          >
+            <TextField
+              id="task name"
+              label="Task Name"
+              variant="outlined"
+              required
+              value={taskName}
+              onChange={(event) => setTaskName(event.target.value)}
+            />
+            <TextField
+              id="task description"
+              label="Task Description"
+              variant="outlined"
+              multiline
+              required
+              value={taskDesc}
+              onChange={(event) => setTaskDesc(event.target.value)}
+            />
             <TextField
               id="date"
               label="Due Date"
@@ -250,9 +251,7 @@ function TaskMain(props) {
             />
             <DialogActions>
               <Button onClick={handlePropDialogClose}>Cancel</Button>
-              <Button type="submit" onClick={(event) => handleAddTask(event)}>
-                Add Task
-              </Button>
+              <Button type="submit">Add Task</Button>
               <Button onClick={handleConfirmDialogOpen}>Save Framework</Button>
             </DialogActions>
           </form>

@@ -96,7 +96,7 @@ export const update = (req, res) => {
         )
       )
       .then(async (task) => {
-        const { dueDate, assignedTo } = req.body;
+        const { dueDate, assignedTo, isCompleted } = req.body;
         // Check variables depending on what inputs are given in req.body
         if (dueDate !== undefined) {
           validateDueDate(res, new Date(dueDate));
@@ -107,6 +107,11 @@ export const update = (req, res) => {
           }
         } else if (assignedTo !== undefined) {
           await validateSubtaskData(res, task, task.dueDate, assignedTo);
+        }
+        // If subtask is marked as false, mark parent task as false
+        if (isCompleted === false) {
+          task.isCompleted = false;
+          await task.save();
         }
       })
       .then(async () => {
@@ -238,18 +243,19 @@ export const deleteSubtask = (req, res) => {
   // The parent task associated with this subtask will be updated accordingly
   BaseTask.findById(req.params.id)
     .then((subtask) => validateIsSubtask(res, subtask))
-    .then((subtask) => {
+    .then((subtask) =>
       // Check that user can access parent of this subtask
-      ParentTask.findOne({ subtasks: subtask.id }).then((parentTask) =>
-        validateCanAccessTask(
-          res,
-          parentTask,
-          req.user.id,
-          "Cannot access this subtask"
+      ParentTask.findOne({ subtasks: subtask.id })
+        .then((parentTask) =>
+          validateCanAccessTask(
+            res,
+            parentTask,
+            req.user.id,
+            "Cannot access this subtask"
+          )
         )
-      );
-      return subtask;
-    })
+        .then(() => subtask)
+    )
     .then((subtask) => {
       subtask.remove();
       ParentTask.collection.updateMany(
