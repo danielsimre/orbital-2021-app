@@ -9,6 +9,7 @@ import {
   Tooltip,
   makeStyles,
 } from "@material-ui/core";
+import { Pagination } from "@material-ui/lab";
 import AddIcon from "@material-ui/icons/Add";
 import axios from "axios";
 
@@ -44,11 +45,15 @@ const useStyles = makeStyles({
     alignSelf: "center",
     flex: "0 0",
   },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+  },
 });
 
 function ClassAnnouncements(props) {
   // Queried values
-  const { curUserRole, classID } = props;
+  const { curUserRole, classId } = props;
   const [announcementList, setAnnouncementList] = useState([]);
 
   // Misc values
@@ -71,11 +76,29 @@ function ClassAnnouncements(props) {
       })
       .then((res) => {
         setAnnouncementList(res.data);
+        setDisplayList(res.data.slice(0, ITEMS_PER_PAGE));
       })
-      .finally(() => setIsRetrieving(false));
+      .finally(() => setIsRetrieving(false))
+      .catch((err) => console.log(err));
   }
 
-  useEffect(() => getClassAnnouncements(classID), [classID]);
+  // Pagination values
+  const ITEMS_PER_PAGE = 4;
+  const numPages = Math.ceil(announcementList.length / ITEMS_PER_PAGE);
+  const [page, setPage] = useState(1);
+  const [displayList, setDisplayList] = useState([]);
+
+  function handleChange(event, value) {
+    setPage(value);
+    setDisplayList(
+      announcementList.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
+
+  useEffect(() => getClassAnnouncements(classId), [classId]);
 
   return (
     isRetrieving || (
@@ -94,7 +117,7 @@ function ClassAnnouncements(props) {
           <Modal open={formModalOpen} onClose={closeForm}>
             <Paper elevation={1} className={classes.paper}>
               <AnnouncementForm
-                classID={classID}
+                classID={classId}
                 getClassAnnouncements={getClassAnnouncements}
                 closeForm={closeForm}
               />
@@ -102,10 +125,10 @@ function ClassAnnouncements(props) {
           </Modal>
         </div>
         <div>
-          {announcementList.length === 0 ? (
+          {displayList.length === 0 ? (
             <Typography>No announcements yet.</Typography>
           ) : (
-            announcementList.map((ann) => (
+            displayList.map((ann) => (
               <Card variant="outlined" className={classes.root} key={ann.id}>
                 <CardContent>
                   <Typography className={classes.announceTitle}>
@@ -123,6 +146,14 @@ function ClassAnnouncements(props) {
                 </CardContent>
               </Card>
             ))
+          )}
+          {numPages < 2 || (
+            <Pagination
+              count={numPages}
+              page={page}
+              onChange={handleChange}
+              className={classes.pagination}
+            />
           )}
         </div>
       </div>

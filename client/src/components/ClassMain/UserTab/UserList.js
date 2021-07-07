@@ -11,7 +11,7 @@ import {
   Typography,
   makeStyles,
 } from "@material-ui/core";
-import { Alert, AlertTitle } from "@material-ui/lab";
+import { Alert, AlertTitle, Pagination } from "@material-ui/lab";
 import axios from "axios";
 
 import AddUserDialog from "./AddUserDialog";
@@ -49,6 +49,10 @@ const useStyles = makeStyles({
     alignSelf: "center",
     flex: "0 0",
   },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+  },
 });
 
 function UserList(props) {
@@ -62,9 +66,17 @@ function UserList(props) {
   const [alertTitleText, setAlertTitleText] = useState("");
   const [alertState, setAlertState] = useState("");
 
+  // Pagination values
+  const ITEMS_PER_PAGE = 6;
+  const numPages = Math.ceil(queriedUserList.length / ITEMS_PER_PAGE);
+  const [page, setPage] = useState(1);
+  const [displayList, setDisplayList] = useState(
+    queriedUserList.slice(0, ITEMS_PER_PAGE)
+  );
+
   // Misc values
   const classes = useStyles();
-  const userRows = queriedUserList.reduce((cols, key, index) => {
+  const userRows = displayList.reduce((cols, key, index) => {
     return (
       (index % 2 === 0 ? cols.push([key]) : cols[cols.length - 1].push(key)) &&
       cols
@@ -75,6 +87,16 @@ function UserList(props) {
     setAlertTitleText(title);
     setAlertText(message);
     setAlertState(severity);
+  }
+
+  function handleChange(event, value) {
+    setPage(value);
+    setDisplayList(
+      queriedUserList.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
   }
 
   // Current only handles adding 1 at a time
@@ -148,6 +170,14 @@ function UserList(props) {
           ))}
         </TableBody>
       </Table>
+      {numPages < 2 || (
+        <Pagination
+          count={numPages}
+          page={page}
+          onChange={handleChange}
+          className={classes.pagination}
+        />
+      )}
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={displayAlert}
