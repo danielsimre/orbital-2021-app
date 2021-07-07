@@ -19,6 +19,10 @@ const useStyles = makeStyles({
   right: {
     width: "50%",
   },
+  title: {
+    textAlign: "center",
+    padding: "1rem",
+  },
 });
 
 function Dashboard() {
@@ -26,6 +30,7 @@ function Dashboard() {
   const [userTaskList, setUserTaskList] = useState([]);
   const [userAnnouncementList, setUserAnnouncementList] = useState([]);
   const [userCommentList, setUserCommentList] = useState([]);
+  const [username, setUsername] = useState("");
 
   // Misc values
   const [isRetrieving, setIsRetrieving] = useState(true);
@@ -39,12 +44,14 @@ function Dashboard() {
         axios.get("/api/v1/announcements", { withCredentials: true }),
         axios.get("/api/v1/tasks", { withCredentials: true }),
         axios.get("/api/v1/comments", { withCredentials: true }),
+        axios.get("/api/v1/users", { withCredentials: true }),
       ])
       .then(
-        axios.spread((announcements, tasks, comments) => {
+        axios.spread((announcements, tasks, comments, userData) => {
           setUserAnnouncementList(announcements.data.slice(0, 2));
           setUserTaskList(tasks.data.incompletedTasks.slice(0, 5));
           setUserCommentList(comments.data.slice(0, 2));
+          setUsername(userData.data.attributes.username);
         })
       )
       .catch((err) => console.log(err))
@@ -56,7 +63,9 @@ function Dashboard() {
   return (
     isRetrieving || (
       <div>
-        <h1 style={{ textAlign: "center" }}>Dashboard</h1>{" "}
+        <Typography variant="h4" className={classes.title}>
+          Welcome back, {username}!
+        </Typography>{" "}
         <div className={classes.container}>
           <div className={classes.left}>
             <CustomBox>
