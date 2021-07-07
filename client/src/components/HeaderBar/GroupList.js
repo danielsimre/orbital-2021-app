@@ -11,6 +11,7 @@ import {
   TableHead,
   makeStyles,
 } from "@material-ui/core";
+import { Pagination } from "@material-ui/lab";
 import axios from "axios";
 
 const useStyles = makeStyles({
@@ -21,6 +22,10 @@ const useStyles = makeStyles({
     margin: "0 auto",
     width: "100%",
     border: "1px solid black",
+  },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
   },
 });
 
@@ -34,6 +39,34 @@ function GroupList(props) {
   const [tabIndex, setTabIndex] = useState(0);
   const classes = useStyles();
 
+  // Pagination values
+  const ITEMS_PER_PAGE = 5;
+  const numMemberPages = Math.ceil(memberGroupList.length / ITEMS_PER_PAGE);
+  const [memberPage, setMemberPage] = useState(1);
+  const [displayMemberList, setDisplayMemberList] = useState([]);
+  const numMentorPages = Math.ceil(mentorGroupList.length / ITEMS_PER_PAGE);
+  const [mentorPage, setMentorPage] = useState(1);
+  const [displayMentorList, setDisplayMentorList] = useState([]);
+
+  function handleMemberChange(event, value) {
+    setMemberPage(value);
+    setDisplayMemberList(
+      memberGroupList.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
+  function handleMentorChange(event, value) {
+    setMentorPage(value);
+    setDisplayMentorList(
+      mentorGroupList.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
+
   function handleChange(event, newValue) {
     setTabIndex(newValue);
   }
@@ -46,6 +79,8 @@ function GroupList(props) {
       .then((response) => {
         setMemberGroupList(response.data.memberOf);
         setMentorGroupList(response.data.mentorOf);
+        setDisplayMemberList(response.data.memberOf.slice(0, ITEMS_PER_PAGE));
+        setDisplayMentorList(response.data.mentorOf.slice(0, ITEMS_PER_PAGE));
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
@@ -53,7 +88,25 @@ function GroupList(props) {
 
   useEffect(() => queryGroupList(), []);
 
-  const groupList = tabIndex === 0 ? memberGroupList : mentorGroupList;
+  const groupList = tabIndex === 0 ? displayMemberList : displayMentorList;
+  const paginationButtons =
+    tabIndex === 0
+      ? numMemberPages < 2 || (
+          <Pagination
+            count={numMemberPages}
+            page={memberPage}
+            onChange={handleMemberChange}
+            className={classes.pagination}
+          />
+        )
+      : numMentorPages < 2 || (
+          <Pagination
+            count={numMentorPages}
+            page={mentorPage}
+            onChange={handleMentorChange}
+            className={classes.pagination}
+          />
+        );
 
   return (
     isRetrieving || (
@@ -90,6 +143,7 @@ function GroupList(props) {
             ))}
           </TableBody>
         </Table>
+        {paginationButtons}
       </div>
     )
   );

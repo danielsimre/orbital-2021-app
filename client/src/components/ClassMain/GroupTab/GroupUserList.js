@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -8,6 +9,7 @@ import {
   Typography,
   makeStyles,
 } from "@material-ui/core";
+import { Pagination } from "@material-ui/lab";
 
 const useStyles = makeStyles({
   root: {
@@ -40,21 +42,58 @@ const useStyles = makeStyles({
     alignSelf: "center",
     flex: "0 0",
   },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+  },
 });
 
 function GroupUserList(props) {
   // Queried values
   const { groupMembers, mentors } = props;
 
+  // Pagination values
+  const ITEMS_PER_PAGE = 4;
+  const numMemberPages = Math.ceil(groupMembers.length / ITEMS_PER_PAGE);
+  const [memberPage, setMemberPage] = useState(1);
+  const [displayMemberList, setDisplayMemberList] = useState(
+    groupMembers.slice(0, ITEMS_PER_PAGE)
+  );
+  const numMentorPages = Math.ceil(mentors.length / ITEMS_PER_PAGE);
+  const [mentorPage, setMentorPage] = useState(1);
+  const [displayMentorList, setDisplayMentorList] = useState(
+    mentors.slice(0, ITEMS_PER_PAGE)
+  );
+
+  function handleMemberChange(event, value) {
+    setMemberPage(value);
+    setDisplayMemberList(
+      groupMembers.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
+
+  function handleMentorChange(event, value) {
+    setMentorPage(value);
+    setDisplayMentorList(
+      mentors.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
+
   // Misc values
   const classes = useStyles();
-  const memberRows = groupMembers.reduce((cols, key, index) => {
+  const memberRows = displayMemberList.reduce((cols, key, index) => {
     return (
       (index % 2 === 0 ? cols.push([key]) : cols[cols.length - 1].push(key)) &&
       cols
     );
   }, []);
-  const mentorRows = mentors.reduce((cols, key, index) => {
+  const mentorRows = displayMentorList.reduce((cols, key, index) => {
     return (
       (index % 2 === 0 ? cols.push([key]) : cols[cols.length - 1].push(key)) &&
       cols
@@ -93,6 +132,14 @@ function GroupUserList(props) {
           ))}
         </TableBody>
       </Table>
+      {numMemberPages < 2 || (
+        <Pagination
+          count={numMemberPages}
+          page={memberPage}
+          onChange={handleMemberChange}
+          className={classes.pagination}
+        />
+      )}
       <div className={classes.tableHeader}>
         <Typography variant="h5" className={classes.tableTitle}>
           Mentors
@@ -123,6 +170,14 @@ function GroupUserList(props) {
           ))}
         </TableBody>
       </Table>
+      {numMentorPages < 2 || (
+        <Pagination
+          count={numMentorPages}
+          page={mentorPage}
+          onChange={handleMentorChange}
+          className={classes.pagination}
+        />
+      )}
     </div>
   );
 }

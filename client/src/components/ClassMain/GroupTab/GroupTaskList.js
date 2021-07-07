@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -6,6 +7,7 @@ import {
   TableHead,
   makeStyles,
 } from "@material-ui/core";
+import { Pagination } from "@material-ui/lab";
 
 import TaskItem from "./TaskItem/TaskEntry";
 
@@ -17,11 +19,33 @@ const useStyles = makeStyles({
     maxHeight: "100%",
     overflow: "auto",
   },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+  },
 });
 
 function GroupTaskList(props) {
   const { queriedTaskList, refreshGroupData } = props;
   const classes = useStyles();
+
+  // Pagination values
+  const ITEMS_PER_PAGE = 4;
+  const numPages = Math.ceil(queriedTaskList.length / ITEMS_PER_PAGE);
+  const [page, setPage] = useState(1);
+  const [displayList, setDisplayList] = useState(
+    queriedTaskList.slice(0, ITEMS_PER_PAGE)
+  );
+
+  function handleChange(event, value) {
+    setPage(value);
+    setDisplayList(
+      queriedTaskList.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
 
   return (
     <div className={classes.root}>
@@ -36,7 +60,7 @@ function GroupTaskList(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {queriedTaskList.map((taskObject) => (
+          {displayList.map((taskObject) => (
             <TaskItem
               taskObject={taskObject}
               refreshGroupData={refreshGroupData}
@@ -44,6 +68,14 @@ function GroupTaskList(props) {
           ))}
         </TableBody>
       </Table>
+      {numPages < 2 || (
+        <Pagination
+          count={numPages}
+          page={page}
+          onChange={handleChange}
+          className={classes.pagination}
+        />
+      )}
     </div>
   );
 }

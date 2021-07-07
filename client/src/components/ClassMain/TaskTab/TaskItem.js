@@ -74,7 +74,7 @@ function TaskItem(props) {
               <Typography variant="h5" align="left">
                 Description
               </Typography>
-              <Typography variant="body" display="block">
+              <Typography variant="body1" display="block">
                 {taskObject.desc}
               </Typography>
               {/*Subtask List. If there are no subtasks, do not render this part*/}
