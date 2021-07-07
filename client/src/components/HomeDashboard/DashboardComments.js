@@ -12,6 +12,10 @@ const useStyles = makeStyles({
   text: {
     fontSize: 14,
   },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+  },
 });
 
 function DashboardComments(props) {
@@ -62,7 +66,12 @@ function DashboardComments(props) {
         </Card>
       ))}
       {numPages < 2 || (
-        <Pagination count={numPages} page={page} onChange={handleChange} />
+        <Pagination
+          count={numPages}
+          page={page}
+          onChange={handleChange}
+          className={classes.pagination}
+        />
       )}
     </div>
   );
