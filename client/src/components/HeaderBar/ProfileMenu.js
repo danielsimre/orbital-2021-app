@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Menu, MenuItem, makeStyles } from "@material-ui/core";
 import axios from "axios";
@@ -11,6 +11,9 @@ const useStyles = makeStyles((theme) => ({
 
 function ProfileMenu(props) {
   const { setIsAuthenticated } = props;
+  const [username, setUsername] = useState("");
+  const [isRetrieving, setIsRetrieving] = useState(true);
+
   const classes = useStyles();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -30,9 +33,19 @@ function ProfileMenu(props) {
       .catch((err) => console.log(err));
   }
 
+  function getUsername() {
+    axios
+      .get("/api/v1/users", { withCredentials: true })
+      .then((res) => setUsername(res.data.attributes.username))
+      .catch((err) => console.log(err))
+      .finally(() => setIsRetrieving(false));
+  }
+
+  useEffect(() => getUsername(), []);
+
   return (
     <>
-      <Button onClick={handleOpen}>Settings</Button>
+      <Button onClick={handleOpen}>{isRetrieving ? "" : username}</Button>
       <Menu
         id="fade-menu"
         anchorEl={anchorEl}
