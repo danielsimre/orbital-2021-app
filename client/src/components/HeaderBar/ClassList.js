@@ -12,6 +12,7 @@ import {
   Typography,
   makeStyles,
 } from "@material-ui/core";
+import { Pagination } from "@material-ui/lab";
 import axios from "axios";
 
 import NewClassForm from "./NewClassForm";
@@ -33,6 +34,10 @@ const useStyles = makeStyles({
     margin: "0 auto",
     padding: "16px",
   },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+  },
 });
 
 function ClassList() {
@@ -43,6 +48,22 @@ function ClassList() {
   const [isRetrieving, setIsRetrieving] = useState(true);
   const [formModalOpen, setFormModalOpen] = useState(false);
   const classes = useStyles();
+
+  // Pagination values
+  const ITEMS_PER_PAGE = 2;
+  const numPages = Math.ceil(queriedClassList.length / ITEMS_PER_PAGE);
+  const [page, setPage] = useState(1);
+  const [displayList, setDisplayList] = useState([]);
+
+  function handleChange(event, value) {
+    setPage(value);
+    setDisplayList(
+      queriedClassList.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
 
   function closeForm() {
     setFormModalOpen(false);
@@ -55,12 +76,13 @@ function ClassList() {
       })
       .then((response) => {
         setQueriedClassList(response.data.classes);
+        setDisplayList(response.data.classes.slice(0, ITEMS_PER_PAGE));
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
   }
 
-  useEffect(() => queryClassList(), [queriedClassList]);
+  useEffect(() => queryClassList(), []);
 
   return (
     isRetrieving || (
@@ -89,7 +111,7 @@ function ClassList() {
             </TableRow>
           </TableHead>
           <TableBody align="center">
-            {queriedClassList.map((curClass, index) => (
+            {displayList.map((curClass, index) => (
               <TableRow key={index} hover>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{curClass.classId.attributes.name}</TableCell>
@@ -106,6 +128,14 @@ function ClassList() {
             ))}
           </TableBody>
         </Table>
+        {numPages < 2 || (
+          <Pagination
+            count={numPages}
+            page={page}
+            onChange={handleChange}
+            className={classes.pagination}
+          />
+        )}
       </div>
     )
   );
