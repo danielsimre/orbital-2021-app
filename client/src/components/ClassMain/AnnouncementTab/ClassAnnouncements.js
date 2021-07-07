@@ -53,8 +53,14 @@ const useStyles = makeStyles({
 
 function ClassAnnouncements(props) {
   // Queried values
-  const { curUserRole, classId } = props;
+  const { curUserRole, classID } = props;
   const [announcementList, setAnnouncementList] = useState([]);
+
+  // Pagination values
+  const ITEMS_PER_PAGE = 4;
+  const numPages = Math.ceil(announcementList.length / ITEMS_PER_PAGE);
+  const [page, setPage] = useState(1);
+  const [displayList, setDisplayList] = useState([]);
 
   // Misc values
   const [formModalOpen, setFormModalOpen] = useState(false);
@@ -82,12 +88,6 @@ function ClassAnnouncements(props) {
       .catch((err) => console.log(err));
   }
 
-  // Pagination values
-  const ITEMS_PER_PAGE = 4;
-  const numPages = Math.ceil(announcementList.length / ITEMS_PER_PAGE);
-  const [page, setPage] = useState(1);
-  const [displayList, setDisplayList] = useState([]);
-
   function handleChange(event, value) {
     setPage(value);
     setDisplayList(
@@ -98,7 +98,7 @@ function ClassAnnouncements(props) {
     );
   }
 
-  useEffect(() => getClassAnnouncements(classId), [classId]);
+  useEffect(() => getClassAnnouncements(classID), [classID]);
 
   return (
     isRetrieving || (
@@ -117,7 +117,7 @@ function ClassAnnouncements(props) {
           <Modal open={formModalOpen} onClose={closeForm}>
             <Paper elevation={1} className={classes.paper}>
               <AnnouncementForm
-                classID={classId}
+                classID={classID}
                 getClassAnnouncements={getClassAnnouncements}
                 closeForm={closeForm}
               />
