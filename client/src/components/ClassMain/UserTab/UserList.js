@@ -93,7 +93,7 @@ function UserList(props) {
     );
   }, []);
 
-  const isOwner = curUserData.id === creatorId;
+  const isCreator = curUserData.id === creatorId;
 
   function handleAlert(title, message, severity) {
     setAlertTitleText(title);
@@ -176,18 +176,22 @@ function UserList(props) {
                       </Typography>
                     </CardContent>
                     {
-                      /* Check if owner or if mentor, but mentor can only remove student */
-                      (isOwner ||
-                        (curUserRole === ClassRoles.MENTOR &&
-                          curUser.role === ClassRoles.STUDENT)) && (
-                        <CardActions>
-                          <Tooltip title="Remove user from class">
-                            <Button>
-                              <CloseIcon />
-                            </Button>
-                          </Tooltip>
-                        </CardActions>
-                      )
+                      /* Button only appears if:
+                      1) The user is not yourself AND either
+                      2a) You are the creator of the class OR
+                      2b) You are a mentor AND the user is a student */
+                      curUser.userId.id !== curUserData.id &&
+                        (isCreator ||
+                          (curUserRole === ClassRoles.MENTOR &&
+                            curUser.role === ClassRoles.STUDENT)) && (
+                          <CardActions>
+                            <Tooltip title="Remove user from class">
+                              <Button>
+                                <CloseIcon />
+                              </Button>
+                            </Tooltip>
+                          </CardActions>
+                        )
                     }
                   </Card>
                 </TableCell>
