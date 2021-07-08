@@ -31,6 +31,7 @@ function ClassMain(props) {
   const { classID } = useParams();
 
   const [classData, setClassData] = useState({});
+  const [curUserData, setCurUserData] = useState({});
 
   const [isRetrieving, setIsRetrieving] = useState(true);
   const { path } = useRouteMatch();
@@ -39,15 +40,17 @@ function ClassMain(props) {
 
   function getClassData(classID) {
     axios
-      .get(`/api/v1/classes/${classID}`, {
-        withCredentials: true,
-      })
-      .then(function (response) {
-        setClassData(response.data.attributes);
-      })
-      .catch(function (error) {
-        console.log(`Could not find class with ID: ${classID}`);
-      })
+      .all([
+        axios.get(`/api/v1/classes/${classID}`, { withCredentials: true }),
+        axios.get(`/api/v1/users`, { withCredentials: true }),
+      ])
+      .then(
+        axios.spread((classData, userData) => {
+          setClassData(classData.data.attributes);
+          setCurUserData(userData.data);
+        })
+      )
+      .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
   }
 
@@ -73,7 +76,9 @@ function ClassMain(props) {
               <UserList
                 curUserRole={classData.role}
                 queriedUserList={classData.users}
+                creatorId={classData.created_by}
                 refreshClassData={getClassData}
+                curUserData={curUserData}
               />
             </Route>
             <Route path={`${path}/tasks`}>

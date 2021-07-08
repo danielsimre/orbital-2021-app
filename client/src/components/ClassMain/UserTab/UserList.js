@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import {
+  Button,
   Card,
+  CardActions,
   CardContent,
   Snackbar,
   Table,
@@ -9,8 +11,10 @@ import {
   TableRow,
   TableCell,
   Typography,
+  Tooltip,
   makeStyles,
 } from "@material-ui/core";
+import CloseIcon from "@material-ui/icons/Close";
 import { Alert, AlertTitle, Pagination } from "@material-ui/lab";
 import axios from "axios";
 
@@ -58,7 +62,13 @@ const useStyles = makeStyles({
 function UserList(props) {
   // Queried values
   const { classID } = useParams();
-  const { curUserRole, queriedUserList, refreshClassData } = props;
+  const {
+    curUserRole,
+    queriedUserList,
+    refreshClassData,
+    creatorId,
+    curUserData,
+  } = props;
 
   // Alert values
   const [displayAlert, setDisplayAlert] = useState(false);
@@ -82,6 +92,8 @@ function UserList(props) {
       cols
     );
   }, []);
+
+  const isOwner = curUserData.id === creatorId;
 
   function handleAlert(title, message, severity) {
     setAlertTitleText(title);
@@ -163,6 +175,20 @@ function UserList(props) {
                         Email: {curUser.userId.attributes.email}
                       </Typography>
                     </CardContent>
+                    {
+                      /* Check if owner or if mentor, but mentor can only remove student */
+                      (isOwner ||
+                        (curUserRole === ClassRoles.MENTOR &&
+                          curUser.role === ClassRoles.STUDENT)) && (
+                        <CardActions>
+                          <Tooltip title="Remove user from class">
+                            <Button>
+                              <CloseIcon />
+                            </Button>
+                          </Tooltip>
+                        </CardActions>
+                      )
+                    }
                   </Card>
                 </TableCell>
               ))}
