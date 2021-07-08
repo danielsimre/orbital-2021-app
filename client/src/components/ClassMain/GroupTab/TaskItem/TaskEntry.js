@@ -1,17 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
-  Button,
   Collapse,
   Checkbox,
   FormControlLabel,
   IconButton,
   Paper,
   Typography,
-  TextField,
-  Table,
-  TableBody,
-  TableHead,
   TableCell,
   TableRow,
   makeStyles,
@@ -37,6 +32,11 @@ const useStyles = makeStyles({
   },
   descBox: {
     textAlign: "center",
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+  },
+  descAndButtonsBox: {
     display: "flex",
     flexDirection: "row",
     width: "100%",
@@ -69,9 +69,10 @@ const useStyles = makeStyles({
   },
   actionsBox: {
     display: "flex",
+    flex: "0 0 38%",
     marginLeft: "auto",
-    margin: "1rem",
-    padding: "1rem",
+    margin: "0.5em",
+    padding: "0.5rem",
     height: "fit-content",
     width: "fit-content",
     boxShadow: "0px 0px 5px 2px rgba(0, 0, 0, 0.2)",
@@ -80,16 +81,14 @@ const useStyles = makeStyles({
 
 function TaskItem(props) {
   // Queried values
-  const { taskObject, refreshGroupData } = props;
+  const { taskObject, refreshGroupData, groupMembers } = props;
 
-  // taskObject.attributes contains submission, comment and subtask list
+  // taskObject.attributes contains submissions, comment and subtask list
   const taskAttributes = taskObject.attributes;
 
   // arrays from taskAttributes
-  const [subtaskList, setSubtaskList] = useState(taskAttributes.subtasks);
-  const [submissionsList, setSubmissionsList] = useState(
-    taskAttributes.submissions
-  );
+  const subtaskList = taskAttributes.subtasks;
+  const submissionsList = taskAttributes.submissions;
 
   // Misc values
   const [isOpen, setIsOpen] = useState(false);
@@ -115,7 +114,7 @@ function TaskItem(props) {
 
   // Allow user to only check the main task as done after all subtasks are done
   function allSubtasksCompleted(subtaskArr) {
-    return subtaskArr.every((subtask) => subtask.isCompleted);
+    return subtaskArr.every((subtask) => subtask.attributes.isCompleted);
   }
 
   return (
@@ -167,8 +166,8 @@ function TaskItem(props) {
           >
             {/*Description of Task*/}
             <Box className={classes.box}>
-              <Box className={classes.descBox}>
-                <Box>
+              <Box className={classes.descAndButtonsBox}>
+                <Box className={classes.descBox}>
                   <Typography variant="h5" display="block" align="left">
                     Description
                   </Typography>
@@ -191,26 +190,37 @@ function TaskItem(props) {
                       <>{submission + "\n"}</>
                     ))}
                   </Typography>
-                  {/* Subtask List. If there are no subtasks, do not render this part */}
-                  {subtaskList !== undefined && subtaskList !== [] && (
-                    <SubtaskTable subtaskList={subtaskList} />
-                  )}
                 </Box>
+                {/* User actions */}
+                <Paper className={classes.actionsBox}>
+                  <EditSubmissionButton
+                    submissionLinks={submissionsList}
+                    refreshGroupData={refreshGroupData}
+                    taskId={taskObject.id}
+                  />
+                  <AddSubtaskButton
+                    className={classes.addSubtaskButton}
+                    parentDueDate={taskAttributes.dueDate}
+                    refreshGroupData={refreshGroupData}
+                    taskId={taskObject.id}
+                    groupMembers={groupMembers}
+                  />
+                  <AddCommentButton
+                    className={classes.addCommentButton}
+                    taskId={taskObject.id}
+                  />
+                </Paper>
               </Box>
+              {/* Subtask List. If there are no subtasks, do not render this part */}
+              {subtaskList !== undefined && subtaskList.length !== 0 && (
+                <SubtaskTable
+                  subtaskList={subtaskList}
+                  groupMembers={groupMembers}
+                  refreshGroupData={refreshGroupData}
+                  parentDueDate={taskAttributes.dueDate}
+                />
+              )}
             </Box>
-            {/* User actions */}
-            <Paper className={classes.actionsBox}>
-              <EditSubmissionButton
-                submissionLinks={submissionsList}
-                refreshGroupData={refreshGroupData}
-                taskId={taskObject.id}
-              />
-              <AddSubtaskButton className={classes.addSubtaskButton} />
-              <AddCommentButton
-                className={classes.addCommentButton}
-                taskId={taskObject.id}
-              />
-            </Paper>
           </Collapse>
         </TableCell>
       </TableRow>

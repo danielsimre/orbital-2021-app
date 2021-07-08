@@ -66,8 +66,6 @@ function TaskMain(props) {
     new Date().toISOString().slice(0, 10)
   );
   const [newTaskFramework, setNewTaskFramework] = useState(taskFramework);
-  const [dateError, setDateError] = useState(false);
-  const [dateHelperText, setDateHelperText] = useState("");
 
   // Alert values
   const [displayAlert, setDisplayAlert] = useState(false);
@@ -108,14 +106,6 @@ function TaskMain(props) {
 
   function handleAddTask(event) {
     event.preventDefault();
-    setDateError(false);
-    setDateHelperText("");
-    if (new Date(taskDueDate) < Date.now()) {
-      setDateError(true);
-      setDateHelperText("Invalid due date");
-      return;
-    }
-
     if (taskName !== "" && taskDesc !== "") {
       // Add new task and slot it into the framework based on its due date
       setNewTaskFramework(
@@ -214,33 +204,32 @@ function TaskMain(props) {
             Add new tasks to the framework, which can be saved and propagated to
             all groups.
           </DialogContentText>
-          <form>
-            <div className={classes.root}>
-              <TextField
-                id="task name"
-                label="Task Name"
-                variant="outlined"
-                required
-                value={taskName}
-                onChange={(event) => setTaskName(event.target.value)}
-              />
-              <TextField
-                id="task description"
-                label="Task Description"
-                variant="outlined"
-                multiline
-                required
-                value={taskDesc}
-                onChange={(event) => setTaskDesc(event.target.value)}
-              />
-            </div>
+          <form
+            className={classes.root}
+            onSubmit={(event) => handleAddTask(event)}
+          >
+            <TextField
+              id="task name"
+              label="Task Name"
+              variant="outlined"
+              required
+              value={taskName}
+              onChange={(event) => setTaskName(event.target.value)}
+            />
+            <TextField
+              id="task description"
+              label="Task Description"
+              variant="outlined"
+              multiline
+              required
+              value={taskDesc}
+              onChange={(event) => setTaskDesc(event.target.value)}
+            />
             <TextField
               id="date"
               label="Due Date"
               type="date"
               required
-              error={dateError}
-              helperText={dateHelperText}
               value={taskDueDate}
               className={classes.textField}
               onChange={(event) => setTaskDueDate(event.target.value)}
@@ -250,9 +239,7 @@ function TaskMain(props) {
             />
             <DialogActions>
               <Button onClick={handlePropDialogClose}>Cancel</Button>
-              <Button type="submit" onClick={(event) => handleAddTask(event)}>
-                Add Task
-              </Button>
+              <Button type="submit">Add Task</Button>
               <Button onClick={handleConfirmDialogOpen}>Save Framework</Button>
             </DialogActions>
           </form>
