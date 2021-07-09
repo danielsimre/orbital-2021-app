@@ -64,4 +64,13 @@ router.post(
   classController.createAnnouncement
 );
 
+// @ route DELETE api/v1/classes/:classId/users/:userId
+// @ desc Remove specified user from class (and groups if any)
+// @ access Private
+router.delete(
+  "/:id/users/:userId",
+  ensureAuthenticated,
+  classController.removeUser
+);
+
 export default router;

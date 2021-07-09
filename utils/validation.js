@@ -214,3 +214,36 @@ export const validateCompleteParentTask = (res, task) => {
     );
   }
 };
+
+export const validateCanRemoveUser = (req, res, classRoleObj) => {
+  // Non-mentors cannot remove users
+  if (classRoleObj.role !== ClassRoles.MENTOR) {
+    sendJsonErrMessage(res, 403, "Not authorized to remove users");
+  }
+  // User cannot remove themselves
+  if (req.user.id === req.params.userId) {
+    sendJsonErrMessage(res, 403, "Cannot remove yourself from class");
+  }
+
+  // User is a mentor: check if user to be removed exists
+  return ClassRole.findOne({
+    classId: req.params.id,
+    userId: req.params.userId,
+  })
+    .populate({ path: "classId" })
+    .then((classRole) => {
+      if (!successfulFindOneQuery(classRole)) {
+        sendJsonErrMessage(res, 400, "That user does not exist in the class");
+      }
+      if (classRole.classId.created_by.equals(req.user.id)) {
+        // User making the request is the creator of the class, allow deletion always
+        return classRole;
+      }
+      if (classRole.role === ClassRoles.MENTOR) {
+        // Current user is not creator but wants to remove a mentor
+        sendJsonErrMessage(res, 403, "Cannot remove that mentor from class");
+      }
+      return classRole;
+    })
+    .catch((err) => console.log(err));
+};

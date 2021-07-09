@@ -1,3 +1,4 @@
+import Mongoose from "mongoose";
 import { Announcement } from "../models/BaseText.js";
 import { BaseTask, ParentTask } from "../models/BaseTask.js";
 import Class from "../models/Class.js";
@@ -13,6 +14,7 @@ import {
   validateSameTaskFramework,
   validateDueDate,
   successfulFindOneQuery,
+  validateCanRemoveUser,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 
@@ -412,5 +414,23 @@ export const createAnnouncement = (req, res) => {
       newAnnouncement.save();
     })
     .then(() => res.json({ msg: "Successfully created announcement" }))
+    .catch((err) => console.log(err));
+};
+
+export const removeUser = (req, res) => {
+  validateCanAccessClass(req, res)
+    .then((classRoleObj) => validateCanRemoveUser(req, res, classRoleObj))
+    .then((classRole) => {
+      classRole.remove();
+      Group.collection.updateMany(
+        { classId: req.params.id },
+        {
+          $pull: {
+            groupMembers: Mongoose.Types.ObjectId(req.params.userId),
+          },
+        }
+      );
+    })
+    .then(() => res.json({ msg: "Successfully removed user from class" }))
     .catch((err) => console.log(err));
 };
