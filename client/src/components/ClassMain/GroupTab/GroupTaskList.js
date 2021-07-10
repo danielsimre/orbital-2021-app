@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -46,6 +46,17 @@ function GroupTaskList(props) {
       )
     );
   }
+
+  useEffect(
+    () =>
+      setDisplayList(
+        queriedTaskList.slice(
+          ITEMS_PER_PAGE * (page - 1),
+          ITEMS_PER_PAGE * (page - 1) + ITEMS_PER_PAGE
+        )
+      ),
+    [queriedTaskList, page]
+  );
 
   return (
     <div className={classes.root}>

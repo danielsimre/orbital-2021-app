@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -84,6 +84,26 @@ function GroupUserList(props) {
       )
     );
   }
+
+  useEffect(() => {
+    setMemberPage(memberPage);
+    setDisplayMemberList(
+      groupMembers.slice(
+        ITEMS_PER_PAGE * (memberPage - 1),
+        ITEMS_PER_PAGE * (memberPage - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }, [groupMembers, memberPage]);
+
+  useEffect(() => {
+    setMentorPage(mentorPage);
+    setDisplayMentorList(
+      mentors.slice(
+        ITEMS_PER_PAGE * (mentorPage - 1),
+        ITEMS_PER_PAGE * (mentorPage - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }, [mentors, mentorPage]);
 
   // Misc values
   const classes = useStyles();

@@ -89,6 +89,12 @@ function GroupList(props) {
   useEffect(() => queryGroupList(), []);
 
   const groupList = tabIndex === 0 ? displayMemberList : displayMentorList;
+
+  const paginationIndex =
+    tabIndex === 0
+      ? (memberPage - 1) * ITEMS_PER_PAGE
+      : (mentorPage - 1) * ITEMS_PER_PAGE;
+
   const paginationButtons =
     tabIndex === 0
       ? numMemberPages < 2 || (
@@ -127,7 +133,7 @@ function GroupList(props) {
           <TableBody align="center">
             {groupList.map((curGroup, index) => (
               <TableRow key={curGroup.id}>
-                <TableCell>{index + 1}</TableCell>
+                <TableCell>{paginationIndex + index + 1}</TableCell>
                 <TableCell>
                   <Button
                     component={Link}

@@ -96,6 +96,25 @@ function UserList(props) {
     queriedUserList.slice(0, ITEMS_PER_PAGE)
   );
 
+  function handleChange(event, value) {
+    setPage(value);
+    setDisplayList(
+      queriedUserList.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
+
+  useEffect(() => {
+    setDisplayList(
+      queriedUserList.slice(
+        ITEMS_PER_PAGE * (page - 1),
+        ITEMS_PER_PAGE * (page - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }, [queriedUserList, page]);
+
   // Misc values
   const classes = useStyles();
   const userRows = displayList.reduce((cols, key, index) => {
@@ -111,16 +130,6 @@ function UserList(props) {
     setAlertTitleText(title);
     setAlertText(message);
     setAlertState(severity);
-  }
-
-  function handleChange(event, value) {
-    setPage(value);
-    setDisplayList(
-      queriedUserList.slice(
-        ITEMS_PER_PAGE * (value - 1),
-        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
-      )
-    );
   }
 
   function handleDeleteOpen(userId) {
@@ -181,15 +190,6 @@ function UserList(props) {
         setDisplayAlert(true);
       });
   }
-
-  useEffect(() => {
-    setDisplayList(
-      queriedUserList.slice(
-        ITEMS_PER_PAGE * (page - 1),
-        ITEMS_PER_PAGE * (page - 1) + ITEMS_PER_PAGE
-      )
-    );
-  }, [queriedUserList]);
 
   return (
     <div className={classes.root}>
