@@ -17,7 +17,7 @@ import {
   Typography,
   makeStyles,
 } from "@material-ui/core";
-import { Alert, AlertTitle } from "@material-ui/lab";
+import { Alert, AlertTitle, Pagination } from "@material-ui/lab";
 import AddIcon from "@material-ui/icons/Add";
 import axios from "axios";
 
@@ -55,6 +55,10 @@ const useStyles = makeStyles({
     padding: "16px",
     margin: "0 auto",
   },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+  },
 });
 
 function ClassGroupList(props) {
@@ -71,6 +75,31 @@ function ClassGroupList(props) {
   const [alertText, setAlertText] = useState("");
   const [alertTitleText, setAlertTitleText] = useState("");
   const [alertState, setAlertState] = useState("");
+
+  // Pagination values
+  const ITEMS_PER_PAGE = 2;
+  const numPages = Math.ceil(queriedGroupList.length / ITEMS_PER_PAGE);
+  const [page, setPage] = useState(1);
+  const [displayList, setDisplayList] = useState([]);
+
+  function handleChange(event, value) {
+    setPage(value);
+    setDisplayList(
+      queriedGroupList.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
+
+  useEffect(() => {
+    setDisplayList(
+      queriedGroupList.slice(
+        ITEMS_PER_PAGE * (page - 1),
+        ITEMS_PER_PAGE * (page - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }, [queriedGroupList, page]);
 
   // Misc values
   const [isRetrieving, setIsRetrieving] = useState(true);
@@ -238,7 +267,7 @@ function ClassGroupList(props) {
         ) : (
           <Table className={classes.table}>
             <TableBody align="center">
-              {queriedGroupList.map((curGroup) => (
+              {displayList.map((curGroup) => (
                 <TableRow key={curGroup.id}>
                   <TableCell>{curGroup.attributes.name}</TableCell>
                   <TableCell>
@@ -275,6 +304,14 @@ function ClassGroupList(props) {
             {alertText}
           </Alert>
         </Snackbar>
+        {numPages < 2 || (
+          <Pagination
+            count={numPages}
+            page={page}
+            onChange={handleChange}
+            className={classes.pagination}
+          />
+        )}
       </div>
     ) : queriedGroupList.length !== 0 ? (
       <Redirect to={`/classes/${classID}/groups/${queriedGroupList[0].id}`} />
