@@ -87,7 +87,10 @@ function ClassMain(props) {
               <GroupMain />
             </Route>
             <Route path={`${path}/groups`}>
-              <ClassGroupList curUserRole={classData.role} />
+              <ClassGroupList
+                curUserRole={classData.role}
+                refreshClassData={() => getClassData(classID)}
+              />
             </Route>
             <Route path={`${path}`}>
               <h1>Class Main Page for {classData.name}</h1>

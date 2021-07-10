@@ -40,6 +40,8 @@ export const getInfo = (req, res) => {
 // If the user is not a part of the class, return an error
 // If the user is a part of the class as a student, return their group (if they have one)
 // If the user is a part of the class as a mentor, return all groups they are mentoring
+// Attributes of each group includes which mentors and students can be added to
+// the group from the class
 export const getGroups = (req, res) => {
   validateCanAccessClass(req, res)
     // Return a object with attributes groups, which contains an array of all groups
@@ -54,9 +56,46 @@ export const getGroups = (req, res) => {
         ],
       })
     )
-    .then((groupsObj) => {
-      res.json(groupsObj);
+    .then((curGroups) => {
+      const invalidStudents = [];
+      // Find all students that are already in a group
+      curGroups.forEach((group) => {
+        const groupObj = group.toObject();
+        invalidStudents.push(...groupObj.attributes.groupMembers);
+      });
+      return Promise.all(
+        curGroups.map((group) => {
+          const groupObj = group.toObject();
+          return Promise.all([
+            ClassRole.find({
+              userId: { $nin: invalidStudents },
+              classId: groupObj.attributes.classId,
+              role: ClassRoles.STUDENT,
+            }).populate({
+              path: "userId",
+              select: "username",
+            }),
+            ClassRole.find({
+              userId: { $nin: groupObj.attributes.mentoredBy },
+              classId: groupObj.attributes.classId,
+              role: ClassRoles.MENTOR,
+            }).populate({
+              path: "userId",
+              select: "username",
+            }),
+          ]).then(([addableStudents, addableMentors]) => {
+            groupObj.attributes.addableStudents = addableStudents.map(
+              (student) => student.userId.username
+            );
+            groupObj.attributes.addableMentors = addableMentors.map(
+              (mentor) => mentor.userId.username
+            );
+            return groupObj;
+          });
+        })
+      );
     })
+    .then((groupsObj) => res.json(groupsObj))
     .catch((err) => console.log(err));
 };
 

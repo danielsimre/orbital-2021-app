@@ -16,8 +16,7 @@ router.get("/", ensureAuthenticated, groupController.getAllInfo);
 router.get("/:id", ensureAuthenticated, groupController.getInfo);
 
 // @route POST api/v1/groups/:id/users
-// @desc Add users/mentors to the group (?mentor to add mentors, no params for students)
-//       User must be a mentor of the group
+// @desc Add users/mentors to the group
 // @access Private
 router.post("/:id/users", ensureAuthenticated, groupController.addUsers);
 
