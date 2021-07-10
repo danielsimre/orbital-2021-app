@@ -14,17 +14,11 @@ const useStyles = makeStyles({
 
 function NewClassForm(props) {
   // Passed values
-  const { closeForm } = props;
+  const { refreshClassList, closeForm, handleAlert, setDisplayAlert } = props;
 
   // Form values
   const [className, setClassName] = useState("");
   const [classDescription, setClassDescription] = useState("");
-
-  // Alert values
-  const [displayAlert, setDisplayAlert] = useState(false);
-  const [alertText, setAlertText] = useState("");
-  const [alertTitleText, setAlertTitleText] = useState("");
-  const [alertState, setAlertState] = useState("");
 
   // Misc values
   const classes = useStyles();
@@ -58,14 +52,9 @@ function NewClassForm(props) {
             "error"
           )
       )
+      .then(() => refreshClassList())
       .then(() => setDisplayAlert(true))
       .finally(() => closeForm());
-  }
-
-  function handleAlert(title, message, severity) {
-    setAlertTitleText(title);
-    setAlertText(message);
-    setAlertState(severity);
   }
 
   return (
@@ -104,16 +93,6 @@ function NewClassForm(props) {
           </Button>
         </fieldset>
       </form>
-      <Snackbar
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        open={displayAlert}
-        onClose={() => setDisplayAlert(false)}
-      >
-        <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
-          <AlertTitle>{alertTitleText}</AlertTitle>
-          {alertText}
-        </Alert>
-      </Snackbar>
     </>
   );
 }

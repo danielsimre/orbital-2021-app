@@ -7,9 +7,10 @@ import {
   Paper,
   Typography,
   Tooltip,
+  Snackbar,
   makeStyles,
 } from "@material-ui/core";
-import { Pagination } from "@material-ui/lab";
+import { Alert, AlertTitle, Pagination } from "@material-ui/lab";
 import AddIcon from "@material-ui/icons/Add";
 import axios from "axios";
 
@@ -62,6 +63,12 @@ function ClassAnnouncements(props) {
   const [page, setPage] = useState(1);
   const [displayList, setDisplayList] = useState([]);
 
+  // Alert values
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
+
   // Misc values
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [isRetrieving, setIsRetrieving] = useState(true);
@@ -88,6 +95,12 @@ function ClassAnnouncements(props) {
       .catch((err) => console.log(err));
   }
 
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
+  }
+
   function handleChange(event, value) {
     setPage(value);
     setDisplayList(
@@ -102,61 +115,80 @@ function ClassAnnouncements(props) {
 
   return (
     isRetrieving || (
-      <div>
-        <div className={classes.header}>
-          <Typography variant="h5" className={classes.title}>
-            Announcements
-          </Typography>
-          {curUserRole === ClassRoles.MENTOR && (
-            <Tooltip title="Make an announcement to the class" placement="top">
-              <Button className={classes.button} onClick={openForm}>
-                <AddIcon />
-              </Button>
-            </Tooltip>
-          )}
-          <Modal open={formModalOpen} onClose={closeForm}>
-            <Paper elevation={1} className={classes.paper}>
-              <AnnouncementForm
-                classID={classID}
-                getClassAnnouncements={getClassAnnouncements}
-                closeForm={closeForm}
-              />
-            </Paper>
-          </Modal>
-        </div>
+      <>
         <div>
-          {displayList.length === 0 ? (
-            <Typography>No announcements yet.</Typography>
-          ) : (
-            displayList.map((ann) => (
-              <Card variant="outlined" className={classes.root} key={ann.id}>
-                <CardContent>
-                  <Typography className={classes.announceTitle}>
-                    {ann.attributes.title}
-                  </Typography>
-                  <Typography className={classes.announceText}>
-                    {ann.attributes.content}
-                  </Typography>
-                  <Typography variant="caption">
-                    {`Made by ${ann.attributes.createdBy.attributes.username} in
+          <div className={classes.header}>
+            <Typography variant="h5" className={classes.title}>
+              Announcements
+            </Typography>
+            {curUserRole === ClassRoles.MENTOR && (
+              <Tooltip
+                title="Make an announcement to the class"
+                placement="top"
+              >
+                <Button className={classes.button} onClick={openForm}>
+                  <AddIcon />
+                </Button>
+              </Tooltip>
+            )}
+            <Modal open={formModalOpen} onClose={closeForm}>
+              <Paper elevation={1} className={classes.paper}>
+                <AnnouncementForm
+                  classID={classID}
+                  handleAlert={handleAlert}
+                  setDisplayAlert={setDisplayAlert}
+                  getClassAnnouncements={getClassAnnouncements}
+                  closeForm={closeForm}
+                />
+              </Paper>
+            </Modal>
+          </div>
+          <div>
+            {displayList.length === 0 ? (
+              <Typography>No announcements yet.</Typography>
+            ) : (
+              displayList.map((ann) => (
+                <Card variant="outlined" className={classes.root} key={ann.id}>
+                  <CardContent>
+                    <Typography className={classes.announceTitle}>
+                      {ann.attributes.title}
+                    </Typography>
+                    <Typography className={classes.announceText}>
+                      {ann.attributes.content}
+                    </Typography>
+                    <Typography variant="caption">
+                      {`Made by ${
+                        ann.attributes.createdBy.attributes.username
+                      } in
                       ${ann.attributes.classId.attributes.name} on
                       ${ann.attributes.creationDate.slice(0, 10)}, 
                       ${ann.attributes.creationDate.slice(11, 19)}`}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))
-          )}
-          {numPages < 2 || (
-            <Pagination
-              count={numPages}
-              page={page}
-              onChange={handleChange}
-              className={classes.pagination}
-            />
-          )}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+            {numPages < 2 || (
+              <Pagination
+                count={numPages}
+                page={page}
+                onChange={handleChange}
+                className={classes.pagination}
+              />
+            )}
+          </div>
         </div>
-      </div>
+        <Snackbar
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          open={displayAlert}
+          onClose={() => setDisplayAlert(false)}
+        >
+          <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+            <AlertTitle>{alertTitleText}</AlertTitle>
+            {alertText}
+          </Alert>
+        </Snackbar>
+      </>
     )
   );
 }
