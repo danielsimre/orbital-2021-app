@@ -421,15 +421,31 @@ export const removeUser = (req, res) => {
   validateCanAccessClass(req, res)
     .then((classRoleObj) => validateCanRemoveUser(req, res, classRoleObj))
     .then((classRole) => {
-      classRole.remove();
-      Group.collection.updateMany(
-        { classId: req.params.id },
-        {
-          $pull: {
-            groupMembers: Mongoose.Types.ObjectId(req.params.userId),
-          },
+      Group.findOne({
+        classId: req.params.id,
+        $or: [
+          { groupMembers: req.params.userId },
+          { mentoredBy: req.params.userId },
+        ],
+      }).then((group) => {
+        if (classRole.role === ClassRoles.MENTOR) {
+          group.mentoredBy = group.mentoredBy.filter(
+            (user) =>
+              !Mongoose.Types.ObjectId(user.id).equals(
+                Mongoose.Types.ObjectId(req.params.userId)
+              )
+          );
+        } else {
+          group.groupMembers = group.groupMembers.filter(
+            (user) =>
+              !Mongoose.Types.ObjectId(user.id).equals(
+                Mongoose.Types.ObjectId(req.params.userId)
+              )
+          );
         }
-      );
+        group.save();
+      });
+      classRole.remove();
     })
     .then(() => res.json({ msg: "Successfully removed user from class" }))
     .catch((err) => console.log(err));

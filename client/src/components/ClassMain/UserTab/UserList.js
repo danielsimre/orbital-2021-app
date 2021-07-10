@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Button,
   Card,
   CardActions,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  DialogContentText,
   Snackbar,
   Table,
   TableBody,
@@ -53,6 +58,9 @@ const useStyles = makeStyles({
     alignSelf: "center",
     flex: "0 0",
   },
+  deleteButton: {
+    color: "red",
+  },
   pagination: {
     display: "flex",
     justifyContent: "center",
@@ -65,8 +73,8 @@ function UserList(props) {
   const {
     curUserRole,
     queriedUserList,
-    refreshClassData,
     creatorId,
+    refreshClassData,
     curUserData,
   } = props;
 
@@ -75,6 +83,10 @@ function UserList(props) {
   const [alertText, setAlertText] = useState("");
   const [alertTitleText, setAlertTitleText] = useState("");
   const [alertState, setAlertState] = useState("");
+
+  // Dialog values
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [curUserId, setCurUserId] = useState(null);
 
   // Pagination values
   const ITEMS_PER_PAGE = 6;
@@ -111,6 +123,15 @@ function UserList(props) {
     );
   }
 
+  function handleDeleteOpen(userId) {
+    setDeleteDialogOpen(true);
+    setCurUserId(userId);
+  }
+
+  function handleDeleteClose() {
+    setDeleteDialogOpen(false);
+  }
+
   // Current only handles adding 1 at a time
   function handleAddUsers(userEmails, newUserRole) {
     axios
@@ -140,6 +161,35 @@ function UserList(props) {
       .then(() => setDisplayAlert(true))
       .catch((err) => console.log(err));
   }
+
+  function handleDeleteUser(event) {
+    event.preventDefault();
+    axios
+      .delete(`/api/v1/classes/${classID}/users/${curUserId}`, {
+        withCredentials: true,
+      })
+      .then((res) => handleAlert("Success!", res.data.msg, "success"))
+      .catch((err) => {
+        console.log(err);
+        handleAlert("Error!", err, "error");
+      })
+      .finally(() => {
+        // clean up state
+        setCurUserId(null);
+        setDeleteDialogOpen(false);
+        refreshClassData(classID);
+        setDisplayAlert(true);
+      });
+  }
+
+  useEffect(() => {
+    setDisplayList(
+      queriedUserList.slice(
+        ITEMS_PER_PAGE * (page - 1),
+        ITEMS_PER_PAGE * (page - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }, [queriedUserList]);
 
   return (
     <div className={classes.root}>
@@ -175,24 +225,32 @@ function UserList(props) {
                         Email: {curUser.userId.attributes.email}
                       </Typography>
                     </CardContent>
-                    {
-                      /* Button only appears if:
+                    <CardActions>
+                      {
+                        /* Button only clickable if:
                       1) The user is not yourself AND either
                       2a) You are the creator of the class OR
                       2b) You are a mentor AND the user is a student */
-                      curUser.userId.id !== curUserData.id &&
+                        curUser.userId.id !== curUserData.id &&
                         (isCreator ||
                           (curUserRole === ClassRoles.MENTOR &&
-                            curUser.role === ClassRoles.STUDENT)) && (
-                          <CardActions>
-                            <Tooltip title="Remove user from class">
-                              <Button>
-                                <CloseIcon />
-                              </Button>
-                            </Tooltip>
-                          </CardActions>
+                            curUser.role === ClassRoles.STUDENT)) ? (
+                          <Tooltip title="Remove user from class">
+                            <Button
+                              onClick={() =>
+                                handleDeleteOpen(curUser.userId.id)
+                              }
+                            >
+                              <CloseIcon />
+                            </Button>
+                          </Tooltip>
+                        ) : (
+                          <Button disabled>
+                            <CloseIcon />
+                          </Button>
                         )
-                    }
+                      }
+                    </CardActions>
                   </Card>
                 </TableCell>
               ))}
@@ -218,6 +276,26 @@ function UserList(props) {
           {alertText}
         </Alert>
       </Snackbar>
+      {/* Delete User Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteClose}>
+        <DialogTitle>Remove User</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to remove this user from the class? This
+            action is irreversible, but you can add the user again in the
+            future.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteClose}>Cancel</Button>
+          <Button
+            className={classes.deleteButton}
+            onClick={(event) => handleDeleteUser(event)}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
