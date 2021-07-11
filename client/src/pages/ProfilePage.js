@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Button,
   Card,
@@ -9,10 +8,13 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Snackbar,
   TextField,
   Typography,
   makeStyles,
 } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
+import axios from "axios";
 
 const useStyles = makeStyles({
   container: {
@@ -40,6 +42,12 @@ function ProfilePage(props) {
   const [userDialogOpen, setUserDialogOpen] = useState(false);
   const [newUsername, setNewUsername] = useState("");
 
+  // Alert values
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
+
   function handleUserOpen() {
     setUserDialogOpen(true);
   }
@@ -50,6 +58,12 @@ function ProfilePage(props) {
 
   // Misc values
   const classes = useStyles();
+
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
+  }
 
   function getUserData() {
     // GET request
@@ -74,9 +88,13 @@ function ProfilePage(props) {
         { withCredentials: true }
       )
       .then((res) => {
-        console.log(res); /* handleAlert here */
+        console.log(res);
+        handleAlert("Username changed!", res.data.msg, "success");
       })
-      .catch((err) => console.log(err))
+      .then(() => setDisplayAlert(true))
+      .catch((err) => {
+        console.log(err);
+      })
       .finally(() => {
         getUserData();
         setUserDialogOpen(false);
@@ -137,6 +155,17 @@ function ProfilePage(props) {
             </Button>
           </DialogActions>
         </Dialog>
+        {/* Alert */}
+        <Snackbar
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          open={displayAlert}
+          onClose={() => setDisplayAlert(false)}
+        >
+          <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+            <AlertTitle>{alertTitleText}</AlertTitle>
+            {alertText}
+          </Alert>
+        </Snackbar>
       </>
     )
   );
