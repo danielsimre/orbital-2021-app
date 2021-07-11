@@ -83,15 +83,13 @@ export const changeUsername = (req, res) => {
 
   User.findOne({ newUsername })
     .then((queriedUser) => {
-      console.log(queriedUser);
       validateUniqueUsername(req, res, queriedUser);
     })
     .then(() =>
       User.findOneAndUpdate({ _id: req.user.id }, { username: newUsername })
     )
-    .then((doc) => {
-      console.log(doc);
-      res.json(doc);
+    .then(() => {
+      res.json({ msg: "Successfully updated your username" });
     })
     .catch((err) => console.log(err));
 };

@@ -79,6 +79,7 @@ function ProfilePage(props) {
       .catch((err) => console.log(err))
       .finally(() => {
         getUserData();
+        setUserDialogOpen(false);
         setUpdateUser(!updateUser);
       });
   }
