@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function HeaderBar(props) {
-  const { isAuthenticated, setIsAuthenticated } = props;
+  const { isAuthenticated, setIsAuthenticated, updateUser } = props;
   const classes = useStyles();
 
   return (
@@ -41,7 +41,10 @@ function HeaderBar(props) {
                 View My Groups
               </Button>
             </Typography>
-            <ProfileMenu setIsAuthenticated={setIsAuthenticated} />
+            <ProfileMenu
+              setIsAuthenticated={setIsAuthenticated}
+              updateUser={updateUser}
+            />
           </Toolbar>
         </AppBar>
       </div>

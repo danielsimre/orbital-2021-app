@@ -30,4 +30,9 @@ router.get("/", ensureAuthenticated, userController.getInfo);
 // @access Private
 router.get("/auth", ensureAuthenticated, userController.isLoggedIn);
 
+// @route PUT api/v1/users/username
+// @desc Change the username of the current user
+// @access Private
+router.put("/username", ensureAuthenticated, userController.changeUsername);
+
 export default router;

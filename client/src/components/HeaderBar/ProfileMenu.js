@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ProfileMenu(props) {
-  const { setIsAuthenticated } = props;
+  const { setIsAuthenticated, updateUser } = props;
   const [username, setUsername] = useState("");
   const [isRetrieving, setIsRetrieving] = useState(true);
 
@@ -41,7 +41,7 @@ function ProfileMenu(props) {
       .finally(() => setIsRetrieving(false));
   }
 
-  useEffect(() => getUsername(), []);
+  useEffect(() => getUsername(), [updateUser]);
 
   return (
     <>

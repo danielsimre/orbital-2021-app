@@ -32,6 +32,10 @@ import Page404 from "./pages/Page404";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // This const is used to (crudely) force HeaderBar to update username
+  const [updateUser, setUpdateUser] = useState(false);
+
   /*
   function getUserData() {
     try {
@@ -71,6 +75,7 @@ function App() {
       <HeaderBar
         isAuthenticated={isAuthenticated}
         setIsAuthenticated={setIsAuthenticated}
+        updateUser={updateUser}
       />
       <Switch>
         <Route exact path="/">
@@ -111,6 +116,8 @@ function App() {
           path="/profile"
           component={ProfilePage}
           isAuthenticated={isAuthenticated}
+          updateUser={updateUser}
+          setUpdateUser={setUpdateUser}
         />
 
         <Route path="*" component={Page404} />

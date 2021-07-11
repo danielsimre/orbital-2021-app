@@ -50,6 +50,16 @@ export const validateRegistration = (req, res, queriedUser) => {
   }
 };
 
+export const validateUniqueUsername = (req, res, queriedUser) => {
+  const { newUsername } = req.body;
+
+  validateFieldsPresent(res, "Please enter a new username", newUsername);
+
+  if (queriedUser && queriedUser.username === newUsername) {
+    sendJsonErrMessage(res, 409, "Username is already in use");
+  }
+};
+
 // Verify that the user can access the current class
 export const validateCanAccessClass = (req, res) =>
   ClassRole.findOne({ classId: req.params.id, userId: req.user.id })
