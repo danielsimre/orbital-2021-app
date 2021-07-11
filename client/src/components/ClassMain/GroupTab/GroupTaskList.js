@@ -26,7 +26,7 @@ const useStyles = makeStyles({
 });
 
 function GroupTaskList(props) {
-  const { queriedTaskList, refreshGroupData, groupMembers } = props;
+  const { queriedTaskList, refreshGroupData, groupMembers, isMentor } = props;
   const classes = useStyles();
 
   // Pagination values
@@ -76,6 +76,7 @@ function GroupTaskList(props) {
               taskObject={taskObject}
               refreshGroupData={refreshGroupData}
               groupMembers={groupMembers}
+              isMentor={isMentor}
             />
           ))}
         </TableBody>

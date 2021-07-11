@@ -89,7 +89,7 @@ function ClassMain(props) {
               />
             </Route>
             <Route path={`${path}/groups/:groupID`}>
-              <GroupMain />
+              <GroupMain curUserRole={classData.role} />
             </Route>
             <Route path={`${path}/groups`}>
               <ClassGroupList curUserRole={classData.role} />

@@ -5,6 +5,7 @@ import axios from "axios";
 
 import GroupTaskList from "./GroupTaskList";
 import GroupUserList from "./GroupUserList";
+import { ClassRoles } from "../../../enums";
 
 const useStyles = makeStyles({
   root: {
@@ -25,6 +26,8 @@ function GroupMain(props) {
   // Queried values
   const { groupID } = useParams();
   const [groupData, setGroupData] = useState({});
+  const { curUserRole } = props;
+  const isMentor = curUserRole === ClassRoles.MENTOR;
 
   // Misc values
   const [isRetrieving, setIsRetrieving] = useState(true);
@@ -73,6 +76,7 @@ function GroupMain(props) {
             queriedTaskList={groupData.tasks}
             refreshGroupData={() => getGroupData(groupID)}
             groupMembers={groupData.groupMembers}
+            isMentor={isMentor}
           />
         ) : (
           <GroupUserList
