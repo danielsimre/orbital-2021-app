@@ -20,7 +20,7 @@ import NewClassForm from "./NewClassForm";
 
 const useStyles = makeStyles({
   header: {
-    padding: "12px",
+    padding: "1rem",
   },
   table: {
     margin: "0 auto",
@@ -33,7 +33,7 @@ const useStyles = makeStyles({
   paper: {
     width: "20%",
     margin: "0 auto",
-    padding: "16px",
+    padding: "1rem",
   },
   pagination: {
     display: "flex",
