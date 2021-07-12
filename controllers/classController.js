@@ -115,7 +115,7 @@ export const getAnnouncements = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-export const create = (req, res) => {
+export const create = async (req, res) => {
   const { name, desc } = req.body;
 
   // Ensure all fields are filled in
@@ -130,18 +130,18 @@ export const create = (req, res) => {
     name,
     desc,
     created_by: req.user.id,
+    studentInviteCode: await generateInviteCode(),
+    mentorInviteCode: await generateInviteCode(),
   });
 
   newClass
     .save()
-    .then(async (savedClass) => {
+    .then((savedClass) => {
       // Creator of the class is automatically considered a 'mentor'
       const newClassRole = new ClassRole({
         userId: req.user.id,
         classId: savedClass.id,
         role: ClassRoles.MENTOR,
-        studentInviteCode: await generateInviteCode(),
-        mentorInviteCode: await generateInviteCode(),
       });
       newClassRole.save();
       return {
