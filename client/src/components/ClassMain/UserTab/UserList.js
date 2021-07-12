@@ -83,7 +83,7 @@ function UserList(props) {
     queriedUserList,
     creatorId,
     refreshClassData,
-    curUserData,
+    curUserId,
   } = props;
 
   // Alert values
@@ -94,7 +94,7 @@ function UserList(props) {
 
   // Dialog values
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [curUserId, setCurUserId] = useState(null);
+  const [deleteUserId, setDeleteUserId] = useState(null);
 
   // Pagination values
   const ITEMS_PER_PAGE = 6;
@@ -132,7 +132,7 @@ function UserList(props) {
     );
   }, []);
 
-  const isCreator = curUserData.id === creatorId;
+  const isCreator = curUserId === creatorId;
 
   function handleAlert(title, message, severity) {
     setAlertTitleText(title);
@@ -142,7 +142,7 @@ function UserList(props) {
 
   function handleDeleteOpen(userId) {
     setDeleteDialogOpen(true);
-    setCurUserId(userId);
+    setDeleteUserId(userId);
   }
 
   function handleDeleteClose() {
@@ -182,7 +182,7 @@ function UserList(props) {
   function handleDeleteUser(event) {
     event.preventDefault();
     axios
-      .delete(`/api/v1/classes/${classID}/users/${curUserId}`, {
+      .delete(`/api/v1/classes/${classID}/users/${deleteUserId}`, {
         withCredentials: true,
       })
       .then((res) => handleAlert("Success!", res.data.msg, "success"))
@@ -192,7 +192,7 @@ function UserList(props) {
       })
       .finally(() => {
         // clean up state
-        setCurUserId(null);
+        setDeleteUserId(null);
         setDeleteDialogOpen(false);
         refreshClassData(classID);
         setDisplayAlert(true);
@@ -240,7 +240,7 @@ function UserList(props) {
                       1) The user is not yourself AND either
                       2a) You are the creator of the class OR
                       2b) You are a mentor AND the user is a student */
-                          curUser.userId.id !== curUserData.id &&
+                          curUser.userId.id !== curUserId &&
                             (isCreator ||
                               (curUserRole === ClassRoles.MENTOR &&
                                 curUser.role === ClassRoles.STUDENT)) && (

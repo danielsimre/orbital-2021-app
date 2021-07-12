@@ -33,6 +33,8 @@ export const getInfo = (req, res) => {
         })
         .then((curClass) => {
           const classObj = curClass.toObject();
+          // add current user id and role into the returned object
+          classObj.attributes.curUserId = req.user.id;
           classObj.attributes.role = classRoleObj.role;
           return classObj;
         })

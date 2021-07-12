@@ -9,6 +9,8 @@ import ClassGroupList from "./GroupTab/ClassGroupList";
 import GroupMain from "./GroupTab/GroupMain";
 import ClassAnnouncements from "./AnnouncementTab/ClassAnnouncements";
 import TaskMain from "./TaskTab/TaskMain";
+import ClassSettings from "./SettingsTab/ClassSettings";
+
 import { ClassRoles } from "../../enums";
 
 const useStyles = makeStyles((theme) => ({
@@ -32,7 +34,6 @@ function ClassMain(props) {
   const { classID } = useParams();
 
   const [classData, setClassData] = useState({});
-  const [curUserData, setCurUserData] = useState({});
 
   const [isRetrieving, setIsRetrieving] = useState(true);
   const { path } = useRouteMatch();
@@ -41,16 +42,10 @@ function ClassMain(props) {
 
   function getClassData() {
     axios
-      .all([
-        axios.get(`/api/v1/classes/${classID}`, { withCredentials: true }),
-        axios.get(`/api/v1/users`, { withCredentials: true }),
-      ])
-      .then(
-        axios.spread((classData, userData) => {
-          setClassData(classData.data.attributes);
-          setCurUserData(userData.data);
-        })
-      )
+      .get(`/api/v1/classes/${classID}`, { withCredentials: true })
+      .then((res) => {
+        setClassData(res.data.attributes);
+      })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
   }
@@ -85,7 +80,7 @@ function ClassMain(props) {
     isRetrieving || (
       <div className={classes.root}>
         <div className={classes.sidebar}>
-          <ClassSidebar classID={classID} />
+          <ClassSidebar classID={classID} curUserRole={classData.role} />
         </div>
         <div className={classes.info}>
           <Switch>
@@ -101,7 +96,7 @@ function ClassMain(props) {
                 queriedUserList={classData.users}
                 creatorId={classData.created_by}
                 refreshClassData={getClassData}
-                curUserData={curUserData}
+                curUserId={classData.curUserId}
               />
             </Route>
             <Route path={`${path}/tasks`}>
