@@ -115,6 +115,9 @@ function ClassMain(props) {
                 refreshClassData={() => getClassData(classID)}
               />
             </Route>
+            <Route path={`${path}/settings`}>
+              <ClassSettings curUserRole={classData.role} />
+            </Route>
             <Route path={`${path}`}>
               <h1>Class Main Page for {classData.name}</h1>
               <p>Description: {classData.desc}</p>

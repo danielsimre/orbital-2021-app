@@ -1,5 +1,6 @@
 import { List, ListItem, ListItemText, makeStyles } from "@material-ui/core";
 import { Link } from "react-router-dom";
+import { ClassRoles } from "../../enums";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -12,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ClassSidebar(props) {
-  const { classID } = props;
+  const { classID, curUserRole } = props;
   const classes = useStyles();
 
   return (
@@ -58,6 +59,16 @@ function ClassSidebar(props) {
         >
           <ListItemText primary="Project Groups" />
         </ListItem>
+        {curUserRole === ClassRoles.MENTOR && (
+          <ListItem
+            button
+            className={classes.option}
+            component={Link}
+            to={`/classes/${classID}/settings`}
+          >
+            <ListItemText primary="Settings" />
+          </ListItem>
+        )}
       </List>
     </div>
   );
