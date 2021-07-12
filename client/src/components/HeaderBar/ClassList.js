@@ -19,15 +19,25 @@ const useStyles = makeStyles({
   header: {
     padding: "0.45em",
     display: "flex",
-    flexDirection: "row",
+    textAlign: "center",
   },
+  span: { flex: "1" },
+  title: { flex: "1" },
   table: {
     margin: "0 auto",
     width: "100%",
     border: "1px solid black",
+    overflow: "auto",
   },
-  button: {
-    float: "right",
+  tableCell: {
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    maxWidth: "0",
+  },
+  buttons: {
+    flex: "1",
+    textAlign: "right",
   },
   paper: {
     width: "20%",
@@ -56,15 +66,20 @@ function ClassList() {
       .finally(() => setIsRetrieving(false));
   }
 
-  useEffect(() => queryClassList(), [queriedClassList]);
+  useEffect(() => queryClassList(), []);
 
   return (
     isRetrieving || (
       <div>
         <div className={classes.header}>
-          <Typography variant="h5">Class List</Typography>
-          <NewClassDialog />
-          <InviteCodeDialog />
+          <span className={classes.span}></span>
+          <Typography variant="h5" className={classes.title}>
+            Class List
+          </Typography>
+          <div className={classes.buttons}>
+            <NewClassDialog refreshClassList={queryClassList} />
+            <InviteCodeDialog refreshClassList={queryClassList} />
+          </div>
         </div>
         <Table className={classes.table}>
           <TableHead>
@@ -79,9 +94,13 @@ function ClassList() {
             {queriedClassList.map((curClass, index) => (
               <TableRow key={index} hover>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell>{curClass.classId.attributes.name}</TableCell>
-                <TableCell>{curClass.classId.attributes.desc}</TableCell>
-                <TableCell align="right">
+                <TableCell className={classes.tableCell}>
+                  {curClass.classId.attributes.name}
+                </TableCell>
+                <TableCell className={classes.tableCell}>
+                  {curClass.classId.attributes.desc}
+                </TableCell>
+                <TableCell align="right" className={classes.tableCell}>
                   <Button
                     component={Link}
                     to={`/classes/${curClass.classId.id}`}

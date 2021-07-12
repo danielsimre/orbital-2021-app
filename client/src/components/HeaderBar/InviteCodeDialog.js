@@ -5,6 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
+  DialogTitle,
   Paper,
   TextField,
   Snackbar,
@@ -19,9 +20,14 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
   },
+  snackbar: {
+    textAlign: "center",
+  },
 });
 
-function InviteCodeDialog() {
+function InviteCodeDialog(props) {
+  const { refreshClassList } = props;
+
   // Form values
   const [inviteCode, setInviteCode] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -73,6 +79,8 @@ function InviteCodeDialog() {
           )
       )
       .then(() => setDisplayAlert(true))
+      .then(() => refreshClassList())
+      .catch((err) => console.log(err))
       .finally(() => handleDialogClose());
   }
 
@@ -84,8 +92,9 @@ function InviteCodeDialog() {
 
   return (
     <>
-      <Button onClick={handleDialogOpen}>Join Class via Code</Button>
+      <Button onClick={handleDialogOpen}>Join Class via Invite Code</Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>Enter Class Invite Code</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Enter an invite code below to join a class. (An invite code contains
@@ -113,6 +122,7 @@ function InviteCodeDialog() {
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={displayAlert}
         onClose={() => setDisplayAlert(false)}
+        className={classes.snackbar}
       >
         <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
           <AlertTitle>{alertTitleText}</AlertTitle>

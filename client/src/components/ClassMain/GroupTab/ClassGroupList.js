@@ -37,8 +37,8 @@ const useStyles = makeStyles({
   },
   tableTitle: {
     flex: "0 1",
-    marginRight: "0.5em",
-    padding: "16px",
+    marginRight: "0.05em",
+    padding: "0.45em",
   },
   table: {
     margin: "0 auto",

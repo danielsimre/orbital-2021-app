@@ -74,7 +74,7 @@ function ClassMain(props) {
 
   useEffect(() => {
     getClassData(classID);
-  }, [classID, setClassData]);
+  }, [classID]);
 
   return (
     isRetrieving || (

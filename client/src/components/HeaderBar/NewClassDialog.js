@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Paper,
   TextField,
@@ -15,16 +16,18 @@ import { Alert, AlertTitle } from "@material-ui/lab";
 import axios from "axios";
 
 const useStyles = makeStyles({
-  button: {
-    marginLeft: "auto",
-  },
   paper: {
     display: "flex",
     flexDirection: "column",
   },
+  snackbar: {
+    textAlign: "center",
+  },
 });
 
-function NewClassDialog() {
+function NewClassDialog(props) {
+  const { refreshClassList } = props;
+
   // Form values
   const [className, setClassName] = useState("");
   const [classDescription, setClassDescription] = useState("");
@@ -79,6 +82,8 @@ function NewClassDialog() {
           )
       )
       .then(() => setDisplayAlert(true))
+      .then(() => refreshClassList())
+      .catch((err) => console.log(err))
       .finally(() => handleDialogClose());
   }
 
@@ -90,12 +95,13 @@ function NewClassDialog() {
 
   return (
     <>
-      <Button onClick={handleDialogOpen} className={classes.button}>
-        Create New Class
-      </Button>
+      <Button onClick={handleDialogOpen}>Create New Class</Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth>
         <DialogTitle>Create New Class</DialogTitle>
         <DialogContent>
+          <DialogContentText>
+            Enter in a name and description for the class.
+          </DialogContentText>
           <form onSubmit={handleSubmit}>
             <Paper className={classes.paper}>
               <TextField
@@ -127,6 +133,7 @@ function NewClassDialog() {
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={displayAlert}
         onClose={() => setDisplayAlert(false)}
+        className={classes.snackbar}
       >
         <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
           <AlertTitle>{alertTitleText}</AlertTitle>
