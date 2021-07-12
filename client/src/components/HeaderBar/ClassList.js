@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Button,
-  Modal,
-  Paper,
   Table,
   TableHead,
   TableBody,
@@ -14,19 +12,32 @@ import {
 } from "@material-ui/core";
 import axios from "axios";
 
-import NewClassForm from "./NewClassForm";
+import NewClassDialog from "./NewClassDialog";
+import InviteCodeDialog from "./InviteCodeDialog";
 
 const useStyles = makeStyles({
   header: {
-    padding: "12px",
+    padding: "0.45em",
+    display: "flex",
+    textAlign: "center",
   },
+  span: { flex: "1" },
+  title: { flex: "1" },
   table: {
     margin: "0 auto",
     width: "100%",
     border: "1px solid black",
+    overflow: "auto",
   },
-  button: {
-    float: "right",
+  tableCell: {
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    maxWidth: "0",
+  },
+  buttons: {
+    flex: "1",
+    textAlign: "right",
   },
   paper: {
     width: "20%",
@@ -41,12 +52,7 @@ function ClassList() {
 
   // Misc values
   const [isRetrieving, setIsRetrieving] = useState(true);
-  const [formModalOpen, setFormModalOpen] = useState(false);
   const classes = useStyles();
-
-  function closeForm() {
-    setFormModalOpen(false);
-  }
 
   function queryClassList() {
     axios
@@ -60,25 +66,21 @@ function ClassList() {
       .finally(() => setIsRetrieving(false));
   }
 
-  useEffect(() => queryClassList(), [queriedClassList]);
+  useEffect(() => queryClassList(), []);
 
   return (
     isRetrieving || (
       <div>
-        <Typography variant="h5" align="left" className={classes.header}>
-          Class List
-          <Button
-            onClick={() => setFormModalOpen(true)}
-            className={classes.button}
-          >
-            Create New Class
-          </Button>
-        </Typography>
-        <Modal open={formModalOpen} onClose={() => setFormModalOpen(false)}>
-          <Paper elevation={1} className={classes.paper}>
-            <NewClassForm closeForm={closeForm} />
-          </Paper>
-        </Modal>
+        <div className={classes.header}>
+          <span className={classes.span}></span>
+          <Typography variant="h5" className={classes.title}>
+            Class List
+          </Typography>
+          <div className={classes.buttons}>
+            <NewClassDialog refreshClassList={queryClassList} />
+            <InviteCodeDialog refreshClassList={queryClassList} />
+          </div>
+        </div>
         <Table className={classes.table}>
           <TableHead>
             <TableRow>
@@ -92,9 +94,13 @@ function ClassList() {
             {queriedClassList.map((curClass, index) => (
               <TableRow key={index} hover>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell>{curClass.classId.attributes.name}</TableCell>
-                <TableCell>{curClass.classId.attributes.desc}</TableCell>
-                <TableCell align="right">
+                <TableCell className={classes.tableCell}>
+                  {curClass.classId.attributes.name}
+                </TableCell>
+                <TableCell className={classes.tableCell}>
+                  {curClass.classId.attributes.desc}
+                </TableCell>
+                <TableCell align="right" className={classes.tableCell}>
                   <Button
                     component={Link}
                     to={`/classes/${curClass.classId.id}`}

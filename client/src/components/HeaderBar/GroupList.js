@@ -9,12 +9,14 @@ import {
   TableRow,
   TableCell,
   TableHead,
+  Typography,
   makeStyles,
 } from "@material-ui/core";
 import axios from "axios";
 
 const useStyles = makeStyles({
   tableTitle: {
+    paddingTop: "0.5em",
     textAlign: "center",
   },
   table: {
@@ -58,7 +60,9 @@ function GroupList(props) {
   return (
     isRetrieving || (
       <div>
-        <h2 className={classes.tableTitle}>Group List</h2>
+        <Typography variant="h5" className={classes.tableTitle}>
+          Group List
+        </Typography>
         <Tabs value={tabIndex} onChange={handleChange} centered>
           <Tab label="Member" />
           <Tab label="Mentor" />

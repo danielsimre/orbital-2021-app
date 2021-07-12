@@ -6,11 +6,10 @@ import User from "../models/User.js";
 import {
   validateCanAccessGroup,
   validateFieldsPresent,
-  validateValueInEnum,
   successfulFindOneQuery,
   successfulFindQuery,
 } from "../utils/validation.js";
-import { GroupRoles, ClassRoles } from "../utils/enums.js";
+import { ClassRoles } from "../utils/enums.js";
 
 export const getInfo = (req, res) => {
   Group.findOne({
@@ -57,7 +56,7 @@ export const getAllInfo = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-// Can add users as group members or mentors
+// Users will be automatically added as group members or mentors depending on their class role
 export const addUsers = (req, res) => {
   Group.findOne({
     _id: req.params.id,
@@ -71,43 +70,34 @@ export const addUsers = (req, res) => {
       )
     )
     .then(async (curGroup) => {
-      const { userEmails, newUserRole } = req.body;
+      const { usernames } = req.body;
 
       validateFieldsPresent(
         res,
-        "Please add an array of user email(s) for attribute userEmails, " +
-          "and either GROUPMEMBER/GROUPLEADER or MENTOR for attribute newUserRole",
-        userEmails,
-        newUserRole
+        "Please add an array of usernames for attribute usernames",
+        usernames
       );
 
-      validateValueInEnum(
-        res,
-        "Please enter GROUPMEMBER/GROUPLEADER or MENTOR for attribute newUserRole",
-        GroupRoles,
-        newUserRole
-      );
+      // Remove duplicate user names
+      const uniqueUsernames = [...new Set(usernames)];
 
-      // Remove duplicate emails
-      const uniqueUserEmails = [...new Set(userEmails)];
-
-      // These five arrays contain the user emails, split into five categories:
-      // Successfully added users, emails that are not attached to a user,
+      // These five arrays contain the user names, split into five categories:
+      // Successfully added users, user names that are not attached to a user,
       // users that are not in the class,
-      // users that are already in the group (or other groups under this class, for group members)
-      // and users that have a role mismatch (adding a mentor as a group member, or student as a mentor)
+      // users that are already in the group,
+      // and users that are already in another group under this class (students only)
       const successArr = [];
       const doesNotExistArr = [];
       const notInClassArr = [];
+      const alreadyInGroupArr = [];
       const alreadyHasGroupArr = [];
-      const roleMismatchArr = [];
 
       await Promise.all(
-        uniqueUserEmails.map(async (userEmail) => {
+        uniqueUsernames.map(async (username) => {
           // Check if user exists
-          const curUser = await User.findOne({ email: userEmail });
+          const curUser = await User.findOne({ username });
           if (!successfulFindOneQuery(curUser)) {
-            doesNotExistArr.push(userEmail);
+            doesNotExistArr.push(username);
             return;
           }
           // Check if user is in the class
@@ -116,42 +106,35 @@ export const addUsers = (req, res) => {
             userId: curUser.id,
           });
           if (!successfulFindOneQuery(classRole)) {
-            notInClassArr.push(userEmail);
+            notInClassArr.push(username);
             return;
           }
-          // If mentors are being added, check if mentor is already in charge of this group
-          if (newUserRole === GroupRoles.MENTOR) {
+          // If user is a mentor, check if they are already in charge of this group
+          if (classRole.role === ClassRoles.MENTOR) {
             if (curGroup.mentoredBy.includes(curUser.id)) {
-              alreadyHasGroupArr.push(userEmail);
-              return;
-            }
-
-            // Check if there is a role mismatch (user is not a class mentor)
-            if (classRole.role !== ClassRoles.MENTOR) {
-              roleMismatchArr.push(userEmail);
+              alreadyInGroupArr.push(username);
               return;
             }
           } else {
-            // Check if user already has a group for this class (need not be the current group)
+            // Check if student is already in this group
+            if (curGroup.groupMembers.includes(curUser.id)) {
+              alreadyInGroupArr.push(username);
+              return;
+            }
+            // Checks if student is already in another group
             const userGroup = await Group.find({
               classId: curGroup.classId,
               groupMembers: curUser.id,
             });
             if (successfulFindQuery(userGroup)) {
-              alreadyHasGroupArr.push(userEmail);
-              return;
-            }
-
-            // Check if there is a role mismatch (user is not a student)
-            if (classRole.role !== ClassRoles.STUDENT) {
-              roleMismatchArr.push(userEmail);
+              alreadyHasGroupArr.push(username);
               return;
             }
           }
 
           // Successfully added
-          successArr.push(userEmail);
-          if (newUserRole === GroupRoles.MENTOR) {
+          successArr.push(username);
+          if (classRole.role === ClassRoles.MENTOR) {
             curGroup.mentoredBy.push(curUser.id);
           } else {
             curGroup.groupMembers.push(curUser.id);
@@ -170,8 +153,8 @@ export const addUsers = (req, res) => {
       res.json({
         doesNotExist: doesNotExistArr,
         notInClass: notInClassArr,
+        alreadyInGroup: alreadyInGroupArr,
         alreadyHasGroup: alreadyHasGroupArr,
-        roleMismatch: roleMismatchArr,
         successfullyAdded: successArr,
       });
       curGroup.save();
