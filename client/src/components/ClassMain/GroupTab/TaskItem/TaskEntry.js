@@ -81,7 +81,7 @@ const useStyles = makeStyles({
 
 function TaskItem(props) {
   // Queried values
-  const { taskObject, refreshGroupData, groupMembers } = props;
+  const { taskObject, refreshGroupData, groupMembers, isMentor } = props;
 
   // taskObject.attributes contains submissions, comment and subtask list
   const taskAttributes = taskObject.attributes;
@@ -144,7 +144,7 @@ function TaskItem(props) {
               <Checkbox
                 color="primary"
                 checked={taskAttributes.isCompleted}
-                disabled={!allSubtasksCompleted(subtaskList)}
+                disabled={!allSubtasksCompleted(subtaskList) || isMentor}
               />
             }
             color="primary"
@@ -218,6 +218,7 @@ function TaskItem(props) {
                   groupMembers={groupMembers}
                   refreshGroupData={refreshGroupData}
                   parentDueDate={taskAttributes.dueDate}
+                  isMentor={isMentor}
                 />
               )}
             </Box>

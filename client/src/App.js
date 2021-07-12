@@ -10,6 +10,7 @@ import MyClassesPage from "./pages/MyClassesPage";
 import MyGroupsPage from "./pages/MyGroupsPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import ClassMainPage from "./pages/ClassMainPage";
+import ProfilePage from "./pages/ProfilePage";
 import Page404 from "./pages/Page404";
 
 /* CURRENT STRUCTURE (pages -> components under them)
@@ -31,6 +32,10 @@ import Page404 from "./pages/Page404";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // This const is used to (crudely) force HeaderBar to update username
+  const [updateUser, setUpdateUser] = useState(false);
+
   /*
   function getUserData() {
     try {
@@ -70,6 +75,7 @@ function App() {
       <HeaderBar
         isAuthenticated={isAuthenticated}
         setIsAuthenticated={setIsAuthenticated}
+        updateUser={updateUser}
       />
       <Switch>
         <Route exact path="/">
@@ -105,6 +111,13 @@ function App() {
           path="/groups"
           component={MyGroupsPage}
           isAuthenticated={isAuthenticated}
+        />
+        <ProtectedRoute
+          path="/profile"
+          component={ProfilePage}
+          isAuthenticated={isAuthenticated}
+          updateUser={updateUser}
+          setUpdateUser={setUpdateUser}
         />
 
         <Route path="*" component={Page404} />

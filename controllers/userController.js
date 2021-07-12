@@ -2,7 +2,10 @@ import bcrypt from "bcryptjs";
 import passport from "passport";
 
 import User from "../models/User.js";
-import { validateRegistration } from "../utils/validation.js";
+import {
+  validateRegistration,
+  validateUniqueUsername,
+} from "../utils/validation.js";
 
 export const getInfo = (req, res) => {
   // api/v1/users?classes returns an array of all classes the user is involved in
@@ -73,4 +76,20 @@ export const logout = (req, res) => {
   req.logOut();
   res.clearCookie("connect.sid");
   res.json({ msg: "You have successfully logged out" });
+};
+
+export const changeUsername = (req, res) => {
+  const { newUsername } = req.body;
+
+  User.findOne({ newUsername })
+    .then((queriedUser) => {
+      validateUniqueUsername(req, res, queriedUser);
+    })
+    .then(() =>
+      User.findOneAndUpdate({ _id: req.user.id }, { username: newUsername })
+    )
+    .then(() => {
+      res.json({ msg: "Successfully updated your username" });
+    })
+    .catch((err) => console.log(err));
 };

@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Card, CardContent, Typography, makeStyles } from "@material-ui/core";
+import { Pagination } from "@material-ui/lab";
 
 const useStyles = makeStyles({
   root: {
@@ -10,18 +12,40 @@ const useStyles = makeStyles({
   text: {
     fontSize: 14,
   },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+  },
 });
 
 function DashboardComments(props) {
   const { userCommentList } = props;
 
+  // Pagination values
+  const ITEMS_PER_PAGE = 2;
+  const numPages = Math.ceil(userCommentList.length / ITEMS_PER_PAGE);
+  const [page, setPage] = useState(1);
+  const [displayList, setDisplayList] = useState(
+    userCommentList.slice(0, ITEMS_PER_PAGE)
+  );
+
   const classes = useStyles();
+
+  function handleChange(event, value) {
+    setPage(value);
+    setDisplayList(
+      userCommentList.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
 
   return userCommentList.length === 0 ? (
     <Typography>No comments!</Typography>
   ) : (
     <div>
-      {userCommentList.map((comment) => (
+      {displayList.map((comment) => (
         <Card variant="outlined" key={comment.attributes.title}>
           <CardContent>
             <Typography className={classes.title}>
@@ -41,6 +65,14 @@ function DashboardComments(props) {
           </CardContent>
         </Card>
       ))}
+      {numPages < 2 || (
+        <Pagination
+          count={numPages}
+          page={page}
+          onChange={handleChange}
+          className={classes.pagination}
+        />
+      )}
     </div>
   );
 }

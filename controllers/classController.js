@@ -1,3 +1,4 @@
+import Mongoose from "mongoose";
 import { Announcement } from "../models/BaseText.js";
 import { BaseTask, ParentTask } from "../models/BaseTask.js";
 import Class from "../models/Class.js";
@@ -13,6 +14,7 @@ import {
   validateSameTaskFramework,
   validateDueDate,
   successfulFindOneQuery,
+  validateCanRemoveUser,
   generateInviteCode,
   validateInviteCode,
 } from "../utils/validation.js";
@@ -456,6 +458,39 @@ export const createAnnouncement = (req, res) => {
     })
     .then(() => res.json({ msg: "Successfully created announcement" }))
     .catch((err) => console.log(err));
+};
+
+export const removeUser = (req, res) => {
+  validateCanAccessClass(req, res)
+    .then((classRoleObj) => validateCanRemoveUser(req, res, classRoleObj))
+    .then((classRole) => {
+      Group.findOne({
+        classId: req.params.id,
+        $or: [
+          { groupMembers: req.params.userId },
+          { mentoredBy: req.params.userId },
+        ],
+      }).then((group) => {
+        if (classRole.role === ClassRoles.MENTOR) {
+          group.mentoredBy = group.mentoredBy.filter(
+            (user) =>
+              !Mongoose.Types.ObjectId(user.id).equals(
+                Mongoose.Types.ObjectId(req.params.userId)
+              )
+          );
+        } else {
+          group.groupMembers = group.groupMembers.filter(
+            (user) =>
+              !Mongoose.Types.ObjectId(user.id).equals(
+                Mongoose.Types.ObjectId(req.params.userId)
+              )
+          );
+        }
+        group.save();
+      });
+      classRole.remove();
+    })
+    .then(() => res.json({ msg: "Successfully removed user from class" }));
 };
 
 // ?studentInviteCode and ?mentorInviteCode generates new invite codes for the class
