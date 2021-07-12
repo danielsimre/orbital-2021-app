@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Button,
-  Modal,
-  Paper,
   Table,
   TableHead,
   TableBody,
@@ -14,11 +12,14 @@ import {
 } from "@material-ui/core";
 import axios from "axios";
 
-import NewClassForm from "./NewClassForm";
+import NewClassDialog from "./NewClassDialog";
+import InviteCodeDialog from "./InviteCodeDialog";
 
 const useStyles = makeStyles({
   header: {
-    padding: "12px",
+    padding: "0.45em",
+    display: "flex",
+    flexDirection: "row",
   },
   table: {
     margin: "0 auto",
@@ -41,12 +42,7 @@ function ClassList() {
 
   // Misc values
   const [isRetrieving, setIsRetrieving] = useState(true);
-  const [formModalOpen, setFormModalOpen] = useState(false);
   const classes = useStyles();
-
-  function closeForm() {
-    setFormModalOpen(false);
-  }
 
   function queryClassList() {
     axios
@@ -65,20 +61,11 @@ function ClassList() {
   return (
     isRetrieving || (
       <div>
-        <Typography variant="h5" align="left" className={classes.header}>
-          Class List
-          <Button
-            onClick={() => setFormModalOpen(true)}
-            className={classes.button}
-          >
-            Create New Class
-          </Button>
-        </Typography>
-        <Modal open={formModalOpen} onClose={() => setFormModalOpen(false)}>
-          <Paper elevation={1} className={classes.paper}>
-            <NewClassForm closeForm={closeForm} />
-          </Paper>
-        </Modal>
+        <div className={classes.header}>
+          <Typography variant="h5">Class List</Typography>
+          <NewClassDialog />
+          <InviteCodeDialog />
+        </div>
         <Table className={classes.table}>
           <TableHead>
             <TableRow>

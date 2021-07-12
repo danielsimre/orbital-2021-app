@@ -10,11 +10,22 @@ const router = express.Router();
 // @access Private
 router.post("/", ensureAuthenticated, classController.create);
 
+// @route POST api/v1/classes/invite
+// @desc Checks which class the inviteCode belongs to (if any),
+//       and enrolls the current user in the class
+// @access Private
+router.post("/invite", ensureAuthenticated, classController.joinClass);
+
 // @route GET api/v1/classes/:id
 // @desc Get the information of the class (User must be a part of the class)
 //       Also gets the role of the user for this class
 // @access Private
 router.get("/:id", ensureAuthenticated, classController.getInfo);
+
+// @route PUT api/v1/classes/:id
+// @desc Updates the information of the class
+// @access Private
+router.put("/:id", ensureAuthenticated, classController.updateInfo);
 
 // @route POST api/v1/classes/:id/users
 // @desc Adds a user/users to the class (User emails are given in the form of an array)

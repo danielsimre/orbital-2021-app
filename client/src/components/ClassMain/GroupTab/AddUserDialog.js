@@ -45,7 +45,6 @@ function AddUserDialog(props) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    console.log(selectedMentors.concat(selectedStudents));
     handleAddUsers(selectedMentors.concat(selectedStudents));
     setSelectedMentors([]);
     setSelectedStudents([]);

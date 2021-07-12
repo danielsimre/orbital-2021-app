@@ -13,6 +13,8 @@ import {
   validateSameTaskFramework,
   validateDueDate,
   successfulFindOneQuery,
+  generateInviteCode,
+  validateInviteCode,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 
@@ -132,12 +134,14 @@ export const create = (req, res) => {
 
   newClass
     .save()
-    .then((savedClass) => {
+    .then(async (savedClass) => {
       // Creator of the class is automatically considered a 'mentor'
       const newClassRole = new ClassRole({
         userId: req.user.id,
         classId: savedClass.id,
         role: ClassRoles.MENTOR,
+        studentInviteCode: await generateInviteCode(),
+        mentorInviteCode: await generateInviteCode(),
       });
       newClassRole.save();
       return {
@@ -451,5 +455,57 @@ export const createAnnouncement = (req, res) => {
       newAnnouncement.save();
     })
     .then(() => res.json({ msg: "Successfully created announcement" }))
+    .catch((err) => console.log(err));
+};
+
+// ?studentInviteCode and ?mentorInviteCode generates new invite codes for the class
+export const updateInfo = (req, res) => {
+  if (req.query.studentInviteCode === "") {
+    validateCanAccessClass(req, res)
+      .then(async (curClass) => {
+        curClass.studentInviteCode = await generateInviteCode();
+        return curClass;
+      })
+      .then((curClass) => {
+        curClass.save();
+        res.json({ msg: "Successfully generated new student invite code" });
+      })
+      .catch((err) => console.log(err));
+  } else if (req.query.mentorInviteCode === "") {
+    validateCanAccessClass(req, res)
+      .then(async (curClass) => {
+        curClass.mentorInviteCode = await generateInviteCode();
+        return curClass;
+      })
+      .then((curClass) => {
+        curClass.save();
+        res.json({ msg: "Successfully generated new mentor invite code" });
+      })
+      .catch((err) => console.log(err));
+  } else {
+    res.status(404).json({ msg: "Invalid operation" });
+  }
+};
+
+export const joinClass = (req, res) => {
+  const { inviteCode } = req.body;
+  validateFieldsPresent(
+    res,
+    "Please add an invite code for attribute inviteCode",
+    inviteCode
+  );
+  Promise.all([
+    Class.findOne({ studentInviteCode: inviteCode }),
+    Class.findOne({ mentorInviteCode: inviteCode }),
+  ])
+    // Ensure that the invite code is valid
+    // and that the user is not already enrolled in the class
+    .then(([studentClass, mentorClass]) =>
+      validateInviteCode(req, res, studentClass, mentorClass)
+    )
+    .then((newClassRole) => {
+      newClassRole.save();
+      res.json({ msg: "Successfully joined class" });
+    })
     .catch((err) => console.log(err));
 };
