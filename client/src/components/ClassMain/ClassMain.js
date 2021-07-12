@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Switch, useRouteMatch, Route, useParams } from "react-router-dom";
-import { makeStyles } from "@material-ui/core";
+import { Button, makeStyles } from "@material-ui/core";
 import axios from "axios";
 
 import ClassSidebar from "./ClassSidebar";
@@ -9,6 +9,7 @@ import ClassGroupList from "./GroupTab/ClassGroupList";
 import GroupMain from "./GroupTab/GroupMain";
 import ClassAnnouncements from "./AnnouncementTab/ClassAnnouncements";
 import TaskMain from "./TaskTab/TaskMain";
+import { ClassRoles } from "../../enums";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,7 +39,7 @@ function ClassMain(props) {
 
   const classes = useStyles();
 
-  function getClassData(classID) {
+  function getClassData() {
     axios
       .all([
         axios.get(`/api/v1/classes/${classID}`, { withCredentials: true }),
@@ -54,9 +55,31 @@ function ClassMain(props) {
       .finally(() => setIsRetrieving(false));
   }
 
+  function handleGenerateStudentInviteCode() {
+    axios
+      .put(`/api/v1/classes/${classID}?studentInviteCode`, {
+        withCredentials: true,
+      })
+      .then(() => getClassData(classID))
+      .catch((error) =>
+        console.log(`Could not find class with ID: ${classID}`)
+      );
+  }
+
+  function handleGenerateMentorInviteCode() {
+    axios
+      .put(`/api/v1/classes/${classID}?mentorInviteCode`, {
+        withCredentials: true,
+      })
+      .then(() => getClassData(classID))
+      .catch((error) =>
+        console.log(`Could not find class with ID: ${classID}`)
+      );
+  }
+
   useEffect(() => {
     getClassData(classID);
-  }, [classID, setClassData]);
+  }, [classID]);
 
   return (
     isRetrieving || (
@@ -92,11 +115,30 @@ function ClassMain(props) {
               <GroupMain curUserRole={classData.role} />
             </Route>
             <Route path={`${path}/groups`}>
-              <ClassGroupList curUserRole={classData.role} />
+              <ClassGroupList
+                curUserRole={classData.role}
+                refreshClassData={() => getClassData(classID)}
+              />
             </Route>
             <Route path={`${path}`}>
               <h1>Class Main Page for {classData.name}</h1>
               <p>Description: {classData.desc}</p>
+              {classData.role === ClassRoles.MENTOR && (
+                <div>
+                  <div>
+                    Student Invite Code: {classData.studentInviteCode}
+                    <Button onClick={handleGenerateStudentInviteCode}>
+                      Generate New Code
+                    </Button>
+                  </div>
+                  <div>
+                    Mentor Invite Code: {classData.mentorInviteCode}
+                    <Button onClick={handleGenerateMentorInviteCode}>
+                      Generate New Code
+                    </Button>
+                  </div>
+                </div>
+              )}
             </Route>
           </Switch>
         </div>

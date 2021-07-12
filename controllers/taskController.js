@@ -1,4 +1,4 @@
-import Mongoose from "mongoose";
+import mongoose from "mongoose";
 import { BaseTask, ParentTask } from "../models/BaseTask.js";
 import { Comment } from "../models/BaseText.js";
 import User from "../models/User.js";
@@ -262,7 +262,7 @@ export const deleteSubtask = (req, res) => {
         {},
         {
           $pull: {
-            subtasks: Mongoose.Types.ObjectId(subtask.id),
+            subtasks: mongoose.Types.ObjectId(subtask.id),
           },
         }
       );

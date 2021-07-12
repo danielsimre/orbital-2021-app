@@ -11,6 +11,14 @@ const baseOptions = {
       return { id: groupId, type: "groups", attributes: { ...ret } };
     },
   },
+  toObject: {
+    transform: (doc, ret) => {
+      const groupId = ret._id;
+      delete ret._id;
+      delete ret.__v;
+      return { id: groupId, type: "groups", attributes: { ...ret } };
+    },
+  },
 };
 
 const GroupSchema = new Schema(

@@ -1,4 +1,5 @@
 import ClassRole from "../models/ClassRole.js";
+import Class from "../models/Class.js";
 import Group from "../models/Group.js";
 import User from "../models/User.js";
 import { ClassRoles } from "./enums.js";
@@ -256,4 +257,61 @@ export const validateCanRemoveUser = (req, res, classRoleObj) => {
       return classRole;
     })
     .catch((err) => console.log(err));
+};
+
+export const generateInviteCode = async () => {
+  const validChars =
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  let classWithIdenticalCode = [];
+  let inviteCode = "";
+  do {
+    inviteCode = "";
+    for (let i = 0; i < 15; i += 1) {
+      inviteCode += validChars.charAt(
+        Math.floor(Math.random() * validChars.length)
+      );
+    }
+    // If a class is found with this invite code, generate a new code
+    // eslint-disable-next-line no-await-in-loop
+    classWithIdenticalCode = await Class.findOne({
+      $or: [
+        { studentInviteCode: inviteCode },
+        { mentorInviteCode: inviteCode },
+      ],
+    });
+  } while (successfulFindOneQuery(classWithIdenticalCode));
+  return inviteCode;
+};
+
+export const validateInviteCode = (req, res, studentClass, mentorClass) => {
+  if (
+    successfulFindOneQuery(studentClass) ||
+    successfulFindOneQuery(mentorClass)
+  ) {
+    let inviteClass = studentClass;
+    let newUserRole = ClassRoles.STUDENT;
+    if (successfulFindOneQuery(mentorClass)) {
+      inviteClass = mentorClass;
+      newUserRole = ClassRoles.MENTOR;
+    }
+    return ClassRole.findOne({
+      userId: req.user.id,
+      classId: inviteClass.id,
+    }).then((classRole) => {
+      // If user is not enrolled in class, return the class info to add to user to it
+      if (!successfulFindOneQuery(classRole)) {
+        return new ClassRole({
+          userId: req.user.id,
+          classId: inviteClass.id,
+          role: newUserRole,
+        });
+      }
+      return sendJsonErrMessage(
+        res,
+        400,
+        "User is already enrolled in the class"
+      );
+    });
+  }
+  return sendJsonErrMessage(res, 400, "Invalid invite code");
 };

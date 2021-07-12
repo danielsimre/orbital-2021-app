@@ -47,6 +47,14 @@ const ClassSchema = new Schema(
         isMilestone: { type: Boolean, required: true, default: false },
       },
     ],
+    studentInviteCode: {
+      type: String,
+      unique: true,
+    },
+    mentorInviteCode: {
+      type: String,
+      unique: true,
+    },
     created_by: {
       type: Schema.Types.ObjectId,
       ref: "User",

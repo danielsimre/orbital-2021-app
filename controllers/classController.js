@@ -15,6 +15,8 @@ import {
   validateDueDate,
   successfulFindOneQuery,
   validateCanRemoveUser,
+  generateInviteCode,
+  validateInviteCode,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 
@@ -42,6 +44,8 @@ export const getInfo = (req, res) => {
 // If the user is not a part of the class, return an error
 // If the user is a part of the class as a student, return their group (if they have one)
 // If the user is a part of the class as a mentor, return all groups they are mentoring
+// Attributes of each group includes which mentors and students can be added to
+// the group from the class
 export const getGroups = (req, res) => {
   validateCanAccessClass(req, res)
     // Return a object with attributes groups, which contains an array of all groups
@@ -56,9 +60,46 @@ export const getGroups = (req, res) => {
         ],
       })
     )
-    .then((groupsObj) => {
-      res.json(groupsObj);
+    .then((curGroups) => {
+      const invalidStudents = [];
+      // Find all students that are already in a group
+      curGroups.forEach((group) => {
+        const groupObj = group.toObject();
+        invalidStudents.push(...groupObj.attributes.groupMembers);
+      });
+      return Promise.all(
+        curGroups.map((group) => {
+          const groupObj = group.toObject();
+          return Promise.all([
+            ClassRole.find({
+              userId: { $nin: invalidStudents },
+              classId: groupObj.attributes.classId,
+              role: ClassRoles.STUDENT,
+            }).populate({
+              path: "userId",
+              select: "username",
+            }),
+            ClassRole.find({
+              userId: { $nin: groupObj.attributes.mentoredBy },
+              classId: groupObj.attributes.classId,
+              role: ClassRoles.MENTOR,
+            }).populate({
+              path: "userId",
+              select: "username",
+            }),
+          ]).then(([addableStudents, addableMentors]) => {
+            groupObj.attributes.addableStudents = addableStudents.map(
+              (student) => student.userId.username
+            );
+            groupObj.attributes.addableMentors = addableMentors.map(
+              (mentor) => mentor.userId.username
+            );
+            return groupObj;
+          });
+        })
+      );
     })
+    .then((groupsObj) => res.json(groupsObj))
     .catch((err) => console.log(err));
 };
 
@@ -76,7 +117,7 @@ export const getAnnouncements = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-export const create = (req, res) => {
+export const create = async (req, res) => {
   const { name, desc } = req.body;
 
   // Ensure all fields are filled in
@@ -91,6 +132,8 @@ export const create = (req, res) => {
     name,
     desc,
     created_by: req.user.id,
+    studentInviteCode: await generateInviteCode(),
+    mentorInviteCode: await generateInviteCode(),
   });
 
   newClass
@@ -447,6 +490,57 @@ export const removeUser = (req, res) => {
       });
       classRole.remove();
     })
-    .then(() => res.json({ msg: "Successfully removed user from class" }))
+    .then(() => res.json({ msg: "Successfully removed user from class" }));
+};
+
+// ?studentInviteCode and ?mentorInviteCode generates new invite codes for the class
+export const updateInfo = (req, res) => {
+  if (req.query.studentInviteCode === "") {
+    validateCanAccessClass(req, res)
+      .then(async (curClass) => {
+        curClass.studentInviteCode = await generateInviteCode();
+        return curClass;
+      })
+      .then((curClass) => {
+        curClass.save();
+        res.json({ msg: "Successfully generated new student invite code" });
+      })
+      .catch((err) => console.log(err));
+  } else if (req.query.mentorInviteCode === "") {
+    validateCanAccessClass(req, res)
+      .then(async (curClass) => {
+        curClass.mentorInviteCode = await generateInviteCode();
+        return curClass;
+      })
+      .then((curClass) => {
+        curClass.save();
+        res.json({ msg: "Successfully generated new mentor invite code" });
+      })
+      .catch((err) => console.log(err));
+  } else {
+    res.status(404).json({ msg: "Invalid operation" });
+  }
+};
+
+export const joinClass = (req, res) => {
+  const { inviteCode } = req.body;
+  validateFieldsPresent(
+    res,
+    "Please add an invite code for attribute inviteCode",
+    inviteCode
+  );
+  Promise.all([
+    Class.findOne({ studentInviteCode: inviteCode }),
+    Class.findOne({ mentorInviteCode: inviteCode }),
+  ])
+    // Ensure that the invite code is valid
+    // and that the user is not already enrolled in the class
+    .then(([studentClass, mentorClass]) =>
+      validateInviteCode(req, res, studentClass, mentorClass)
+    )
+    .then((newClassRole) => {
+      newClassRole.save();
+      res.json({ msg: "Successfully joined class" });
+    })
     .catch((err) => console.log(err));
 };
