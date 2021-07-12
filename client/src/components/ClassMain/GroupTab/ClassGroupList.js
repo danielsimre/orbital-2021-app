@@ -21,8 +21,7 @@ import { Alert, AlertTitle, Pagination } from "@material-ui/lab";
 import AddIcon from "@material-ui/icons/Add";
 import axios from "axios";
 
-import AddUserDialog from "../UserTab/AddUserDialog";
-import { ClassRoles } from "../../../enums";
+import AddUserDialog from "./AddUserDialog";
 
 const useStyles = makeStyles({
   root: {
@@ -38,8 +37,8 @@ const useStyles = makeStyles({
   },
   tableTitle: {
     flex: "0 1",
-    marginRight: "0.5em",
-    padding: "16px",
+    marginRight: "0.05em",
+    padding: "0.45em",
   },
   table: {
     margin: "0 auto",
@@ -63,7 +62,7 @@ const useStyles = makeStyles({
 
 function ClassGroupList(props) {
   // Queried values
-  const { curUserRole } = props;
+  const { curUserRole, refreshClassData } = props;
   const { classID } = useParams();
   const [queriedGroupList, setQueriedGroupList] = useState([]);
 
@@ -158,61 +157,12 @@ function ClassGroupList(props) {
       .catch((err) => console.log(err));
   }
 
-  // Current only handles adding 1 at a time
-  function handleAddUsersToGroups(groupID, userEmails, newUserRole) {
-    // Edit this when adding group leaders are implemented
-    if (newUserRole === ClassRoles.STUDENT) {
-      newUserRole = "GROUPMEMBER";
-    }
-    axios
-      .post(
-        `/api/v1/groups/${groupID}/users`,
-        {
-          userEmails: [userEmails],
-          newUserRole: newUserRole,
-        },
-        { withCredentials: true }
-      )
-      .then((response) => {
-        console.log(response.data);
-        // Alert message current only handles one user
-        if (response.data.doesNotExist.length !== 0) {
-          handleAlert("Error!", "This user does not exist.", "error");
-        } else if (response.data.notInClass.length !== 0) {
-          handleAlert("Error!", "This user is not in the class.", "error");
-        } else if (response.data.alreadyHasGroup.length !== 0) {
-          handleAlert(
-            "Error!",
-            "This user already has a group or is already in this group.",
-            "error"
-          );
-        } else if (response.data.roleMismatch.length !== 0) {
-          handleAlert(
-            "Error!",
-            "This user cannot be added as that role. " +
-              "(Mentors in the class can only be added as group mentors, " +
-              "and students can only be added as group members)",
-            "error"
-          );
-        } else {
-          handleAlert(
-            "User Added!",
-            "The user has been added successfully.",
-            "success"
-          );
-        }
-      })
-      .then(() => setDisplayAlert(true))
-      .catch((err) => console.log(err));
-  }
-
   function getGroupData(classID) {
     axios
       .get(`/api/v1/classes/${classID}/groups`, {
         withCredentials: true,
       })
       .then((response) => {
-        console.log(response.data);
         setQueriedGroupList(response.data);
       })
       .catch((err) => console.log(err))
@@ -280,13 +230,10 @@ function ClassGroupList(props) {
                   </TableCell>
                   <TableCell>
                     <AddUserDialog
-                      handleAddUsers={(userEmails, newUserRole) =>
-                        handleAddUsersToGroups(
-                          curGroup.id,
-                          userEmails,
-                          newUserRole
-                        )
-                      }
+                      groupId={curGroup.id}
+                      addableMentors={curGroup.attributes.addableMentors}
+                      addableStudents={curGroup.attributes.addableStudents}
+                      refreshClassData={refreshClassData}
                     />
                   </TableCell>
                 </TableRow>
