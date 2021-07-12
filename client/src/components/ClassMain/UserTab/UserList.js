@@ -65,6 +65,14 @@ const useStyles = makeStyles({
     display: "flex",
     justifyContent: "center",
   },
+  userCard: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  userButton: {
+    marginLeft: "auto",
+    color: "red",
+  },
 });
 
 function UserList(props) {
@@ -214,43 +222,42 @@ function UserList(props) {
                   key={curUser.userId.attributes.username}
                 >
                   <Card variant="outlined">
-                    <CardContent>
-                      <Typography variant="h6">
-                        {curUser.userId.attributes.username}
-                      </Typography>
-                      <Typography variant="caption" display="block">
-                        Role: {curUser.role}
-                      </Typography>
-                      <Typography variant="caption" display="block">
-                        Email: {curUser.userId.attributes.email}
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      {
-                        /* Button only clickable if:
+                    <CardContent className={classes.userCard}>
+                      <div>
+                        <Typography variant="h6">
+                          {curUser.userId.attributes.username}
+                        </Typography>
+                        <Typography variant="caption" display="block">
+                          Role: {curUser.role}
+                        </Typography>
+                        <Typography variant="caption" display="block">
+                          Email: {curUser.userId.attributes.email}
+                        </Typography>
+                      </div>
+                      <div>
+                        {
+                          /* Button only clickable if:
                       1) The user is not yourself AND either
                       2a) You are the creator of the class OR
                       2b) You are a mentor AND the user is a student */
-                        curUser.userId.id !== curUserData.id &&
-                        (isCreator ||
-                          (curUserRole === ClassRoles.MENTOR &&
-                            curUser.role === ClassRoles.STUDENT)) ? (
-                          <Tooltip title="Remove user from class">
-                            <Button
-                              onClick={() =>
-                                handleDeleteOpen(curUser.userId.id)
-                              }
-                            >
-                              <CloseIcon />
-                            </Button>
-                          </Tooltip>
-                        ) : (
-                          <Button disabled>
-                            <CloseIcon />
-                          </Button>
-                        )
-                      }
-                    </CardActions>
+                          curUser.userId.id !== curUserData.id &&
+                            (isCreator ||
+                              (curUserRole === ClassRoles.MENTOR &&
+                                curUser.role === ClassRoles.STUDENT)) && (
+                              <Tooltip title="Remove user from class">
+                                <Button
+                                  onClick={() =>
+                                    handleDeleteOpen(curUser.userId.id)
+                                  }
+                                  className={classes.userButton}
+                                >
+                                  <CloseIcon />
+                                </Button>
+                              </Tooltip>
+                            )
+                        }
+                      </div>
+                    </CardContent>
                   </Card>
                 </TableCell>
               ))}
