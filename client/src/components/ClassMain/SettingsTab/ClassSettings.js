@@ -11,6 +11,7 @@ import {
 } from "@material-ui/core";
 import { Redirect, useParams } from "react-router-dom";
 import { ClassRoles } from "../../../enums";
+import axios from "axios";
 
 const useStyles = makeStyles({
   header: {
@@ -24,7 +25,7 @@ const useStyles = makeStyles({
 
 function ClassSettings(props) {
   // Queried values
-  const { curUserRole } = props;
+  const { curUserRole, refreshClassData } = props;
   const { classID } = useParams();
 
   // Class Complete Dialog values
@@ -39,7 +40,18 @@ function ClassSettings(props) {
   }
 
   function handleClassComplete() {
-    console.log("Class is locked");
+    axios
+      .put(
+        `/api/v1/classes/${classID}?isCompleted`,
+        {},
+        { withCredentials: true }
+      )
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setCompleteDialogOpen(false);
+        refreshClassData();
+      });
   }
 
   const classes = useStyles();

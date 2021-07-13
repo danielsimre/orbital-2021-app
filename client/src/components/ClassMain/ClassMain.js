@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Switch, useRouteMatch, Route, useParams } from "react-router-dom";
 import { Button, makeStyles } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import axios from "axios";
 
 import ClassSidebar from "./ClassSidebar";
@@ -27,6 +28,11 @@ const useStyles = makeStyles((theme) => ({
     flex: "1 1",
     height: "100%",
     textAlign: "center",
+  },
+  alert: {
+    margin: "0 auto",
+    width: "70%",
+    textAlign: "left",
   },
 }));
 
@@ -73,7 +79,7 @@ function ClassMain(props) {
   }
 
   useEffect(() => {
-    getClassData(classID);
+    getClassData();
   }, [classID]);
 
   return (
@@ -116,7 +122,10 @@ function ClassMain(props) {
               />
             </Route>
             <Route path={`${path}/settings`}>
-              <ClassSettings curUserRole={classData.role} />
+              <ClassSettings
+                curUserRole={classData.role}
+                refreshClassData={getClassData}
+              />
             </Route>
             <Route path={`${path}`}>
               <h1>Class Main Page for {classData.name}</h1>
@@ -138,10 +147,11 @@ function ClassMain(props) {
                 </div>
               )}
               {classData.isCompleted && (
-                <div>
+                <Alert severity="info" className={classes.alert}>
+                  <AlertTitle>This class is closed</AlertTitle>
                   This class has been marked as complete. You may still view the
-                  class information, but you cannot modify anything
-                </div>
+                  class information, but you cannot modify anything.
+                </Alert>
               )}
             </Route>
           </Switch>
