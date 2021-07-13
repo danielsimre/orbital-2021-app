@@ -76,7 +76,6 @@ export const validateCanAccessClass = (req, res) =>
 
 export const validateClassIsIncomplete = (req, res, classId, ret) =>
   Class.findById(classId).then((classObj) => {
-    console.log(classObj);
     if (classObj.isCompleted) {
       sendJsonErrMessage(
         res,
