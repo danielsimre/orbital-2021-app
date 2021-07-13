@@ -18,7 +18,7 @@ function ClassSidebar(props) {
 
   return (
     <div className={classes.root}>
-      <List component="nav" aria-label="main mailbox folders">
+      <List component="nav">
         <ListItem
           button
           className={classes.option}

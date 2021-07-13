@@ -137,6 +137,12 @@ function ClassMain(props) {
                   </div>
                 </div>
               )}
+              {classData.isCompleted && (
+                <div>
+                  This class has been marked as complete. You may still view the
+                  class information, but you cannot modify anything
+                </div>
+              )}
             </Route>
           </Switch>
         </div>
