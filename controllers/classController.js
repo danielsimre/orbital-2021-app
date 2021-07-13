@@ -17,6 +17,7 @@ import {
   validateCanRemoveUser,
   generateInviteCode,
   validateInviteCode,
+  validateClassIsIncomplete,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 
@@ -170,6 +171,9 @@ export const create = async (req, res) => {
 // Can add users as group members or mentors
 export const addUsers = (req, res) => {
   validateCanAccessClass(req, res)
+    .then((classObj) =>
+      validateClassIsIncomplete(req, res, classObj.id, classObj)
+    )
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -242,6 +246,9 @@ export const addUsers = (req, res) => {
 
 export const createGroups = (req, res) => {
   validateCanAccessClass(req, res)
+    .then((classObj) =>
+      validateClassIsIncomplete(req, res, classObj.id, classObj)
+    )
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -328,6 +335,9 @@ export const createGroups = (req, res) => {
 
 export const createTasks = (req, res) => {
   validateCanAccessClass(req, res)
+    .then((classObj) =>
+      validateClassIsIncomplete(req, res, classObj.id, classObj)
+    )
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -432,6 +442,9 @@ export const getTasks = (req, res) => {
 
 export const createAnnouncement = (req, res) => {
   validateCanAccessClass(req, res)
+    .then((classObj) =>
+      validateClassIsIncomplete(req, res, classObj.id, classObj)
+    )
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -464,6 +477,9 @@ export const createAnnouncement = (req, res) => {
 
 export const removeUser = (req, res) => {
   validateCanAccessClass(req, res)
+    .then((classObj) =>
+      validateClassIsIncomplete(req, res, classObj.id, classObj)
+    )
     .then((classRoleObj) => validateCanRemoveUser(req, res, classRoleObj))
     .then((classRole) => {
       Group.findOne({
@@ -500,6 +516,9 @@ export const removeUser = (req, res) => {
 export const updateInfo = (req, res) => {
   if (req.query.studentInviteCode === "") {
     validateCanAccessClass(req, res)
+      .then((curClass) =>
+        validateClassIsIncomplete(req, res, curClass.id, curClass)
+      )
       .then(async (curClass) => {
         curClass.studentInviteCode = await generateInviteCode();
         return curClass;
@@ -511,6 +530,9 @@ export const updateInfo = (req, res) => {
       .catch((err) => console.log(err));
   } else if (req.query.mentorInviteCode === "") {
     validateCanAccessClass(req, res)
+      .then((curClass) =>
+        validateClassIsIncomplete(req, res, curClass.id, curClass)
+      )
       .then(async (curClass) => {
         curClass.mentorInviteCode = await generateInviteCode();
         return curClass;
@@ -522,6 +544,11 @@ export const updateInfo = (req, res) => {
       .catch((err) => console.log(err));
   } else if (req.query.isCompleted === "") {
     validateCanAccessClass(req, res)
+      /*
+      .then((curClass) =>
+        //validateClassIsIncomplete(req, res, curClass.id, curClass)
+      )
+      */
       .then((curClass) => {
         curClass.isCompleted = !curClass.isCompleted;
         return curClass;
@@ -549,6 +576,10 @@ export const joinClass = (req, res) => {
   ])
     // Ensure that the invite code is valid
     // and that the user is not already enrolled in the class
+    .then(([studentClass, mentorClass]) => [
+      validateClassIsIncomplete(req, res, studentClass.id, studentClass),
+      validateClassIsIncomplete(req, res, mentorClass.id, mentorClass),
+    ])
     .then(([studentClass, mentorClass]) =>
       validateInviteCode(req, res, studentClass, mentorClass)
     )
