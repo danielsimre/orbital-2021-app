@@ -496,6 +496,7 @@ export const removeUser = (req, res) => {
 };
 
 // ?studentInviteCode and ?mentorInviteCode generates new invite codes for the class
+// ?isCompleted changes the isCompleted flag for a class
 export const updateInfo = (req, res) => {
   if (req.query.studentInviteCode === "") {
     validateCanAccessClass(req, res)
@@ -517,6 +518,17 @@ export const updateInfo = (req, res) => {
       .then((curClass) => {
         curClass.save();
         res.json({ msg: "Successfully generated new mentor invite code" });
+      })
+      .catch((err) => console.log(err));
+  } else if (req.query.isCompleted === "") {
+    validateCanAccessClass(req, res)
+      .then((curClass) => {
+        curClass.isCompleted = !curClass.isCompleted;
+        return curClass;
+      })
+      .then((curClass) => {
+        curClass.save();
+        res.json({ msg: "Successfully changed class state" });
       })
       .catch((err) => console.log(err));
   } else {
