@@ -10,6 +10,7 @@ import {
   validateDueDate,
   validateIsSubtask,
   validateSubtaskData,
+  validateClassIsIncomplete,
 } from "../utils/validation.js";
 
 export const getAllInfo = (req, res) => {
@@ -35,6 +36,7 @@ export const update = (req, res) => {
           "Cannot update submissions of task"
         )
       )
+      .then((task) => validateClassIsIncomplete(req, res, task.classId, task))
       .then((task) => {
         const { submissionLinks } = req.body;
         validateFieldsPresent(
@@ -62,6 +64,7 @@ export const update = (req, res) => {
           "Cannot update completion status of task"
         )
       )
+      .then((task) => validateClassIsIncomplete(req, res, task.classId, task))
       .then((task) => {
         const { isCompleted } = req.body;
         validateFieldsPresent(
@@ -94,6 +97,9 @@ export const update = (req, res) => {
             "Cannot access this subtask"
           )
         )
+      )
+      .then((subtask) =>
+        validateClassIsIncomplete(req, res, subtask.classId, subtask)
       )
       .then(async (task) => {
         const { dueDate, assignedTo, isCompleted } = req.body;
@@ -166,6 +172,7 @@ export const update = (req, res) => {
 
 export const createComment = (req, res) => {
   ParentTask.findOne({ _id: req.params.id })
+    .then((task) => validateClassIsIncomplete(req, res, task.classId, task))
     .then((curTask) => {
       const { title, content } = req.body;
       const newComment = new Comment({
@@ -200,6 +207,7 @@ export const createSubtask = (req, res) => {
     .then((task) =>
       validateCanAccessTask(res, task, req.user.id, "Cannot access this task")
     )
+    .then((task) => validateClassIsIncomplete(req, res, task.classId, task))
     .then((task) => {
       const { taskName, taskDesc, dueDate, assignedTo } = req.body;
       validateFieldsPresent(
@@ -255,6 +263,9 @@ export const deleteSubtask = (req, res) => {
           )
         )
         .then(() => subtask)
+    )
+    .then((subtask) =>
+      validateClassIsIncomplete(req, res, subtask.classId, subtask)
     )
     .then((subtask) => {
       subtask.remove();
