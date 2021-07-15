@@ -7,8 +7,10 @@ import {
   DialogTitle,
   DialogActions,
   Typography,
+  Snackbar,
   makeStyles,
 } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import { Redirect, useParams } from "react-router-dom";
 import { ClassRoles } from "../../../enums";
 import axios from "axios";
@@ -31,12 +33,24 @@ function ClassSettings(props) {
   // Class Complete Dialog values
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
 
+  // for the alert
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
+
   function handleDialogOpen() {
     setCompleteDialogOpen(true);
   }
 
   function handleDialogClose() {
     setCompleteDialogOpen(false);
+  }
+
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
   }
 
   function handleClassComplete() {
@@ -46,11 +60,18 @@ function ClassSettings(props) {
         {},
         { withCredentials: true }
       )
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err))
+      .then((res) => {
+        console.log(res);
+        handleAlert("Class Locked", res.data.msg, "info");
+      })
+      .catch((err) => {
+        console.log(err);
+        handleAlert("Error!", err.response.data.msg, "error");
+      })
       .finally(() => {
         setCompleteDialogOpen(false);
         refreshClassData();
+        setDisplayAlert(true);
       });
   }
 
@@ -91,6 +112,16 @@ function ClassSettings(props) {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={displayAlert}
+        onClose={() => setDisplayAlert(false)}
+      >
+        <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+          <AlertTitle>{alertTitleText}</AlertTitle>
+          {alertText}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
