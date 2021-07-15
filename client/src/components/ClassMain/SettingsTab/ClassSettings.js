@@ -25,7 +25,7 @@ const useStyles = makeStyles({
 
 function ClassSettings(props) {
   // Queried values
-  const { curUserRole, refreshClassData } = props;
+  const { curUserRole, refreshClassData, isCompleted } = props;
   const { classID } = useParams();
 
   // Class Complete Dialog values

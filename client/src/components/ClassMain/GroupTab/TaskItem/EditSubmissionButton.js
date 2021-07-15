@@ -21,7 +21,7 @@ const useStyles = makeStyles({
 
 function EditSubmissionButton(props) {
   // Queried values
-  const { submissionLinks, refreshGroupData, taskId } = props;
+  const { submissionLinks, refreshGroupData, taskId, isCompleted } = props;
 
   // Form values
   const [newSubmissionLink, setNewSubmissionLink] = useState("");
@@ -84,9 +84,12 @@ function EditSubmissionButton(props) {
 
   return (
     <>
-      <Button onClick={handleDialogOpen} className={classes.button}>
-        {" "}
-        Add Submission{" "}
+      <Button
+        onClick={handleDialogOpen}
+        className={classes.button}
+        disabled={isCompleted}
+      >
+        Add Submission
       </Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
         <DialogTitle>Add Submissions</DialogTitle>

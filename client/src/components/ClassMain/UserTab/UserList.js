@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import {
   Button,
   Card,
-  CardActions,
   CardContent,
   Dialog,
   DialogActions,
@@ -84,6 +83,7 @@ function UserList(props) {
     creatorId,
     refreshClassData,
     curUserId,
+    isCompleted,
   } = props;
 
   // Alert values
@@ -175,8 +175,11 @@ function UserList(props) {
         }
       })
       .then(() => refreshClassData(classID))
-      .then(() => setDisplayAlert(true))
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        handleAlert("Error!", err.response.data.msg, "error");
+      })
+      .finally(() => setDisplayAlert(true));
   }
 
   function handleDeleteUser(event) {
@@ -208,7 +211,10 @@ function UserList(props) {
         {
           // If user is a mentor, render the add users button
           curUserRole === ClassRoles.MENTOR && (
-            <AddUserDialog handleAddUsers={handleAddUsers} />
+            <AddUserDialog
+              handleAddUsers={handleAddUsers}
+              isCompleted={isCompleted}
+            />
           )
         }
       </div>
@@ -250,6 +256,7 @@ function UserList(props) {
                                     handleDeleteOpen(curUser.userId.id)
                                   }
                                   className={classes.userButton}
+                                  disabled={isCompleted}
                                 >
                                   <CloseIcon />
                                 </Button>

@@ -81,7 +81,8 @@ const useStyles = makeStyles({
 
 function TaskItem(props) {
   // Queried values
-  const { taskObject, refreshGroupData, groupMembers, isMentor } = props;
+  const { taskObject, refreshGroupData, groupMembers, isMentor, isCompleted } =
+    props;
 
   // taskObject.attributes contains submissions, comment and subtask list
   const taskAttributes = taskObject.attributes;
@@ -144,7 +145,9 @@ function TaskItem(props) {
               <Checkbox
                 color="primary"
                 checked={taskAttributes.isCompleted}
-                disabled={!allSubtasksCompleted(subtaskList) || isMentor}
+                disabled={
+                  !allSubtasksCompleted(subtaskList) || isMentor || isCompleted
+                }
               />
             }
             color="primary"
@@ -197,6 +200,7 @@ function TaskItem(props) {
                     submissionLinks={submissionsList}
                     refreshGroupData={refreshGroupData}
                     taskId={taskObject.id}
+                    isCompleted={isCompleted}
                   />
                   <AddSubtaskButton
                     className={classes.addSubtaskButton}
@@ -204,10 +208,12 @@ function TaskItem(props) {
                     refreshGroupData={refreshGroupData}
                     taskId={taskObject.id}
                     groupMembers={groupMembers}
+                    isCompleted={isCompleted}
                   />
                   <AddCommentButton
                     className={classes.addCommentButton}
                     taskId={taskObject.id}
+                    isCompleted={isCompleted}
                   />
                 </Paper>
               </Box>
@@ -219,6 +225,7 @@ function TaskItem(props) {
                   refreshGroupData={refreshGroupData}
                   parentDueDate={taskAttributes.dueDate}
                   isMentor={isMentor}
+                  isCompleted={isCompleted}
                 />
               )}
             </Box>

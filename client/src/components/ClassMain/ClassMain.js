@@ -51,6 +51,7 @@ function ClassMain(props) {
       .get(`/api/v1/classes/${classID}`, { withCredentials: true })
       .then((res) => {
         setClassData(res.data.attributes);
+        console.log(res.data.attributes);
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
@@ -94,6 +95,7 @@ function ClassMain(props) {
               <ClassAnnouncements
                 curUserRole={classData.role}
                 classID={classID}
+                isCompleted={classData.isCompleted}
               />
             </Route>
             <Route path={`${path}/users`}>
@@ -103,6 +105,7 @@ function ClassMain(props) {
                 creatorId={classData.created_by}
                 refreshClassData={getClassData}
                 curUserId={classData.curUserId}
+                isCompleted={classData.isCompleted}
               />
             </Route>
             <Route path={`${path}/tasks`}>
@@ -110,21 +113,27 @@ function ClassMain(props) {
                 curUserRole={classData.role}
                 taskFramework={classData.taskFramework}
                 refreshClassData={getClassData}
+                isCompleted={classData.isCompleted}
               />
             </Route>
             <Route path={`${path}/groups/:groupID`}>
-              <GroupMain curUserRole={classData.role} />
+              <GroupMain
+                curUserRole={classData.role}
+                isCompleted={classData.isCompleted}
+              />
             </Route>
             <Route path={`${path}/groups`}>
               <ClassGroupList
                 curUserRole={classData.role}
                 refreshClassData={() => getClassData(classID)}
+                isCompleted={classData.isCompleted}
               />
             </Route>
             <Route path={`${path}/settings`}>
               <ClassSettings
                 curUserRole={classData.role}
                 refreshClassData={getClassData}
+                isCompleted={classData.isCompleted}
               />
             </Route>
             <Route path={`${path}`}>
@@ -134,13 +143,19 @@ function ClassMain(props) {
                 <div>
                   <div>
                     Student Invite Code: {classData.studentInviteCode}
-                    <Button onClick={handleGenerateStudentInviteCode}>
+                    <Button
+                      onClick={handleGenerateStudentInviteCode}
+                      disabled={classData.isCompleted}
+                    >
                       Generate New Code
                     </Button>
                   </div>
                   <div>
                     Mentor Invite Code: {classData.mentorInviteCode}
-                    <Button onClick={handleGenerateMentorInviteCode}>
+                    <Button
+                      onClick={handleGenerateMentorInviteCode}
+                      disabled={classData.isCompleted}
+                    >
                       Generate New Code
                     </Button>
                   </div>
