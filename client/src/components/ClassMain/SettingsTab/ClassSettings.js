@@ -62,7 +62,11 @@ function ClassSettings(props) {
       )
       .then((res) => {
         console.log(res);
-        handleAlert("Class Locked", res.data.msg, "info");
+        handleAlert(
+          "Class Locked",
+          "The class is now locked. You can still view the class information, but can no longer modify anything.",
+          "info"
+        );
       })
       .catch((err) => {
         console.log(err);
