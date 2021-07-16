@@ -24,7 +24,13 @@ const useStyles = makeStyles({
 
 function AddUserDialog(props) {
   // Queried values
-  const { groupId, refreshClassData, addableMentors, addableStudents } = props;
+  const {
+    groupId,
+    refreshClassData,
+    addableMentors,
+    addableStudents,
+    isCompleted,
+  } = props;
   // Form values
   const [selectedMentors, setSelectedMentors] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
@@ -68,7 +74,11 @@ function AddUserDialog(props) {
   return (
     <>
       <Tooltip title="Add Users" placement="top">
-        <Button className={styles.button} onClick={handleDialogOpen}>
+        <Button
+          className={styles.button}
+          onClick={handleDialogOpen}
+          disabled={isCompleted}
+        >
           <AddIcon />
         </Button>
       </Tooltip>

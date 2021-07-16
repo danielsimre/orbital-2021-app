@@ -44,7 +44,7 @@ const useStyles = makeStyles({
 
 function AddCommentButton(props) {
   // Queried values
-  const { refreshGroupData, taskId } = props;
+  const { refreshGroupData, taskId, isCompleted } = props;
   const [commentList, setCommentList] = useState([]);
   const [curUserId, setCurUserId] = useState(null);
 
@@ -184,9 +184,12 @@ function AddCommentButton(props) {
 
   return (
     <>
-      <Button onClick={handleDialogOpen} className={classes.button}>
-        {" "}
-        View Comments{" "}
+      <Button
+        onClick={handleDialogOpen}
+        className={classes.button}
+        disabled={isCompleted}
+      >
+        View Comments
       </Button>
       {/* Start of Comment List Dialog */}
       <Dialog

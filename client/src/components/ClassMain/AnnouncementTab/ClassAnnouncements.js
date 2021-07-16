@@ -54,7 +54,7 @@ const useStyles = makeStyles({
 
 function ClassAnnouncements(props) {
   // Queried values
-  const { curUserRole, classID } = props;
+  const { curUserRole, classID, isCompleted } = props;
   const [announcementList, setAnnouncementList] = useState([]);
 
   // Pagination values
@@ -126,7 +126,11 @@ function ClassAnnouncements(props) {
                 title="Make an announcement to the class"
                 placement="top"
               >
-                <Button className={classes.button} onClick={openForm}>
+                <Button
+                  className={classes.button}
+                  onClick={openForm}
+                  disabled={isCompleted}
+                >
                   <AddIcon />
                 </Button>
               </Tooltip>

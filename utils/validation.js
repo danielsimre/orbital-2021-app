@@ -62,6 +62,7 @@ export const validateUniqueUsername = (req, res, queriedUser) => {
 };
 
 // Verify that the user can access the current class
+// and returns that class if so
 export const validateCanAccessClass = (req, res) =>
   ClassRole.findOne({ classId: req.params.id, userId: req.user.id })
     .populate({ path: "classId" })
@@ -72,6 +73,18 @@ export const validateCanAccessClass = (req, res) =>
       classRoleObj.classId.role = classRoleObj.role;
       return classRoleObj.classId;
     });
+
+export const validateClassIsIncomplete = (req, res, classId, ret) =>
+  Class.findById(classId).then((classObj) => {
+    if (classObj.isCompleted) {
+      sendJsonErrMessage(
+        res,
+        403,
+        "Class data cannot be modified as it has been marked as completed"
+      );
+    }
+    return ret;
+  });
 
 export const validateCanAccessGroup = (res, curGroup, msg) => {
   if (!successfulFindOneQuery(curGroup)) {

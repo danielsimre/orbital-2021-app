@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Switch, useRouteMatch, Route, useParams } from "react-router-dom";
 import { Button, makeStyles } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import axios from "axios";
 
 import ClassSidebar from "./ClassSidebar";
@@ -9,6 +10,8 @@ import ClassGroupList from "./GroupTab/ClassGroupList";
 import GroupMain from "./GroupTab/GroupMain";
 import ClassAnnouncements from "./AnnouncementTab/ClassAnnouncements";
 import TaskMain from "./TaskTab/TaskMain";
+import ClassSettings from "./SettingsTab/ClassSettings";
+
 import { ClassRoles } from "../../enums";
 
 const useStyles = makeStyles((theme) => ({
@@ -26,13 +29,17 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     textAlign: "center",
   },
+  alert: {
+    margin: "0 auto",
+    width: "70%",
+    textAlign: "left",
+  },
 }));
 
 function ClassMain(props) {
   const { classID } = useParams();
 
   const [classData, setClassData] = useState({});
-  const [curUserData, setCurUserData] = useState({});
 
   const [isRetrieving, setIsRetrieving] = useState(true);
   const { path } = useRouteMatch();
@@ -41,16 +48,11 @@ function ClassMain(props) {
 
   function getClassData() {
     axios
-      .all([
-        axios.get(`/api/v1/classes/${classID}`, { withCredentials: true }),
-        axios.get(`/api/v1/users`, { withCredentials: true }),
-      ])
-      .then(
-        axios.spread((classData, userData) => {
-          setClassData(classData.data.attributes);
-          setCurUserData(userData.data);
-        })
-      )
+      .get(`/api/v1/classes/${classID}`, { withCredentials: true })
+      .then((res) => {
+        setClassData(res.data.attributes);
+        console.log(res.data.attributes);
+      })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
   }
@@ -78,14 +80,14 @@ function ClassMain(props) {
   }
 
   useEffect(() => {
-    getClassData(classID);
+    getClassData();
   }, [classID]);
 
   return (
     isRetrieving || (
       <div className={classes.root}>
         <div className={classes.sidebar}>
-          <ClassSidebar classID={classID} />
+          <ClassSidebar classID={classID} curUserRole={classData.role} />
         </div>
         <div className={classes.info}>
           <Switch>
@@ -93,6 +95,7 @@ function ClassMain(props) {
               <ClassAnnouncements
                 curUserRole={classData.role}
                 classID={classID}
+                isCompleted={classData.isCompleted}
               />
             </Route>
             <Route path={`${path}/users`}>
@@ -101,7 +104,8 @@ function ClassMain(props) {
                 queriedUserList={classData.users}
                 creatorId={classData.created_by}
                 refreshClassData={getClassData}
-                curUserData={curUserData}
+                curUserId={classData.curUserId}
+                isCompleted={classData.isCompleted}
               />
             </Route>
             <Route path={`${path}/tasks`}>
@@ -109,15 +113,27 @@ function ClassMain(props) {
                 curUserRole={classData.role}
                 taskFramework={classData.taskFramework}
                 refreshClassData={getClassData}
+                isCompleted={classData.isCompleted}
               />
             </Route>
             <Route path={`${path}/groups/:groupID`}>
-              <GroupMain curUserRole={classData.role} />
+              <GroupMain
+                curUserRole={classData.role}
+                isCompleted={classData.isCompleted}
+              />
             </Route>
             <Route path={`${path}/groups`}>
               <ClassGroupList
                 curUserRole={classData.role}
                 refreshClassData={() => getClassData(classID)}
+                isCompleted={classData.isCompleted}
+              />
+            </Route>
+            <Route path={`${path}/settings`}>
+              <ClassSettings
+                curUserRole={classData.role}
+                refreshClassData={getClassData}
+                isCompleted={classData.isCompleted}
               />
             </Route>
             <Route path={`${path}`}>
@@ -127,17 +143,30 @@ function ClassMain(props) {
                 <div>
                   <div>
                     Student Invite Code: {classData.studentInviteCode}
-                    <Button onClick={handleGenerateStudentInviteCode}>
+                    <Button
+                      onClick={handleGenerateStudentInviteCode}
+                      disabled={classData.isCompleted}
+                    >
                       Generate New Code
                     </Button>
                   </div>
                   <div>
                     Mentor Invite Code: {classData.mentorInviteCode}
-                    <Button onClick={handleGenerateMentorInviteCode}>
+                    <Button
+                      onClick={handleGenerateMentorInviteCode}
+                      disabled={classData.isCompleted}
+                    >
                       Generate New Code
                     </Button>
                   </div>
                 </div>
+              )}
+              {classData.isCompleted && (
+                <Alert severity="info" className={classes.alert}>
+                  <AlertTitle>This class is closed</AlertTitle>
+                  This class has been marked as complete. You may still view the
+                  class information, but you cannot modify anything.
+                </Alert>
               )}
             </Route>
           </Switch>

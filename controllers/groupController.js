@@ -8,6 +8,7 @@ import {
   validateFieldsPresent,
   successfulFindOneQuery,
   successfulFindQuery,
+  validateClassIsIncomplete,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 
@@ -69,6 +70,7 @@ export const addUsers = (req, res) => {
         "Group does not exist or user is not authorized to add users to group"
       )
     )
+    .then((group) => validateClassIsIncomplete(req, res, group.classId, group))
     .then(async (curGroup) => {
       const { usernames } = req.body;
 

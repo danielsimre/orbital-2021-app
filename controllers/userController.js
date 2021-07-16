@@ -81,7 +81,7 @@ export const logout = (req, res) => {
 export const changeUsername = (req, res) => {
   const { newUsername } = req.body;
 
-  User.findOne({ newUsername })
+  User.findOne({ username: newUsername })
     .then((queriedUser) => {
       validateUniqueUsername(req, res, queriedUser);
     })
