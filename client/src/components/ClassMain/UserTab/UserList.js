@@ -153,7 +153,19 @@ function UserList(props) {
         { withCredentials: true }
       )
       .then((response) => {
-        // Alert message for CSV files not implemented yet
+        console.log(response.data);
+        const message = `User does not exist for emails: ${response.data.doesNotExist} \n
+        User is already in the class: ${response.data.alreadyAdded} \n
+        Sucessfully added users: ${response.data.successfullyAdded}`;
+        if (response.data.successfullyAdded.length === 0) {
+          handleAlert("Failure!", message, "error");
+        } else {
+          handleAlert(
+            `${response.data.successfullyAdded.length} users added!`,
+            message,
+            "success"
+          );
+        }
       })
       .then(() => refreshClassData(classID))
       .catch((err) => console.log(err));
@@ -175,7 +187,6 @@ function UserList(props) {
         setCurUserId(null);
         setDeleteDialogOpen(false);
         refreshClassData(classID);
-        setDisplayAlert(true);
       });
   }
 
@@ -255,7 +266,7 @@ function UserList(props) {
         />
       )}
       <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        anchorOrigin={{ vertical: "center", horizontal: "center" }}
         open={displayAlert}
         onClose={() => setDisplayAlert(false)}
       >
