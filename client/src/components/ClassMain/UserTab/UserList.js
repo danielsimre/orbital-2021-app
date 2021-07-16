@@ -130,6 +130,7 @@ function UserList(props) {
     setAlertTitleText(title);
     setAlertText(message);
     setAlertState(severity);
+    setDisplayAlert(true);
   }
 
   function handleDeleteOpen(userId) {
@@ -141,33 +142,20 @@ function UserList(props) {
     setDeleteDialogOpen(false);
   }
 
-  // Current only handles adding 1 at a time
   function handleAddUsers(userEmails, newUserRole) {
     axios
       .post(
         `/api/v1/classes/${classID}/users`,
         {
-          userEmails: [userEmails],
+          userEmails: userEmails,
           newUserRole: newUserRole,
         },
         { withCredentials: true }
       )
       .then((response) => {
-        // Alert message current only handles one user
-        if (response.data.doesNotExist.length !== 0) {
-          handleAlert("Error!", "The user does not exist.", "error");
-        } else if (response.data.alreadyAdded.length !== 0) {
-          handleAlert("Error!", "The user has already been added.", "error");
-        } else {
-          handleAlert(
-            "User Added!",
-            "The user has been added successfully.",
-            "success"
-          );
-        }
+        // Alert message for CSV files not implemented yet
       })
       .then(() => refreshClassData(classID))
-      .then(() => setDisplayAlert(true))
       .catch((err) => console.log(err));
   }
 

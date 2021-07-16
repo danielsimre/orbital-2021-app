@@ -76,7 +76,7 @@ function ClassGroupList(props) {
   const [alertState, setAlertState] = useState("");
 
   // Pagination values
-  const ITEMS_PER_PAGE = 2;
+  const ITEMS_PER_PAGE = 6;
   const numPages = Math.ceil(queriedGroupList.length / ITEMS_PER_PAGE);
   const [page, setPage] = useState(1);
   const [displayList, setDisplayList] = useState([]);
