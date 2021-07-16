@@ -8,6 +8,7 @@ import {
   validateFieldsPresent,
   successfulFindOneQuery,
   successfulFindQuery,
+  validateGroupSize,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 
@@ -69,18 +70,18 @@ export const addUsers = (req, res) => {
         "Group does not exist or user is not authorized to add users to group"
       )
     )
-    .then(async (curGroup) => {
+    .then((curGroup) => {
       const { usernames } = req.body;
-
       validateFieldsPresent(
         res,
         "Please add an array of usernames for attribute usernames",
         usernames
       );
-
       // Remove duplicate user names
-      const uniqueUsernames = [...new Set(usernames)];
-
+      return validateGroupSize(res, [...new Set(usernames)], curGroup);
+    })
+    .then(async (curGroup) => {
+      const uniqueUsernames = [...new Set(req.body.usernames)];
       // These five arrays contain the user names, split into five categories:
       // Successfully added users, user names that are not attached to a user,
       // users that are not in the class,

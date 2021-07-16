@@ -315,3 +315,35 @@ export const validateInviteCode = (req, res, studentClass, mentorClass) => {
   }
   return sendJsonErrMessage(res, 400, "Invalid invite code");
 };
+
+export const validateGroupSize = (res, usernames, curGroup) =>
+  // Find all users via their usernames and get an array of user ids
+  User.find({ username: { $in: usernames } })
+    .then((userArray) => userArray.map((user) => user.id))
+    .then((userIds) =>
+      // Only check for students
+      ClassRole.find({
+        role: ClassRoles.STUDENT,
+        classId: curGroup.classId,
+        userId: { $in: userIds },
+      })
+    )
+    .then((validStudents) =>
+      // Does not check if the student already has a group
+      Class.findById(curGroup.classId).then((classObj) => {
+        if (
+          curGroup.groupMembers.length + validStudents.length >
+          classObj.groupSize
+        ) {
+          sendJsonErrMessage(
+            res,
+            400,
+            `Adding these students would cause group to exceed member limit of ${classObj.groupSize}`
+          );
+        }
+        return curGroup;
+      })
+    )
+    .catch((err) => {
+      throw err;
+    });

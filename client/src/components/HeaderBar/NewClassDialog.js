@@ -7,8 +7,10 @@ import {
   DialogContentText,
   DialogTitle,
   Paper,
+  MenuItem,
   TextField,
   Snackbar,
+  Select,
   makeStyles,
 } from "@material-ui/core";
 import { Alert, AlertTitle } from "@material-ui/lab";
@@ -31,6 +33,7 @@ function NewClassDialog(props) {
   // Form values
   const [className, setClassName] = useState("");
   const [classDescription, setClassDescription] = useState("");
+  const [classGroupSize, setClassGroupSize] = useState(5);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Alert values
@@ -41,6 +44,8 @@ function NewClassDialog(props) {
 
   // Misc values
   const classes = useStyles();
+  // Creates an array with values from 1 to 10
+  const groupSizeOptions = Array.from({ length: 10 }, (e, i) => i + 1);
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -57,13 +62,14 @@ function NewClassDialog(props) {
     setDialogOpen(false);
   }
 
-  function handleNewClass(name, desc) {
+  function handleNewClass(name, desc, groupSize) {
     axios
       .post(
         "/api/v1/classes/",
         {
           name: name,
           desc: desc,
+          groupSize: groupSize,
         },
         { withCredentials: true }
       )
@@ -121,6 +127,18 @@ function NewClassDialog(props) {
                 value={classDescription}
                 onChange={(event) => setClassDescription(event.target.value)}
               />
+              <Select
+                native
+                value={classGroupSize}
+                onChange={(event) => setClassGroupSize(event.target.value)}
+                inputProps={{
+                  name: "Group Size",
+                }}
+              >
+                {groupSizeOptions.map((number) => (
+                  <MenuItem value={number}>{number}</MenuItem>
+                ))}
+              </Select>
             </Paper>
             <DialogActions>
               <Button onClick={handleDialogClose}>Cancel</Button>

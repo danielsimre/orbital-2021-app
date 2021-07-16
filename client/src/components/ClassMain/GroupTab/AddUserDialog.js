@@ -8,9 +8,11 @@ import {
   DialogTitle,
   MenuItem,
   Select,
+  Snackbar,
   Tooltip,
   makeStyles,
 } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import AddIcon from "@material-ui/icons/Add";
 import axios from "axios";
 
@@ -20,18 +22,35 @@ const useStyles = makeStyles({
     alignSelf: "center",
     flex: "0 0",
   },
+  snackbar: {
+    textAlign: "center",
+  },
 });
 
 function AddUserDialog(props) {
   // Queried values
-  const { groupId, refreshClassData, addableMentors, addableStudents } = props;
+  const {
+    groupId,
+    refreshClassData,
+    addableMentors,
+    addableStudents,
+    curGroupSize,
+    groupSizeLimit,
+  } = props;
+
   // Form values
   const [selectedMentors, setSelectedMentors] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
 
+  // Alert values
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
+
   // Misc values
   const [dialogOpen, setDialogOpen] = useState(false);
-  const styles = useStyles();
+  const classes = useStyles();
 
   function handleDialogOpen() {
     setSelectedMentors([]);
@@ -51,6 +70,28 @@ function AddUserDialog(props) {
     handleDialogClose();
   }
 
+  function handleSelectStudents(students) {
+    if (students.length > groupSizeLimit - curGroupSize) {
+      console.log(students.length);
+      handleAlert(
+        "Error!",
+        `You can only add up to ${
+          groupSizeLimit - curGroupSize
+        } group members to this group`,
+        "error"
+      );
+    } else {
+      setSelectedStudents(students);
+    }
+  }
+
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
+    setDisplayAlert(true);
+  }
+
   function handleAddUsers(usernames) {
     axios
       .post(
@@ -61,6 +102,15 @@ function AddUserDialog(props) {
         { withCredentials: true }
       )
       .then((response) => console.log(response))
+      .then(
+        (res) =>
+          handleAlert(
+            "Users Added!",
+            "Users have been successfully added to the group!",
+            "success"
+          ),
+        (err) => handleAlert("Error!", err.response.data.msg, "error")
+      )
       .then(() => refreshClassData())
       .catch((err) => console.log(err));
   }
@@ -68,7 +118,7 @@ function AddUserDialog(props) {
   return (
     <>
       <Tooltip title="Add Users" placement="top">
-        <Button className={styles.button} onClick={handleDialogOpen}>
+        <Button className={classes.button} onClick={handleDialogOpen}>
           <AddIcon />
         </Button>
       </Tooltip>
@@ -79,7 +129,7 @@ function AddUserDialog(props) {
             Add users to the group. Students of the class will be added as group
             members, and mentors will be added as group mentors. Students can
             only be in one group, while mentors can been a mentor to many
-            groups.
+            groups. (Current group size limit is {groupSizeLimit})
           </DialogContentText>
           Mentors:{" "}
           <Select
@@ -97,7 +147,7 @@ function AddUserDialog(props) {
           <Select
             multiple
             value={selectedStudents}
-            onChange={(event) => setSelectedStudents(event.target.value)}
+            onChange={(event) => handleSelectStudents(event.target.value)}
           >
             {addableStudents.map((studentName) => (
               <MenuItem key={studentName} value={studentName}>
@@ -111,6 +161,17 @@ function AddUserDialog(props) {
           <Button onClick={handleSubmit}>Add</Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={displayAlert}
+        onClose={() => setDisplayAlert(false)}
+        className={classes.snackbar}
+      >
+        <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+          <AlertTitle>{alertTitleText}</AlertTitle>
+          {alertText}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
