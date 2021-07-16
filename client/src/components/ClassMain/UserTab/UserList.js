@@ -236,9 +236,6 @@ function UserList(props) {
                         <Typography variant="caption" display="block">
                           Role: {curUser.role}
                         </Typography>
-                        <Typography variant="caption" display="block">
-                          Email: {curUser.userId.attributes.email}
-                        </Typography>
                       </div>
                       <div>
                         {

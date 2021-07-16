@@ -141,9 +141,6 @@ function GroupUserList(props) {
                       <Typography variant="h6">
                         {curUser.attributes.username}
                       </Typography>
-                      <Typography variant="caption" display="block">
-                        Email: {curUser.attributes.email}
-                      </Typography>
                     </CardContent>
                   </Card>
                 </TableCell>
@@ -178,9 +175,6 @@ function GroupUserList(props) {
                     <CardContent>
                       <Typography variant="h6">
                         {curUser.attributes.username}
-                      </Typography>
-                      <Typography variant="caption" display="block">
-                        Email: {curUser.attributes.email}
                       </Typography>
                     </CardContent>
                   </Card>
