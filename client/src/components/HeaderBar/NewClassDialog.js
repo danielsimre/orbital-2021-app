@@ -25,6 +25,9 @@ const useStyles = makeStyles({
   snackbar: {
     textAlign: "center",
   },
+  select: {
+    width: "10%",
+  },
 });
 
 function NewClassDialog(props) {
@@ -49,7 +52,7 @@ function NewClassDialog(props) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    handleNewClass(className, classDescription);
+    handleNewClass(className, classDescription, classGroupSize);
   }
 
   function handleDialogOpen() {
@@ -127,19 +130,16 @@ function NewClassDialog(props) {
                 value={classDescription}
                 onChange={(event) => setClassDescription(event.target.value)}
               />
-              <Select
-                native
-                value={classGroupSize}
-                onChange={(event) => setClassGroupSize(event.target.value)}
-                inputProps={{
-                  name: "Group Size",
-                }}
-              >
-                {groupSizeOptions.map((number) => (
-                  <MenuItem value={number}>{number}</MenuItem>
-                ))}
-              </Select>
             </Paper>
+            <Select
+              value={classGroupSize}
+              onChange={(event) => setClassGroupSize(event.target.value)}
+              className={classes.select}
+            >
+              {groupSizeOptions.map((number) => (
+                <MenuItem value={number}>{number}</MenuItem>
+              ))}
+            </Select>
             <DialogActions>
               <Button onClick={handleDialogClose}>Cancel</Button>
               <Button type="submit">Create</Button>

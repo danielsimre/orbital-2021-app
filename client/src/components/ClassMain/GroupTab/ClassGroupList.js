@@ -127,6 +127,19 @@ function ClassGroupList(props) {
   // Current only handles adding 1 at a time
   function handleAddGroups(numOfGroups) {
     let groups = [];
+    let counter = 1;
+    while (groups.length < numOfGroups) {
+      const curGroupName = `Group ${counter}`;
+      counter += 1;
+      // Checks if there is a group name conflict, if not, add to the array
+      if (
+        !queriedGroupList.some(
+          (group) => group.attributes.name === curGroupName
+        )
+      ) {
+        groups.push(curGroupName);
+      }
+    }
     axios
       .post(
         `/api/v1/classes/${classID}/groups`,
