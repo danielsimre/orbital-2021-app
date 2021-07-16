@@ -25,8 +25,9 @@ const useStyles = makeStyles({
 function GroupMain(props) {
   // Queried values
   const { groupID } = useParams();
+  const { curUserRole, isCompleted } = props;
   const [groupData, setGroupData] = useState({});
-  const { curUserRole } = props;
+
   const isMentor = curUserRole === ClassRoles.MENTOR;
 
   // Misc values
@@ -77,6 +78,7 @@ function GroupMain(props) {
             refreshGroupData={() => getGroupData(groupID)}
             groupMembers={groupData.groupMembers}
             isMentor={isMentor}
+            isCompleted={isCompleted}
           />
         ) : (
           <GroupUserList

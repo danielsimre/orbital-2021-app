@@ -36,6 +36,7 @@ function AddUserDialog(props) {
     addableStudents,
     curGroupSize,
     groupSizeLimit,
+    isCompleted,
   } = props;
 
   // Form values
@@ -118,7 +119,10 @@ function AddUserDialog(props) {
   return (
     <>
       <Tooltip title="Add Users" placement="top">
-        <Button className={classes.button} onClick={handleDialogOpen}>
+        <Button className={classes.button} 
+          onClick={handleDialogOpen}
+          disabled={isCompleted}
+        >
           <AddIcon />
         </Button>
       </Tooltip>

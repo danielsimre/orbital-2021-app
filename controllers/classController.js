@@ -17,105 +17,9 @@ import {
   validateCanRemoveUser,
   generateInviteCode,
   validateInviteCode,
+  validateClassIsIncomplete,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
-
-export const getInfo = (req, res) => {
-  validateCanAccessClass(req, res)
-    // Query the class, now with info of ALL users involved in the class
-    .then((classRoleObj) =>
-      Class.findById(req.params.id)
-        .populate({
-          path: "users",
-          populate: {
-            path: "userId",
-          },
-        })
-        .then((curClass) => {
-          const classObj = curClass.toObject();
-          classObj.attributes.role = classRoleObj.role;
-          return classObj;
-        })
-    )
-    .then((curClass) => res.json(curClass))
-    .catch((err) => console.log(err));
-};
-
-// If the user is not a part of the class, return an error
-// If the user is a part of the class as a student, return their group (if they have one)
-// If the user is a part of the class as a mentor, return all groups they are mentoring
-// Attributes of each group includes which mentors and students can be added to
-// the group from the class
-export const getGroups = (req, res) => {
-  validateCanAccessClass(req, res)
-    // Return a object with attributes groups, which contains an array of all groups
-    // Mentors can have multiple groups in the array, students have at most one
-    .then(() =>
-      Group.find({
-        $and: [
-          { classId: req.params.id },
-          {
-            $or: [{ groupMembers: req.user.id }, { mentoredBy: req.user.id }],
-          },
-        ],
-      })
-    )
-    .then((curGroups) => {
-      const invalidStudents = [];
-      // Find all students that are already in a group
-      curGroups.forEach((group) => {
-        const groupObj = group.toObject();
-        invalidStudents.push(...groupObj.attributes.groupMembers);
-      });
-      return Promise.all(
-        curGroups.map((group) => {
-          const groupObj = group.toObject();
-          return Promise.all([
-            ClassRole.find({
-              userId: { $nin: invalidStudents },
-              classId: groupObj.attributes.classId,
-              role: ClassRoles.STUDENT,
-            }).populate({
-              path: "userId",
-              select: "username",
-            }),
-            ClassRole.find({
-              userId: { $nin: groupObj.attributes.mentoredBy },
-              classId: groupObj.attributes.classId,
-              role: ClassRoles.MENTOR,
-            }).populate({
-              path: "userId",
-              select: "username",
-            }),
-          ]).then(([addableStudents, addableMentors]) => {
-            groupObj.attributes.addableStudents = addableStudents.map(
-              (student) => student.userId.username
-            );
-            groupObj.attributes.addableMentors = addableMentors.map(
-              (mentor) => mentor.userId.username
-            );
-            return groupObj;
-          });
-        })
-      );
-    })
-    .then((groupsObj) => res.json(groupsObj))
-    .catch((err) => console.log(err));
-};
-
-// Get announcements sorted by order of when the announcement was made, starting from the latest one
-export const getAnnouncements = (req, res) => {
-  validateCanAccessClass(req, res)
-    .then(() =>
-      Announcement.find({
-        classId: req.params.id,
-      })
-    )
-    .then((announcements) => {
-      res.json(announcements);
-    })
-    .catch((err) => console.log(err));
-};
 
 export const create = async (req, res) => {
   const { name, desc, groupSize } = req.body;
@@ -167,9 +71,143 @@ export const create = async (req, res) => {
     .catch((err) => console.log(err));
 };
 
+export const joinClass = (req, res) => {
+  const { inviteCode } = req.body;
+  validateFieldsPresent(
+    res,
+    "Please add an invite code for attribute inviteCode",
+    inviteCode
+  );
+  Promise.all([
+    Class.findOne({ studentInviteCode: inviteCode }),
+    Class.findOne({ mentorInviteCode: inviteCode }),
+  ])
+    // Ensure that the invite code is valid
+    // and that the user is not already enrolled in the class
+    .then(([studentClass, mentorClass]) => [
+      validateClassIsIncomplete(req, res, studentClass.id, studentClass),
+      validateClassIsIncomplete(req, res, mentorClass.id, mentorClass),
+    ])
+    .then(([studentClass, mentorClass]) =>
+      validateInviteCode(req, res, studentClass, mentorClass)
+    )
+    .then((newClassRole) => {
+      newClassRole.save();
+      res.json({ msg: "Successfully joined class" });
+    })
+    .catch((err) => console.log(err));
+};
+
+export const getInfo = (req, res) => {
+  validateCanAccessClass(req, res)
+    // Query the class, now with info of ALL users involved in the class
+    .then((classRoleObj) =>
+      Class.findById(req.params.id)
+        .populate({
+          path: "users",
+          populate: {
+            path: "userId",
+          },
+        })
+        .then((curClass) => {
+          const classObj = curClass.toObject();
+          // add current user id and role into the returned object
+          classObj.attributes.curUserId = req.user.id;
+          classObj.attributes.role = classRoleObj.role;
+          return classObj;
+        })
+    )
+    .then((curClass) => res.json(curClass))
+    .catch((err) => console.log(err));
+};
+
+// ?studentInviteCode and ?mentorInviteCode generates new invite codes for the class
+// ?isCompleted changes the isCompleted flag for a class
+export const updateInfo = (req, res) => {
+  if (req.query.studentInviteCode === "") {
+    validateCanAccessClass(req, res)
+      .then((curClass) =>
+        validateClassIsIncomplete(req, res, curClass.id, curClass)
+      )
+      .then(async (curClass) => {
+        curClass.studentInviteCode = await generateInviteCode();
+        return curClass;
+      })
+      .then((curClass) => {
+        curClass.save();
+        res.json({ msg: "Successfully generated new student invite code" });
+      })
+      .catch((err) => console.log(err));
+  } else if (req.query.mentorInviteCode === "") {
+    validateCanAccessClass(req, res)
+      .then((curClass) =>
+        validateClassIsIncomplete(req, res, curClass.id, curClass)
+      )
+      .then(async (curClass) => {
+        curClass.mentorInviteCode = await generateInviteCode();
+        return curClass;
+      })
+      .then((curClass) => {
+        curClass.save();
+        res.json({ msg: "Successfully generated new mentor invite code" });
+      })
+      .catch((err) => console.log(err));
+  } else if (req.query.isCompleted === "") {
+    validateCanAccessClass(req, res)
+      .then((curClass) =>
+        validateClassIsIncomplete(req, res, curClass.id, curClass)
+      )
+      .then((curClass) => {
+        curClass.isCompleted = true;
+        return curClass;
+      })
+      .then((curClass) => {
+        curClass.save();
+        res.json({ msg: "Successfully closed the class" });
+      })
+      .catch((err) => console.log(err));
+  } else {
+    validateCanAccessClass(req, res)
+      .then((curClass) =>
+        validateClassIsIncomplete(req, res, curClass.id, curClass)
+      )
+      .then((curClass) => {
+        let { groupSize } = req.body;
+        // If groupSize is not an integer, set it to null so that an error is
+        // thrown in validateFieldsPresent
+        groupSize = Number.isInteger(groupSize) ? groupSize : null;
+        validateFieldsPresent(
+          res,
+          "Please add an integer for attribute groupSize",
+          groupSize
+        );
+        curClass.groupSize = groupSize;
+        // Reset group members for all groups
+        return Group.find({ classId: curClass.id }).then((groups) => {
+          Promise.all(
+            groups.map((group) => {
+              group.groupMembers = [];
+              group.save();
+              return group;
+            })
+          );
+          curClass.save();
+          return groupSize;
+        });
+      })
+      .then((groupSize) => {
+        res.json({ msg: `Successfully updated group size to ${groupSize}` });
+      })
+      .catch((err) => console.log(err));
+  }
+};
+
 // Can add users as group members or mentors
 export const addUsers = (req, res) => {
   validateCanAccessClass(req, res)
+    .then((classObj) =>
+      validateClassIsIncomplete(req, res, classObj.id, classObj)
+    )
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -240,8 +278,73 @@ export const addUsers = (req, res) => {
     .catch((err) => console.log(err));
 };
 
+// If the user is not a part of the class, return an error
+// If the user is a part of the class as a student, return their group (if they have one)
+// If the user is a part of the class as a mentor, return all groups they are mentoring
+// Attributes of each group includes which mentors and students can be added to
+// the group from the class
+export const getGroups = (req, res) => {
+  validateCanAccessClass(req, res)
+    // Return a object with attributes groups, which contains an array of all groups
+    // Mentors can have multiple groups in the array, students have at most one
+    .then(() =>
+      Group.find({
+        $and: [
+          { classId: req.params.id },
+          {
+            $or: [{ groupMembers: req.user.id }, { mentoredBy: req.user.id }],
+          },
+        ],
+      })
+    )
+    .then((curGroups) => {
+      const invalidStudents = [];
+      // Find all students that are already in a group
+      curGroups.forEach((group) => {
+        const groupObj = group.toObject();
+        invalidStudents.push(...groupObj.attributes.groupMembers);
+      });
+      return Promise.all(
+        curGroups.map((group) => {
+          const groupObj = group.toObject();
+          return Promise.all([
+            ClassRole.find({
+              userId: { $nin: invalidStudents },
+              classId: groupObj.attributes.classId,
+              role: ClassRoles.STUDENT,
+            }).populate({
+              path: "userId",
+              select: "username",
+            }),
+            ClassRole.find({
+              userId: { $nin: groupObj.attributes.mentoredBy },
+              classId: groupObj.attributes.classId,
+              role: ClassRoles.MENTOR,
+            }).populate({
+              path: "userId",
+              select: "username",
+            }),
+          ]).then(([addableStudents, addableMentors]) => {
+            groupObj.attributes.addableStudents = addableStudents.map(
+              (student) => student.userId.username
+            );
+            groupObj.attributes.addableMentors = addableMentors.map(
+              (mentor) => mentor.userId.username
+            );
+            return groupObj;
+          });
+        })
+      );
+    })
+    .then((groupsObj) => res.json(groupsObj))
+    .catch((err) => console.log(err));
+};
+
 export const createGroups = (req, res) => {
   validateCanAccessClass(req, res)
+    .then((classObj) =>
+      validateClassIsIncomplete(req, res, classObj.id, classObj)
+    )
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -326,8 +429,27 @@ export const createGroups = (req, res) => {
     .catch((err) => console.log(err));
 };
 
+// If the user is not a part of the class, return an error
+// If the user is a part of the class as a mentor, nothing will be returned (mentors do not have tasks)
+// If the user is a part of the class as a student, return all tasks from this class that are
+// assigned to this user
+export const getTasks = (req, res) => {
+  validateCanAccessClass(req, res)
+    .then(() =>
+      ParentTask.find({
+        classId: req.params.id,
+        assignedTo: req.user.id,
+      })
+    )
+    .then((tasksObj) => res.json(tasksObj))
+    .catch((err) => console.log(err));
+};
+
 export const createTasks = (req, res) => {
   validateCanAccessClass(req, res)
+    .then((classObj) =>
+      validateClassIsIncomplete(req, res, classObj.id, classObj)
+    )
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -414,24 +536,25 @@ export const createTasks = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-// If the user is not a part of the class, return an error
-// If the user is a part of the class as a mentor, nothing will be returned (mentors do not have tasks)
-// If the user is a part of the class as a student, return all tasks from this class that are
-// assigned to this user
-export const getTasks = (req, res) => {
+// Get announcements sorted by order of when the announcement was made, starting from the latest one
+export const getAnnouncements = (req, res) => {
   validateCanAccessClass(req, res)
     .then(() =>
-      ParentTask.find({
+      Announcement.find({
         classId: req.params.id,
-        assignedTo: req.user.id,
       })
     )
-    .then((tasksObj) => res.json(tasksObj))
+    .then((announcements) => {
+      res.json(announcements);
+    })
     .catch((err) => console.log(err));
 };
 
 export const createAnnouncement = (req, res) => {
   validateCanAccessClass(req, res)
+    .then((classObj) =>
+      validateClassIsIncomplete(req, res, classObj.id, classObj)
+    )
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -464,6 +587,9 @@ export const createAnnouncement = (req, res) => {
 
 export const removeUser = (req, res) => {
   validateCanAccessClass(req, res)
+    .then((classObj) =>
+      validateClassIsIncomplete(req, res, classObj.id, classObj)
+    )
     .then((classRoleObj) => validateCanRemoveUser(req, res, classRoleObj))
     .then((classRole) => {
       Group.findOne({
@@ -495,83 +621,3 @@ export const removeUser = (req, res) => {
     .then(() => res.json({ msg: "Successfully removed user from class" }));
 };
 
-// ?studentInviteCode and ?mentorInviteCode generates new invite codes for the class
-// Also allows updating of group size for all groups
-export const updateInfo = (req, res) => {
-  if (req.query.studentInviteCode === "") {
-    validateCanAccessClass(req, res)
-      .then(async (curClass) => {
-        curClass.studentInviteCode = await generateInviteCode();
-        return curClass;
-      })
-      .then((curClass) => {
-        curClass.save();
-        res.json({ msg: "Successfully generated new student invite code" });
-      })
-      .catch((err) => console.log(err));
-  } else if (req.query.mentorInviteCode === "") {
-    validateCanAccessClass(req, res)
-      .then(async (curClass) => {
-        curClass.mentorInviteCode = await generateInviteCode();
-        return curClass;
-      })
-      .then((curClass) => {
-        curClass.save();
-        res.json({ msg: "Successfully generated new mentor invite code" });
-      })
-      .catch((err) => console.log(err));
-  } else {
-    validateCanAccessClass(req, res)
-      .then((curClass) => {
-        let { groupSize } = req.body;
-        // If groupSize is not an integer, set it to null so that an error is
-        // thrown in validateFieldsPresent
-        groupSize = Number.isInteger(groupSize) ? groupSize : null;
-        validateFieldsPresent(
-          res,
-          "Please add an integer for attribute groupSize",
-          groupSize
-        );
-        curClass.groupSize = groupSize;
-        // Reset group members for all groups
-        return Group.find({ classId: curClass.id }).then((groups) => {
-          Promise.all(
-            groups.map((group) => {
-              group.groupMembers = [];
-              group.save();
-              return group;
-            })
-          );
-          curClass.save();
-          return groupSize;
-        });
-      })
-      .then((groupSize) => {
-        res.json({ msg: `Successfully updated group size to ${groupSize}` });
-      })
-      .catch((err) => console.log(err));
-  }
-};
-
-export const joinClass = (req, res) => {
-  const { inviteCode } = req.body;
-  validateFieldsPresent(
-    res,
-    "Please add an invite code for attribute inviteCode",
-    inviteCode
-  );
-  Promise.all([
-    Class.findOne({ studentInviteCode: inviteCode }),
-    Class.findOne({ mentorInviteCode: inviteCode }),
-  ])
-    // Ensure that the invite code is valid
-    // and that the user is not already enrolled in the class
-    .then(([studentClass, mentorClass]) =>
-      validateInviteCode(req, res, studentClass, mentorClass)
-    )
-    .then((newClassRole) => {
-      newClassRole.save();
-      res.json({ msg: "Successfully joined class" });
-    })
-    .catch((err) => console.log(err));
-};

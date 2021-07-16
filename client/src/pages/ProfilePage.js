@@ -88,16 +88,15 @@ function ProfilePage(props) {
         { withCredentials: true }
       )
       .then((res) => {
-        console.log(res);
         handleAlert("Username changed!", res.data.msg, "success");
+        setUserDialogOpen(false);
       })
-      .then(() => setDisplayAlert(true))
       .catch((err) => {
-        console.log(err);
+        handleAlert("Error!", err.response.data.msg, "error");
       })
       .finally(() => {
         getUserData();
-        setUserDialogOpen(false);
+        setDisplayAlert(true);
         setUpdateUser(!updateUser);
       });
   }

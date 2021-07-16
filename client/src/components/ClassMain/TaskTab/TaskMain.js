@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
 function TaskMain(props) {
   // Queried values
   const { classID } = useParams();
-  const { curUserRole, taskFramework, refreshClassData } = props;
+  const { curUserRole, taskFramework, refreshClassData, isCompleted } = props;
   const [queriedTaskList, setQueriedTaskList] = useState([]);
 
   // Form values
@@ -185,7 +185,11 @@ function TaskMain(props) {
 
   return curUserRole === ClassRoles.MENTOR ? (
     <div className={classes.root}>
-      <Button onClick={handlePropDialogOpen} className={classes.button}>
+      <Button
+        onClick={handlePropDialogOpen}
+        className={classes.button}
+        disabled={isCompleted}
+      >
         {" "}
         Create New Task Framework{" "}
       </Button>
@@ -240,7 +244,9 @@ function TaskMain(props) {
             <DialogActions>
               <Button onClick={handlePropDialogClose}>Cancel</Button>
               <Button type="submit">Add Task</Button>
-              <Button onClick={handleConfirmDialogOpen}>Save Framework</Button>
+              <Button onClick={handleConfirmDialogOpen} disabled={isCompleted}>
+                Save Framework
+              </Button>
             </DialogActions>
           </form>
         </DialogContent>
@@ -308,7 +314,10 @@ function TaskMain(props) {
         </TableHead>
         <TableBody>
           {queriedTaskList.map((taskObject) => (
-            <TaskItem taskObject={taskObject.attributes} />
+            <TaskItem
+              taskObject={taskObject.attributes}
+              isCompleted={isCompleted}
+            />
           ))}
         </TableBody>
       </Table>

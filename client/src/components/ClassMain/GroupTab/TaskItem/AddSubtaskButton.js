@@ -27,7 +27,8 @@ const useStyles = makeStyles({
 
 function AddSubtaskButton(props) {
   // Queried values
-  const { parentDueDate, refreshGroupData, taskId, groupMembers } = props;
+  const { parentDueDate, refreshGroupData, taskId, groupMembers, isCompleted } =
+    props;
 
   // Form values
   const [newSubtaskName, setNewSubtaskName] = useState("");
@@ -92,7 +93,11 @@ function AddSubtaskButton(props) {
 
   return (
     <>
-      <Button className={classes.button} onClick={handleDialogOpen}>
+      <Button
+        className={classes.button}
+        onClick={handleDialogOpen}
+        disabled={isCompleted}
+      >
         Add Subtask
       </Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>

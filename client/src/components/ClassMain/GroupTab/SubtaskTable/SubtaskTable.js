@@ -12,7 +12,13 @@ import axios from "axios";
 import SubtaskDialogs from "./SubtaskDialogs";
 
 function SubtaskTable(props) {
-  const { groupMembers, refreshGroupData, parentDueDate, isMentor } = props;
+  const {
+    groupMembers,
+    refreshGroupData,
+    parentDueDate,
+    isMentor,
+    isCompleted,
+  } = props;
   const subtaskList = props.subtaskList.sort((subtask1, subtask2) => {
     if (subtask1.attributes.dueDate < subtask2.attributes.dueDate) {
       return -1;
@@ -87,7 +93,7 @@ function SubtaskTable(props) {
                       event.target.checked
                     )
                   }
-                  disabled={isMentor}
+                  disabled={isMentor || isCompleted}
                 />
               </TableCell>
               <TableCell>

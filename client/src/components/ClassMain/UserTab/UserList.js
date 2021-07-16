@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import {
   Button,
   Card,
-  CardActions,
   CardContent,
   Dialog,
   DialogActions,
@@ -65,6 +64,14 @@ const useStyles = makeStyles({
     display: "flex",
     justifyContent: "center",
   },
+  userCard: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  userButton: {
+    marginLeft: "auto",
+    color: "red",
+  },
 });
 
 function UserList(props) {
@@ -75,7 +82,8 @@ function UserList(props) {
     queriedUserList,
     creatorId,
     refreshClassData,
-    curUserData,
+    curUserId,
+    isCompleted,
   } = props;
 
   // Alert values
@@ -86,7 +94,7 @@ function UserList(props) {
 
   // Dialog values
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [curUserId, setCurUserId] = useState(null);
+  const [deleteUserId, setDeleteUserId] = useState(null);
 
   // Pagination values
   const ITEMS_PER_PAGE = 6;
@@ -124,7 +132,7 @@ function UserList(props) {
     );
   }, []);
 
-  const isCreator = curUserData.id === creatorId;
+  const isCreator = curUserId === creatorId;
 
   function handleAlert(title, message, severity) {
     setAlertTitleText(title);
@@ -135,7 +143,7 @@ function UserList(props) {
 
   function handleDeleteOpen(userId) {
     setDeleteDialogOpen(true);
-    setCurUserId(userId);
+    setDeleteUserId(userId);
   }
 
   function handleDeleteClose() {
@@ -168,13 +176,16 @@ function UserList(props) {
         }
       })
       .then(() => refreshClassData(classID))
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        handleAlert("Error!", err.response.data.msg, "error");
+      });
   }
 
   function handleDeleteUser(event) {
     event.preventDefault();
     axios
-      .delete(`/api/v1/classes/${classID}/users/${curUserId}`, {
+      .delete(`/api/v1/classes/${classID}/users/${deleteUserId}`, {
         withCredentials: true,
       })
       .then((res) => handleAlert("Success!", res.data.msg, "success"))
@@ -184,7 +195,7 @@ function UserList(props) {
       })
       .finally(() => {
         // clean up state
-        setCurUserId(null);
+        setDeleteUserId(null);
         setDeleteDialogOpen(false);
         refreshClassData(classID);
       });
@@ -199,7 +210,10 @@ function UserList(props) {
         {
           // If user is a mentor, render the add users button
           curUserRole === ClassRoles.MENTOR && (
-            <AddUserDialog handleAddUsers={handleAddUsers} />
+            <AddUserDialog
+              handleAddUsers={handleAddUsers}
+              isCompleted={isCompleted}
+            />
           )
         }
       </div>
@@ -213,43 +227,43 @@ function UserList(props) {
                   key={curUser.userId.attributes.username}
                 >
                   <Card variant="outlined">
-                    <CardContent>
-                      <Typography variant="h6">
-                        {curUser.userId.attributes.username}
-                      </Typography>
-                      <Typography variant="caption" display="block">
-                        Role: {curUser.role}
-                      </Typography>
-                      <Typography variant="caption" display="block">
-                        Email: {curUser.userId.attributes.email}
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      {
-                        /* Button only clickable if:
+                    <CardContent className={classes.userCard}>
+                      <div>
+                        <Typography variant="h6">
+                          {curUser.userId.attributes.username}
+                        </Typography>
+                        <Typography variant="caption" display="block">
+                          Role: {curUser.role}
+                        </Typography>
+                        <Typography variant="caption" display="block">
+                          Email: {curUser.userId.attributes.email}
+                        </Typography>
+                      </div>
+                      <div>
+                        {
+                          /* Button only clickable if:
                       1) The user is not yourself AND either
                       2a) You are the creator of the class OR
                       2b) You are a mentor AND the user is a student */
-                        curUser.userId.id !== curUserData.id &&
-                        (isCreator ||
-                          (curUserRole === ClassRoles.MENTOR &&
-                            curUser.role === ClassRoles.STUDENT)) ? (
-                          <Tooltip title="Remove user from class">
-                            <Button
-                              onClick={() =>
-                                handleDeleteOpen(curUser.userId.id)
-                              }
-                            >
-                              <CloseIcon />
-                            </Button>
-                          </Tooltip>
-                        ) : (
-                          <Button disabled>
-                            <CloseIcon />
-                          </Button>
-                        )
-                      }
-                    </CardActions>
+                          curUser.userId.id !== curUserId &&
+                            (isCreator ||
+                              (curUserRole === ClassRoles.MENTOR &&
+                                curUser.role === ClassRoles.STUDENT)) && (
+                              <Tooltip title="Remove user from class">
+                                <Button
+                                  onClick={() =>
+                                    handleDeleteOpen(curUser.userId.id)
+                                  }
+                                  className={classes.userButton}
+                                  disabled={isCompleted}
+                                >
+                                  <CloseIcon />
+                                </Button>
+                              </Tooltip>
+                            )
+                        }
+                      </div>
+                    </CardContent>
                   </Card>
                 </TableCell>
               ))}

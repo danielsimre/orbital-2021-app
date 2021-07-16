@@ -62,7 +62,7 @@ const useStyles = makeStyles({
 
 function ClassGroupList(props) {
   // Queried values
-  const { curUserRole, groupSize, refreshClassData } = props;
+  const { curUserRole, groupSize, refreshClassData, isCompleted } = props;
   const { classID } = useParams();
   const [queriedGroupList, setQueriedGroupList] = useState([]);
 
@@ -200,7 +200,11 @@ function ClassGroupList(props) {
           </Typography>
           <>
             <Tooltip title="Create groups for this class" placement="top">
-              <Button className={classes.button} onClick={handleDialogOpen}>
+              <Button
+                className={classes.button}
+                onClick={handleDialogOpen}
+                disabled={isCompleted}
+              >
                 <AddIcon />
               </Button>
             </Tooltip>
@@ -250,6 +254,7 @@ function ClassGroupList(props) {
                       refreshClassData={refreshClassData}
                       curGroupSize={curGroup.attributes.groupMembers.length}
                       groupSizeLimit={groupSize}
+                      isCompleted={isCompleted}
                     />
                   </TableCell>
                 </TableRow>
