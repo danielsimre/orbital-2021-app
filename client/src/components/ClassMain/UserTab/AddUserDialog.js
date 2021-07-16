@@ -6,13 +6,14 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Input,
   MenuItem,
   Select,
-  TextField,
   Tooltip,
   makeStyles,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
+import Papa from "papaparse";
 
 import { ClassRoles } from "../../../enums";
 
@@ -29,7 +30,7 @@ function AddUserDialog(props) {
   const { handleAddUsers, isCompleted } = props;
 
   // Form values
-  const [userEmails, setUserEmails] = useState("");
+  const [userEmailsCSV, setUserEmailsCSV] = useState(null);
   const [newUserRole, setNewUserRole] = useState("STUDENT");
 
   // Misc values
@@ -44,10 +45,22 @@ function AddUserDialog(props) {
     setDialogOpen(false);
   }
 
+  function parseCSV() {
+    Papa.parse(userEmailsCSV, {
+      complete: function (results, file) {
+        console.log("Parsing complete");
+        handleAddUsers(
+          results.data.flat().filter((email) => email !== ""),
+          newUserRole
+        );
+      },
+    });
+  }
+
   function handleSubmit(event) {
     event.preventDefault();
-    handleAddUsers(userEmails, newUserRole);
-    setUserEmails("");
+    parseCSV();
+    setUserEmailsCSV(null);
     handleDialogClose();
   }
 
@@ -66,17 +79,18 @@ function AddUserDialog(props) {
         <DialogTitle>Add Users</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Add a user by typing in their email.
+            Add users to this class by uploading a csv file <br />
+            containing the emails of the users you want to add.
           </DialogContentText>
-          <TextField
-            autoFocus
-            id="email"
-            label="Email Address"
-            type="email"
-            fullWidth
-            value={userEmails}
-            onChange={(event) => setUserEmails(event.target.value)}
-          />
+          <div>
+            <Input
+              type="file"
+              inputProps={{ accept: ".csv" }}
+              name="file"
+              placeholder={null}
+              onChange={(event) => setUserEmailsCSV(event.target.files[0])}
+            />
+          </div>
           <Select
             value={newUserRole}
             onChange={(event) => setNewUserRole(event.target.value)}

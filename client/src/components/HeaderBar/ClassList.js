@@ -60,7 +60,7 @@ function ClassList() {
   const classes = useStyles();
 
   // Pagination values
-  const ITEMS_PER_PAGE = 4;
+  const ITEMS_PER_PAGE = 5;
   const numPages = Math.ceil(queriedClassList.length / ITEMS_PER_PAGE);
   const [page, setPage] = useState(1);
   const [displayList, setDisplayList] = useState([]);

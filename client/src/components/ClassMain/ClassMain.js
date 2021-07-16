@@ -125,6 +125,7 @@ function ClassMain(props) {
             <Route path={`${path}/groups`}>
               <ClassGroupList
                 curUserRole={classData.role}
+                groupSize={classData.groupSize}
                 refreshClassData={() => getClassData(classID)}
                 isCompleted={classData.isCompleted}
               />
