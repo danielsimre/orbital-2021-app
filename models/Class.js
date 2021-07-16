@@ -55,6 +55,17 @@ const ClassSchema = new Schema(
       type: String,
       unique: true,
     },
+    groupSize: {
+      type: Number,
+      required: true,
+      default: 5,
+      min: [1, "Group size must be at least 1"],
+      max: [10, "Group size can be at most 10"],
+      validate: {
+        validator: Number.isInteger,
+        message: "Group size must be an integer value between 1 and 10",
+      },
+    },
     created_by: {
       type: Schema.Types.ObjectId,
       ref: "User",

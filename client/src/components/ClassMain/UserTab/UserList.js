@@ -138,6 +138,7 @@ function UserList(props) {
     setAlertTitleText(title);
     setAlertText(message);
     setAlertState(severity);
+    setDisplayAlert(true);
   }
 
   function handleDeleteOpen(userId) {
@@ -149,27 +150,27 @@ function UserList(props) {
     setDeleteDialogOpen(false);
   }
 
-  // Current only handles adding 1 at a time
   function handleAddUsers(userEmails, newUserRole) {
     axios
       .post(
         `/api/v1/classes/${classID}/users`,
         {
-          userEmails: [userEmails],
+          userEmails: userEmails,
           newUserRole: newUserRole,
         },
         { withCredentials: true }
       )
       .then((response) => {
-        // Alert message current only handles one user
-        if (response.data.doesNotExist.length !== 0) {
-          handleAlert("Error!", "The user does not exist.", "error");
-        } else if (response.data.alreadyAdded.length !== 0) {
-          handleAlert("Error!", "The user has already been added.", "error");
+        console.log(response.data);
+        const message = `User does not exist for emails: ${response.data.doesNotExist} \n
+        User is already in the class: ${response.data.alreadyAdded} \n
+        Sucessfully added users: ${response.data.successfullyAdded}`;
+        if (response.data.successfullyAdded.length === 0) {
+          handleAlert("Failure!", message, "error");
         } else {
           handleAlert(
-            "User Added!",
-            "The user has been added successfully.",
+            `${response.data.successfullyAdded.length} users added!`,
+            message,
             "success"
           );
         }
@@ -178,8 +179,7 @@ function UserList(props) {
       .catch((err) => {
         console.log(err);
         handleAlert("Error!", err.response.data.msg, "error");
-      })
-      .finally(() => setDisplayAlert(true));
+      });
   }
 
   function handleDeleteUser(event) {
@@ -198,7 +198,6 @@ function UserList(props) {
         setDeleteUserId(null);
         setDeleteDialogOpen(false);
         refreshClassData(classID);
-        setDisplayAlert(true);
       });
   }
 
@@ -281,7 +280,7 @@ function UserList(props) {
         />
       )}
       <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        anchorOrigin={{ vertical: "center", horizontal: "center" }}
         open={displayAlert}
         onClose={() => setDisplayAlert(false)}
       >

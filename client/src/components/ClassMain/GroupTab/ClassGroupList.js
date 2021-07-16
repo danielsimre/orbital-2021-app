@@ -62,12 +62,12 @@ const useStyles = makeStyles({
 
 function ClassGroupList(props) {
   // Queried values
-  const { curUserRole, refreshClassData, isCompleted } = props;
+  const { curUserRole, groupSize, refreshClassData, isCompleted } = props;
   const { classID } = useParams();
   const [queriedGroupList, setQueriedGroupList] = useState([]);
 
   // Form values
-  const [groupNames, setGroupNames] = useState("");
+  const [numOfGroups, setNumOfGroups] = useState(1);
 
   // Alert values
   const [displayAlert, setDisplayAlert] = useState(false);
@@ -76,7 +76,7 @@ function ClassGroupList(props) {
   const [alertState, setAlertState] = useState("");
 
   // Pagination values
-  const ITEMS_PER_PAGE = 2;
+  const ITEMS_PER_PAGE = 6;
   const numPages = Math.ceil(queriedGroupList.length / ITEMS_PER_PAGE);
   const [page, setPage] = useState(1);
   const [displayList, setDisplayList] = useState([]);
@@ -115,7 +115,7 @@ function ClassGroupList(props) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    handleAddGroups(groupNames);
+    handleAddGroups(numOfGroups);
   }
 
   function handleAlert(title, message, severity) {
@@ -125,12 +125,26 @@ function ClassGroupList(props) {
   }
 
   // Current only handles adding 1 at a time
-  function handleAddGroups(groupNames) {
+  function handleAddGroups(numOfGroups) {
+    let groups = [];
+    let counter = 1;
+    while (groups.length < numOfGroups) {
+      const curGroupName = `Group ${counter}`;
+      counter += 1;
+      // Checks if there is a group name conflict, if not, add to the array
+      if (
+        !queriedGroupList.some(
+          (group) => group.attributes.name === curGroupName
+        )
+      ) {
+        groups.push(curGroupName);
+      }
+    }
     axios
       .post(
         `/api/v1/classes/${classID}/groups`,
         {
-          groupNames: [groupNames],
+          groupNames: groups,
         },
         { withCredentials: true }
       )
@@ -149,7 +163,7 @@ function ClassGroupList(props) {
             "success"
           );
         }
-        setGroupNames("");
+        setNumOfGroups(1);
         handleDialogClose();
       })
       .then(() => getGroupData(classID))
@@ -198,15 +212,15 @@ function ClassGroupList(props) {
               <DialogTitle>Add Groups</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  Add a group by typing in a group name.
+                  Type in the number of groups that you want to add (up to 100).
                 </DialogContentText>
                 <TextField
                   autoFocus
-                  id="group names"
-                  label="Group Name"
+                  id="number of groups"
+                  label="Number of Groups"
                   fullWidth
-                  value={groupNames}
-                  onChange={(event) => setGroupNames(event.target.value)}
+                  value={numOfGroups}
+                  onChange={(event) => setNumOfGroups(event.target.value)}
                 />
               </DialogContent>
               <DialogActions>
@@ -238,6 +252,8 @@ function ClassGroupList(props) {
                       addableMentors={curGroup.attributes.addableMentors}
                       addableStudents={curGroup.attributes.addableStudents}
                       refreshClassData={refreshClassData}
+                      curGroupSize={curGroup.attributes.groupMembers.length}
+                      groupSizeLimit={groupSize}
                       isCompleted={isCompleted}
                     />
                   </TableCell>

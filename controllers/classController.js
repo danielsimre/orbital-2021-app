@@ -22,14 +22,15 @@ import {
 import { ClassRoles } from "../utils/enums.js";
 
 export const create = async (req, res) => {
-  const { name, desc } = req.body;
+  const { name, desc, groupSize } = req.body;
 
   // Ensure all fields are filled in
   validateFieldsPresent(
     res,
-    "Please fill in the name and desc fields",
+    "Please fill in the name, desc and groupSize fields",
     name,
-    desc
+    desc,
+    groupSize
   );
 
   const newClass = new Class({
@@ -38,6 +39,7 @@ export const create = async (req, res) => {
     created_by: req.user.id,
     studentInviteCode: await generateInviteCode(),
     mentorInviteCode: await generateInviteCode(),
+    groupSize,
   });
 
   newClass
@@ -152,22 +154,51 @@ export const updateInfo = (req, res) => {
       .catch((err) => console.log(err));
   } else if (req.query.isCompleted === "") {
     validateCanAccessClass(req, res)
-      /*
       .then((curClass) =>
-        //validateClassIsIncomplete(req, res, curClass.id, curClass)
+        validateClassIsIncomplete(req, res, curClass.id, curClass)
       )
-      */
       .then((curClass) => {
-        curClass.isCompleted = !curClass.isCompleted;
+        curClass.isCompleted = true;
         return curClass;
       })
       .then((curClass) => {
         curClass.save();
-        res.json({ msg: "Successfully changed class state" });
+        res.json({ msg: "Successfully closed the class" });
       })
       .catch((err) => console.log(err));
   } else {
-    res.status(404).json({ msg: "Invalid operation" });
+    validateCanAccessClass(req, res)
+      .then((curClass) =>
+        validateClassIsIncomplete(req, res, curClass.id, curClass)
+      )
+      .then((curClass) => {
+        let { groupSize } = req.body;
+        // If groupSize is not an integer, set it to null so that an error is
+        // thrown in validateFieldsPresent
+        groupSize = Number.isInteger(groupSize) ? groupSize : null;
+        validateFieldsPresent(
+          res,
+          "Please add an integer for attribute groupSize",
+          groupSize
+        );
+        curClass.groupSize = groupSize;
+        // Reset group members for all groups
+        return Group.find({ classId: curClass.id }).then((groups) => {
+          Promise.all(
+            groups.map((group) => {
+              group.groupMembers = [];
+              group.save();
+              return group;
+            })
+          );
+          curClass.save();
+          return groupSize;
+        });
+      })
+      .then((groupSize) => {
+        res.json({ msg: `Successfully updated group size to ${groupSize}` });
+      })
+      .catch((err) => console.log(err));
   }
 };
 
@@ -589,3 +620,4 @@ export const removeUser = (req, res) => {
     })
     .then(() => res.json({ msg: "Successfully removed user from class" }));
 };
+
