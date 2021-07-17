@@ -312,7 +312,7 @@ function GroupUserList(props) {
         </DialogActions>
       </Dialog>
       <Snackbar
-        anchorOrigin={{ vertical: "center", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={displayAlert}
         onClose={() => setDisplayAlert(false)}
       >

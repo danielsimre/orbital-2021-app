@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Tabs, Tab, makeStyles } from "@material-ui/core/";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Tabs,
+  Tab,
+  makeStyles,
+  Typography,
+} from "@material-ui/core/";
 import axios from "axios";
 
 import GroupTaskList from "./GroupTaskList";
@@ -20,6 +31,12 @@ const useStyles = makeStyles({
     borderTop: "1px solid black",
     borderBottom: "1px solid black",
   },
+  header: {
+    padding: "1rem",
+  },
+  leaveButton: {
+    color: "red",
+  },
 });
 
 function GroupMain(props) {
@@ -31,10 +48,13 @@ function GroupMain(props) {
 
   const isMentor = curUserRole === ClassRoles.MENTOR;
 
+  // Dialog values
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+
   // Misc values
   const [isRetrieving, setIsRetrieving] = useState(true);
 
-  // Misc values
+  // Tab values
   const [tabIndex, setTabIndex] = useState(0);
   const classes = useStyles();
 
@@ -42,18 +62,36 @@ function GroupMain(props) {
     setTabIndex(newValue);
   }
 
-  function getGroupData(groupID) {
+  function handleLeaveOpen() {
+    setLeaveDialogOpen(true);
+  }
+
+  function handleLeaveClose() {
+    setLeaveDialogOpen(false);
+  }
+
+  function getGroupData(groupId) {
     axios
-      .get(`/api/v1/groups/${groupID}`, {
+      .get(`/api/v1/groups/${groupId}`, {
         withCredentials: true,
       })
       .then((res) => {
         setGroupData(res.data.attributes);
       })
       .catch((err) => {
-        console.log(`Could not find group with ID: ${groupID}`);
+        console.log(`Could not find group with ID: ${groupId}`);
       })
       .finally(() => setIsRetrieving(false));
+  }
+
+  function handleLeaveGroup(event) {
+    event.preventDefault();
+    axios
+      .delete(`/api/v1/groups/${groupID}/users/`, { withCredentials: true })
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err))
+      .finally(() => setLeaveDialogOpen(false));
+    // Unsure how to redirect if needed, may also need alert
   }
 
   useEffect(() => {
@@ -63,7 +101,12 @@ function GroupMain(props) {
   return (
     isRetrieving || (
       <div className={classes.root}>
-        <h1>{groupData.name}</h1>
+        <div>
+          <Typography variant="h5" className={classes.header}>
+            {groupData.name}
+          </Typography>
+          <Button onClick={handleLeaveOpen}>Leave Group</Button>
+        </div>
         <Tabs
           value={tabIndex}
           onChange={handleChange}
@@ -92,6 +135,25 @@ function GroupMain(props) {
             groupID={groupID}
           />
         )}
+        {/* Start of Delete Comment Dialog */}
+        <Dialog open={leaveDialogOpen} onClose={handleLeaveClose}>
+          <DialogTitle>Leave Group</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to leave this group?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleLeaveClose}>Cancel</Button>
+            <Button
+              type="submit"
+              className={classes.leaveButton}
+              onClick={(event) => handleLeaveGroup(event)}
+            >
+              Leave
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     )
   );
