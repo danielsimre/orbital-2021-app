@@ -154,11 +154,14 @@ export const updateInfo = (req, res) => {
       .catch((err) => console.log(err));
   } else if (req.query.isCompleted === "") {
     validateCanAccessClass(req, res)
+      /* TODO: Leave commented until ready to stop toggling    
       .then((curClass) =>
         validateClassIsIncomplete(req, res, curClass.id, curClass)
       )
+      */
       .then((curClass) => {
-        curClass.isCompleted = true;
+        // TODO: change to "= true" for completed product
+        curClass.isCompleted = !curClass.isCompleted;
         return curClass;
       })
       .then((curClass) => {
@@ -620,4 +623,3 @@ export const removeUser = (req, res) => {
     })
     .then(() => res.json({ msg: "Successfully removed user from class" }));
 };
-

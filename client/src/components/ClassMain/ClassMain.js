@@ -141,6 +141,7 @@ function ClassMain(props) {
                 curUserRole={classData.role}
                 refreshClassData={getClassData}
                 isCompleted={classData.isCompleted}
+                isCreator={isCreator}
               />
             </Route>
             <Route path={`${path}`}>
