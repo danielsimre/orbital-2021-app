@@ -359,3 +359,13 @@ export const validateGroupSize = (res, usernames, curGroup) =>
     .catch((err) => {
       throw err;
     });
+
+export const validateHasMentors = (res, mentorArray) => {
+  if (mentorArray.length < 1) {
+    sendJsonErrMessage(
+      res,
+      403,
+      "You cannot leave the group as it will have no mentors left"
+    );
+  }
+};

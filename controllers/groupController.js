@@ -11,6 +11,7 @@ import {
   successfulFindQuery,
   validateGroupSize,
   validateClassIsIncomplete,
+  validateHasMentors,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 
@@ -204,6 +205,63 @@ export const removeUser = (req, res) => {
             (user) =>
               !Mongoose.Types.ObjectId(user.id).equals(
                 Mongoose.Types.ObjectId(req.params.userId)
+              )
+          );
+          task.save();
+        });
+      });
+    })
+    .then(() => res.json({ msg: "Successfully removed user from group" }))
+    .catch((err) => console.log(err));
+};
+
+export const leaveGroup = (req, res) => {
+  Group.findOne({
+    $and: [
+      { _id: req.params.id },
+      {
+        $or: [{ groupMembers: req.user.id }, { mentoredBy: req.user.id }],
+      },
+    ],
+  })
+    .then((curGroup) =>
+      validateCanAccessGroup(
+        res,
+        curGroup,
+        "Group does not exist or user is not authorized to add users to group"
+      )
+    )
+    .then((curGroup) => {
+      validateClassIsIncomplete(res, curGroup.classId);
+      return curGroup;
+    })
+    .then((curGroup) => {
+      curGroup.groupMembers = curGroup.groupMembers.filter(
+        (user) =>
+          !Mongoose.Types.ObjectId(user.id).equals(
+            Mongoose.Types.ObjectId(req.user.id)
+          )
+      );
+      curGroup.mentoredBy = curGroup.mentoredBy.filter(
+        (user) =>
+          !Mongoose.Types.ObjectId(user.id).equals(
+            Mongoose.Types.ObjectId(req.user.id)
+          )
+      );
+      validateHasMentors(res, curGroup.mentoredBy);
+
+      curGroup.save();
+      return curGroup;
+    })
+    .then((curGroup) => {
+      const taskIdArray = curGroup.tasks;
+
+      taskIdArray.forEach((taskId) => {
+        BaseTask.findById(taskId).then((task) => {
+          task.assignedTo = task.assignedTo.filter(
+            (user) =>
+              !Mongoose.Types.ObjectId(user.id).equals(
+                Mongoose.Types.ObjectId(req.user.id)
               )
           );
           task.save();

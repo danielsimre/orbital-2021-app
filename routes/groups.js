@@ -29,4 +29,9 @@ router.delete(
   groupController.removeUser
 );
 
+// @route DELETE api/v1/groups/:id/users/self
+// @desc Leave a specified group
+// @access Private
+router.delete("/:id/users/", ensureAuthenticated, groupController.leaveGroup);
+
 export default router;
