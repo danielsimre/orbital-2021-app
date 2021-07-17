@@ -14,11 +14,13 @@ import {
   TableCell,
   Typography,
   Tooltip,
+  Snackbar,
   makeStyles,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import { Pagination } from "@material-ui/lab";
+import { Alert, AlertTitle, Pagination } from "@material-ui/lab";
 import { ClassRoles } from "../../../enums";
+import axios from "axios";
 
 const useStyles = makeStyles({
   root: {
@@ -70,7 +72,21 @@ const useStyles = makeStyles({
 
 function GroupUserList(props) {
   // Queried values
-  const { groupMembers, mentors, isCreator, curUserId, isCompleted } = props;
+  const {
+    groupMembers,
+    mentors,
+    isCreator,
+    curUserId,
+    isCompleted,
+    refreshGroupData,
+    groupID,
+  } = props;
+
+  // Alert values
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
 
   // Pagination values
   const ITEMS_PER_PAGE = 4;
@@ -119,9 +135,31 @@ function GroupUserList(props) {
     setDeleteUserId(null);
   }
 
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
+    setDisplayAlert(true);
+  }
+
   function handleDeleteUser(event) {
     event.preventDefault();
     console.log(`Deleting user ${deleteUserId}...`);
+    axios
+      .delete(`/api/v1/groups/${groupID}/users/${deleteUserId}`, {
+        withCredentials: true,
+      })
+      .then((res) => handleAlert("Success!", res.data.msg, "success"))
+      .catch((err) => {
+        console.log(err);
+        handleAlert("Error!", err.response.data.msg, "error");
+      })
+      .finally(() => {
+        // clean up state
+        setDeleteUserId(null);
+        setDeleteDialogOpen(false);
+        refreshGroupData(groupID);
+      });
   }
 
   useEffect(() => {
@@ -273,6 +311,16 @@ function GroupUserList(props) {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        anchorOrigin={{ vertical: "center", horizontal: "center" }}
+        open={displayAlert}
+        onClose={() => setDisplayAlert(false)}
+      >
+        <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+          <AlertTitle>{alertTitleText}</AlertTitle>
+          {alertText}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

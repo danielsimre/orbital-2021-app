@@ -88,6 +88,8 @@ function GroupMain(props) {
             isCreator={isCreator}
             curUserId={curUserId}
             isCompleted={isCompleted}
+            refreshGroupData={() => getGroupData(groupID)}
+            groupID={groupID}
           />
         )}
       </div>
