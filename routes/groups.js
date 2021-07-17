@@ -20,4 +20,13 @@ router.get("/:id", ensureAuthenticated, groupController.getInfo);
 // @access Private
 router.post("/:id/users", ensureAuthenticated, groupController.addUsers);
 
+// @route DELETE api/v1/groups/:id/users/:userId
+// @desc Remove specified student from the group
+// @access Private
+router.delete(
+  "/:id/users/:userId",
+  ensureAuthenticated,
+  groupController.removeUser
+);
+
 export default router;

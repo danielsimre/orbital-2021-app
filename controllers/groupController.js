@@ -1,6 +1,7 @@
+import Mongoose from "mongoose";
 import ClassRole from "../models/ClassRole.js";
 import Group from "../models/Group.js";
-import { ParentTask } from "../models/BaseTask.js";
+import { BaseTask, ParentTask } from "../models/BaseTask.js";
 import User from "../models/User.js";
 
 import {
@@ -165,5 +166,50 @@ export const addUsers = (req, res) => {
       });
       curGroup.save();
     })
+    .catch((err) => console.log(err));
+};
+
+export const removeUser = (req, res) => {
+  Group.findOne({
+    _id: req.params.id,
+    mentoredBy: req.user.id,
+  })
+    .then((curGroup) =>
+      validateCanAccessGroup(
+        res,
+        curGroup,
+        "Group does not exist or user is not authorized to add users to group"
+      )
+    )
+    .then((curGroup) => {
+      validateClassIsIncomplete(res, curGroup.classId);
+      return curGroup;
+    })
+    .then((curGroup) => {
+      curGroup.groupMembers = curGroup.groupMembers.filter(
+        (user) =>
+          !Mongoose.Types.ObjectId(user.id).equals(
+            Mongoose.Types.ObjectId(req.params.userId)
+          )
+      );
+      curGroup.save();
+      return curGroup;
+    })
+    .then((curGroup) => {
+      const taskIdArray = curGroup.tasks;
+
+      taskIdArray.forEach((taskId) => {
+        BaseTask.findById(taskId).then((task) => {
+          task.assignedTo = task.assignedTo.filter(
+            (user) =>
+              !Mongoose.Types.ObjectId(user.id).equals(
+                Mongoose.Types.ObjectId(req.params.userId)
+              )
+          );
+          task.save();
+        });
+      });
+    })
+    .then(() => res.json({ msg: "Successfully removed user from group" }))
     .catch((err) => console.log(err));
 };
