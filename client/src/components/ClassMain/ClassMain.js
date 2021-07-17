@@ -44,6 +44,8 @@ function ClassMain(props) {
   const [isRetrieving, setIsRetrieving] = useState(true);
   const { path } = useRouteMatch();
 
+  const isCreator = classData.curUserId === classData.created_by;
+
   const classes = useStyles();
 
   function getClassData() {
@@ -102,8 +104,8 @@ function ClassMain(props) {
               <UserList
                 curUserRole={classData.role}
                 queriedUserList={classData.users}
-                creatorId={classData.created_by}
                 refreshClassData={getClassData}
+                isCreator={isCreator}
                 curUserId={classData.curUserId}
                 isCompleted={classData.isCompleted}
               />
@@ -119,6 +121,9 @@ function ClassMain(props) {
             <Route path={`${path}/groups/:groupID`}>
               <GroupMain
                 curUserRole={classData.role}
+                curUserId={classData.curUserId}
+                refreshClassData={getClassData}
+                isCreator={isCreator}
                 isCompleted={classData.isCompleted}
               />
             </Route>
@@ -128,6 +133,7 @@ function ClassMain(props) {
                 groupSize={classData.groupSize}
                 refreshClassData={() => getClassData(classID)}
                 isCompleted={classData.isCompleted}
+                isCreator={isCreator}
               />
             </Route>
             <Route path={`${path}/settings`}>

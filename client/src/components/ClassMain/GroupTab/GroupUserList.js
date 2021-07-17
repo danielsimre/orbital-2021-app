@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
 import {
+  Button,
   Card,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Table,
   TableBody,
   TableRow,
   TableCell,
   Typography,
+  Tooltip,
   makeStyles,
 } from "@material-ui/core";
+import CloseIcon from "@material-ui/icons/Close";
 import { Pagination } from "@material-ui/lab";
+import { ClassRoles } from "../../../enums";
 
 const useStyles = makeStyles({
   root: {
@@ -42,6 +51,17 @@ const useStyles = makeStyles({
     alignSelf: "center",
     flex: "0 0",
   },
+  userButton: {
+    marginLeft: "auto",
+    color: "red",
+  },
+  userCard: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  deleteButton: {
+    color: "red",
+  },
   pagination: {
     display: "flex",
     justifyContent: "center",
@@ -50,7 +70,7 @@ const useStyles = makeStyles({
 
 function GroupUserList(props) {
   // Queried values
-  const { groupMembers, mentors } = props;
+  const { groupMembers, mentors, isCreator, curUserId, isCompleted } = props;
 
   // Pagination values
   const ITEMS_PER_PAGE = 4;
@@ -83,6 +103,25 @@ function GroupUserList(props) {
         ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
       )
     );
+  }
+
+  // Dialog values
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteUserId, setDeleteUserId] = useState(null);
+
+  function handleDeleteOpen(userId) {
+    setDeleteDialogOpen(true);
+    setDeleteUserId(userId);
+  }
+
+  function handleDeleteClose() {
+    setDeleteDialogOpen(false);
+    setDeleteUserId(null);
+  }
+
+  function handleDeleteUser(event) {
+    event.preventDefault();
+    console.log(`Deleting user ${deleteUserId}...`);
   }
 
   useEffect(() => {
@@ -137,10 +176,34 @@ function GroupUserList(props) {
                   key={curUser.attributes.username}
                 >
                   <Card variant="outlined">
-                    <CardContent>
-                      <Typography variant="h6">
-                        {curUser.attributes.username}
-                      </Typography>
+                    <CardContent className={classes.userCard}>
+                      <div>
+                        <Typography variant="h6">
+                          {curUser.attributes.username}
+                        </Typography>
+                      </div>
+                      <div>
+                        {
+                          /* Button only clickable if:
+                      1) The user is not yourself AND either
+                      2a) You are the creator of the class OR
+                      2b) You are a mentor AND the user is a student */
+                          curUser.id !== curUserId &&
+                            (isCreator ||
+                              (curUser.role === ClassRoles.MENTOR &&
+                                curUser.role === ClassRoles.STUDENT)) && (
+                              <Tooltip title="Remove user from group">
+                                <Button
+                                  onClick={() => handleDeleteOpen(curUser.id)}
+                                  className={classes.userButton}
+                                  disabled={isCompleted}
+                                >
+                                  <CloseIcon />
+                                </Button>
+                              </Tooltip>
+                            )
+                        }
+                      </div>
                     </CardContent>
                   </Card>
                 </TableCell>
@@ -172,7 +235,7 @@ function GroupUserList(props) {
                   key={curUser.attributes.username}
                 >
                   <Card variant="outlined">
-                    <CardContent>
+                    <CardContent className={classes.userCard}>
                       <Typography variant="h6">
                         {curUser.attributes.username}
                       </Typography>
@@ -192,6 +255,24 @@ function GroupUserList(props) {
           className={classes.pagination}
         />
       )}
+      {/* Delete User Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteClose}>
+        <DialogTitle>Remove User</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to remove this user from the group?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteClose}>Cancel</Button>
+          <Button
+            className={classes.deleteButton}
+            onClick={(event) => handleDeleteUser(event)}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

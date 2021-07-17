@@ -80,8 +80,8 @@ function UserList(props) {
   const {
     curUserRole,
     queriedUserList,
-    creatorId,
     refreshClassData,
+    isCreator,
     curUserId,
     isCompleted,
   } = props;
@@ -131,8 +131,6 @@ function UserList(props) {
       cols
     );
   }, []);
-
-  const isCreator = curUserId === creatorId;
 
   function handleAlert(title, message, severity) {
     setAlertTitleText(title);
