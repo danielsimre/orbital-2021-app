@@ -71,7 +71,10 @@ export const addUsers = (req, res) => {
         "Group does not exist or user is not authorized to add users to group"
       )
     )
-    .then((curGroup) => validateClassIsIncomplete(req, res, curGroup.classId, curGroup))
+    .then((curGroup) => {
+      validateClassIsIncomplete(res, curGroup.classId);
+      return curGroup;
+    })
     .then(async (curGroup) => {
       const { usernames } = req.body;
       validateFieldsPresent(
