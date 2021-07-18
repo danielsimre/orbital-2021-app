@@ -47,6 +47,7 @@ const useStyles = makeStyles({
   },
   tableCell: {
     border: "none",
+    width: "50%",
   },
   button: {
     border: "1px solid black",
@@ -75,6 +76,7 @@ function GroupUserList(props) {
   const {
     groupMembers,
     mentors,
+    isMentor,
     isCreator,
     curUserId,
     isCompleted,
@@ -222,24 +224,19 @@ function GroupUserList(props) {
                       </div>
                       <div>
                         {
-                          /* Button only clickable if:
-                      1) The user is not yourself AND either
-                      2a) You are the creator of the class OR
-                      2b) You are a mentor AND the user is a student */
-                          curUser.id !== curUserId &&
-                            (isCreator ||
-                              (curUser.role === ClassRoles.MENTOR &&
-                                curUser.role === ClassRoles.STUDENT)) && (
-                              <Tooltip title="Remove user from group">
-                                <Button
-                                  onClick={() => handleDeleteOpen(curUser.id)}
-                                  className={classes.userButton}
-                                  disabled={isCompleted}
-                                >
-                                  <CloseIcon />
-                                </Button>
-                              </Tooltip>
-                            )
+                          /* Button only clickable if you are a mentor 
+                          No overlaps occur because this button only appears on students */
+                          isMentor && (
+                            <Tooltip title="Remove user from group">
+                              <Button
+                                onClick={() => handleDeleteOpen(curUser.id)}
+                                className={classes.userButton}
+                                disabled={isCompleted}
+                              >
+                                <CloseIcon />
+                              </Button>
+                            </Tooltip>
+                          )
                         }
                       </div>
                     </CardContent>
