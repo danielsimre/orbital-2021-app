@@ -9,9 +9,11 @@ import {
   DialogTitle,
   Tabs,
   Tab,
+  Snackbar,
   makeStyles,
   Typography,
 } from "@material-ui/core/";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import axios from "axios";
 
 import GroupTaskList from "./GroupTaskList";
@@ -51,6 +53,19 @@ function GroupMain(props) {
   // Dialog values
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
+  // Alert values
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
+
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
+    setDisplayAlert(true);
+  }
+
   // Misc values
   const [isRetrieving, setIsRetrieving] = useState(true);
 
@@ -88,8 +103,17 @@ function GroupMain(props) {
     event.preventDefault();
     axios
       .delete(`/api/v1/groups/${groupID}/users/`, { withCredentials: true })
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err))
+      .then((res) =>
+        handleAlert(
+          "Left the group",
+          "You have successfully left the group",
+          "success"
+        )
+      )
+      .catch((err) => {
+        console.log(err);
+        handleAlert("Error!", err.response.data.msg, "error");
+      })
       .finally(() => setLeaveDialogOpen(false));
     // Unsure how to redirect if needed, may also need alert
   }
@@ -128,6 +152,7 @@ function GroupMain(props) {
           <GroupUserList
             groupMembers={groupData.groupMembers}
             mentors={groupData.mentoredBy}
+            isMentor={isMentor}
             isCreator={isCreator}
             curUserId={curUserId}
             isCompleted={isCompleted}
@@ -154,6 +179,16 @@ function GroupMain(props) {
             </Button>
           </DialogActions>
         </Dialog>
+        <Snackbar
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          open={displayAlert}
+          onClose={() => setDisplayAlert(false)}
+        >
+          <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+            <AlertTitle>{alertTitleText}</AlertTitle>
+            {alertText}
+          </Alert>
+        </Snackbar>
       </div>
     )
   );
