@@ -12,6 +12,7 @@ import {
   validateGroupSize,
   validateClassIsIncomplete,
   validateHasMentors,
+  validateNoStudentsLeft,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 
@@ -58,6 +59,41 @@ export const getAllInfo = (req, res) => {
       res.json({ memberOf: groupArray[0], mentorOf: groupArray[1] })
     )
     .catch((err) => console.log(err));
+};
+
+export const deleteGroup = (req, res) => {
+  Group.findById(req.params.id)
+    .then((curGroup) =>
+      validateCanAccessGroup(
+        res,
+        curGroup,
+        "Group does not exist or user is not authorized to add users to group"
+      )
+    )
+    .then((curGroup) => {
+      validateClassIsIncomplete(res, curGroup.classId);
+      return curGroup;
+    })
+    .then((curGroup) => {
+      validateNoStudentsLeft(res, curGroup.groupMembers);
+      return curGroup;
+    })
+    .then((curGroup) => {
+      const taskIdArray = curGroup.tasks; // These tasks are parent tasks
+
+      taskIdArray.forEach((taskId) => {
+        BaseTask.findById(taskId).then((task) => {
+          const subtaskIdArray = task.subtasks;
+          if (subtaskIdArray.length > 0) {
+            BaseTask.deleteMany({ _id: { $in: subtaskIdArray } }).catch((err) =>
+              console.log(err)
+            ); // Delete all subtasks belong to the parent task
+          }
+          task.save();
+        });
+        BaseTask.findByIdAndDelete(taskId);
+      });
+    });
 };
 
 // Users will be automatically added as group members or mentors depending on their class role
@@ -199,8 +235,21 @@ export const removeUser = (req, res) => {
     .then((curGroup) => {
       const taskIdArray = curGroup.tasks;
 
+      // Iterate through all tasks and their respective subtasks
       taskIdArray.forEach((taskId) => {
         BaseTask.findById(taskId).then((task) => {
+          const subtaskIdArray = task.subtasks;
+          subtaskIdArray.forEach((subtaskId) => {
+            BaseTask.findById(subtaskId).then((subtask) => {
+              subtask.assignedTo = subtask.assignedTo.filter(
+                (user) =>
+                  !Mongoose.Types.ObjectId(user.id).equals(
+                    Mongoose.Types.ObjectId(req.params.userId)
+                  )
+              );
+              subtask.save();
+            });
+          });
           task.assignedTo = task.assignedTo.filter(
             (user) =>
               !Mongoose.Types.ObjectId(user.id).equals(
@@ -256,8 +305,21 @@ export const leaveGroup = (req, res) => {
     .then((curGroup) => {
       const taskIdArray = curGroup.tasks;
 
+      // Iterate through all tasks and their respective subtasks
       taskIdArray.forEach((taskId) => {
         BaseTask.findById(taskId).then((task) => {
+          const subtaskIdArray = task.subtasks;
+          subtaskIdArray.forEach((subtaskId) => {
+            BaseTask.findById(subtaskId).then((subtask) => {
+              subtask.assignedTo = subtask.assignedTo.filter(
+                (user) =>
+                  !Mongoose.Types.ObjectId(user.id).equals(
+                    Mongoose.Types.ObjectId(req.user.id)
+                  )
+              );
+              subtask.save();
+            });
+          });
           task.assignedTo = task.assignedTo.filter(
             (user) =>
               !Mongoose.Types.ObjectId(user.id).equals(
