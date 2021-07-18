@@ -22,6 +22,7 @@ import AddIcon from "@material-ui/icons/Add";
 import axios from "axios";
 
 import AddUserDialog from "./AddUserDialog";
+import DeleteGroupDialog from "./DeleteGroupDialog";
 
 const useStyles = makeStyles({
   root: {
@@ -255,6 +256,10 @@ function ClassGroupList(props) {
                       curGroupSize={curGroup.attributes.groupMembers.length}
                       groupSizeLimit={groupSize}
                       isCompleted={isCompleted}
+                    />
+                    <DeleteGroupDialog
+                      groupId={curGroup.id}
+                      refreshClassData={refreshClassData}
                     />
                   </TableCell>
                 </TableRow>
