@@ -611,24 +611,41 @@ export const removeUser = (req, res) => {
           { groupMembers: req.params.userId },
           { mentoredBy: req.params.userId },
         ],
-      }).then((group) => {
-        if (classRole.role === ClassRoles.MENTOR) {
-          group.mentoredBy = group.mentoredBy.filter(
-            (user) =>
-              !Mongoose.Types.ObjectId(user.id).equals(
-                Mongoose.Types.ObjectId(req.params.userId)
-              )
-          );
-        } else {
-          group.groupMembers = group.groupMembers.filter(
-            (user) =>
-              !Mongoose.Types.ObjectId(user.id).equals(
-                Mongoose.Types.ObjectId(req.params.userId)
-              )
-          );
-        }
-        group.save();
-      });
+      })
+        .then((curGroup) => {
+          if (classRole.role === ClassRoles.MENTOR) {
+            curGroup.mentoredBy = curGroup.mentoredBy.filter(
+              (user) =>
+                !Mongoose.Types.ObjectId(user.id).equals(
+                  Mongoose.Types.ObjectId(req.params.userId)
+                )
+            );
+          } else {
+            curGroup.groupMembers = curGroup.groupMembers.filter(
+              (user) =>
+                !Mongoose.Types.ObjectId(user.id).equals(
+                  Mongoose.Types.ObjectId(req.params.userId)
+                )
+            );
+          }
+          curGroup.save();
+          return curGroup;
+        })
+        .then((curGroup) => {
+          const taskIdArray = curGroup.tasks;
+
+          taskIdArray.forEach((taskId) => {
+            BaseTask.findById(taskId).then((task) => {
+              task.assignedTo = task.assignedTo.filter(
+                (user) =>
+                  !Mongoose.Types.ObjectId(user.id).equals(
+                    Mongoose.Types.ObjectId(req.params.userId)
+                  )
+              );
+              task.save();
+            });
+          });
+        });
       classRole.remove();
     })
     .then(() => res.json({ msg: "Successfully removed user from class" }));
