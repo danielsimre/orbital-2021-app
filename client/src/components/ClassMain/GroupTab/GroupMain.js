@@ -102,7 +102,7 @@ function GroupMain(props) {
   function handleLeaveGroup(event) {
     event.preventDefault();
     axios
-      .delete(`/api/v1/groups/${groupID}/users/`, { withCredentials: true })
+      .delete(`/api/v1/groups/${groupID}/users`, { withCredentials: true })
       .then((res) =>
         handleAlert(
           "Left the group",

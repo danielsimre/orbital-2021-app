@@ -146,7 +146,6 @@ function GroupUserList(props) {
 
   function handleDeleteUser(event) {
     event.preventDefault();
-    console.log(`Deleting user ${deleteUserId}...`);
     axios
       .delete(`/api/v1/groups/${groupID}/users/${deleteUserId}`, {
         withCredentials: true,
