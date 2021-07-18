@@ -369,3 +369,13 @@ export const validateHasMentors = (res, mentorArray) => {
     );
   }
 };
+
+export const validateNoStudentsLeft = (res, studentArray) => {
+  if (studentArray.length > 0) {
+    sendJsonErrMessage(
+      res,
+      403,
+      "You cannot delete this group as there are still students inside"
+    );
+  }
+};

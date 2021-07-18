@@ -89,11 +89,15 @@ export const deleteGroup = (req, res) => {
               console.log(err)
             ); // Delete all subtasks belong to the parent task
           }
-          task.save();
         });
-        BaseTask.findByIdAndDelete(taskId);
+        BaseTask.deleteOne({ _id: taskId });
       });
-    });
+    })
+    .then((curGroup) => {
+      Group.deleteOne({ _id: curGroup.id });
+    })
+    .then(() => res.json({ msg: "Successfully deleted group" }))
+    .catch((err) => console.log(err));
 };
 
 // Users will be automatically added as group members or mentors depending on their class role
