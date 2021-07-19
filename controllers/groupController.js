@@ -15,6 +15,7 @@ import {
   validateNoStudentsLeft,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
+import Class from "../models/Class.js";
 
 export const getInfo = (req, res) => {
   Group.findOne({
@@ -67,7 +68,7 @@ export const deleteGroup = (req, res) => {
       validateCanAccessGroup(
         res,
         curGroup,
-        "Group does not exist or user is not authorized to add users to group"
+        "Group does not exist or user is not authorized to delete group"
       )
     )
     .then((curGroup) => {
@@ -78,24 +79,41 @@ export const deleteGroup = (req, res) => {
       validateNoStudentsLeft(res, curGroup.groupMembers);
       return curGroup;
     })
+    .catch((err) => console.log(err))
     .then((curGroup) => {
       const taskIdArray = curGroup.tasks; // These tasks are parent tasks
 
       taskIdArray.forEach((taskId) => {
         BaseTask.findById(taskId).then((task) => {
-          const subtaskIdArray = task.subtasks;
-          if (subtaskIdArray.length > 0) {
-            BaseTask.deleteMany({ _id: { $in: subtaskIdArray } }).catch((err) =>
-              console.log(err)
-            ); // Delete all subtasks belong to the parent task
+          if (task) {
+            const subtaskIdArray = task.subtasks;
+            if (subtaskIdArray) {
+              BaseTask.deleteMany({ _id: { $in: subtaskIdArray } }).catch(
+                (err) => console.log(err)
+              ); // Delete all subtasks belong to the parent task
+            }
           }
         });
-        BaseTask.deleteOne({ _id: taskId });
+        BaseTask.deleteOne({ _id: taskId }).catch((err) => console.log(err));
       });
+      return curGroup;
     })
     .then((curGroup) => {
-      Group.deleteOne({ _id: curGroup.id });
+      Class.findById(curGroup.classId).then((classObj) => {
+        classObj.groups = classObj.groups.filter(
+          (group) =>
+            !Mongoose.Types.ObjectId(group.id).equals(
+              Mongoose.Types.ObjectId(req.params.id)
+            )
+        );
+        classObj.save();
+      });
+      return curGroup;
     })
+    .then((curGroup) => {
+      Group.deleteOne({ _id: curGroup.id }).catch((err) => console.log(err));
+    })
+    .catch((err) => console.log(err))
     .then(() => res.json({ msg: "Successfully deleted group" }))
     .catch((err) => console.log(err));
 };
