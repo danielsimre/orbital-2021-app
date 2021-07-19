@@ -167,7 +167,7 @@ function ClassGroupList(props) {
         setNumOfGroups(1);
         handleDialogClose();
       })
-      .then(() => getGroupData(classID))
+      .then(() => refreshClassData(classID))
       .then(() => setDisplayAlert(true))
       .catch((err) => console.log(err));
   }
@@ -260,6 +260,7 @@ function ClassGroupList(props) {
                     <DeleteGroupDialog
                       groupId={curGroup.id}
                       refreshClassData={refreshClassData}
+                      isCompleted={isCompleted}
                     />
                   </TableCell>
                 </TableRow>

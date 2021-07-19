@@ -30,7 +30,7 @@ const useStyles = makeStyles({
 
 function DeleteGroupDialog(props) {
   // Queried values
-  const { groupId, refreshClassData } = props;
+  const { groupId, refreshClassData, isCompleted } = props;
 
   // Dialog values
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -60,23 +60,28 @@ function DeleteGroupDialog(props) {
   const classes = useStyles();
 
   function handleDeleteGroup() {
-    console.log(`Deleting group ${groupId}`);
     axios
       .delete(`/api/v1/groups/${groupId}`, { withCredentials: true })
       .then((res) =>
         handleAlert("Group removed!", "The group has been removed", "success")
       )
-      .then(() => refreshClassData())
+      .then(() => {
+        setDialogOpen(false);
+        refreshClassData();
+      })
       .catch((err) => {
-        console.log(err);
         handleAlert("Error!", err.response.data.msg, "error");
       });
   }
 
   return (
     <>
-      <Tooltip title="Delete group">
-        <Button className={classes.button} onClick={handleDialogOpen}>
+      <Tooltip title="Delete group" placement="top">
+        <Button
+          className={classes.button}
+          onClick={handleDialogOpen}
+          disabled={isCompleted}
+        >
           <DeleteIcon />
         </Button>
       </Tooltip>

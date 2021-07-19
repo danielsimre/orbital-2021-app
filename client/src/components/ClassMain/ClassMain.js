@@ -131,7 +131,7 @@ function ClassMain(props) {
               <ClassGroupList
                 curUserRole={classData.role}
                 groupSize={classData.groupSize}
-                refreshClassData={() => getClassData(classID)}
+                refreshClassData={getClassData}
                 isCompleted={classData.isCompleted}
                 isCreator={isCreator}
               />

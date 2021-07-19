@@ -119,7 +119,8 @@ function AddUserDialog(props) {
   return (
     <>
       <Tooltip title="Add Users" placement="top">
-        <Button className={classes.button} 
+        <Button
+          className={classes.button}
           onClick={handleDialogOpen}
           disabled={isCompleted}
         >
