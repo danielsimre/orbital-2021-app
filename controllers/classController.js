@@ -626,3 +626,95 @@ export const removeUser = (req, res) => {
     })
     .then(() => res.json({ msg: "Successfully removed user from class" }));
 };
+
+// Automatically adds users enrolled into the class to groups
+// ?auto=students to autodistribute students into all groups (greedily fill groups by alphabetical order)
+// Will only distribute users that are not in a group
+// Output message depends if there are groups left over or students left over
+// ?auto=mentors&mentorsPerGroup={num} to autodistribute mentors based on num (excluding owner)
+export const distributeUsersIntoGroups = async (req, res) => {
+  try {
+    if (req.query.auto !== undefined) {
+      if (req.query.auto === "students") {
+        const classDoc = await Class.findById(req.params.id)
+          // Populate class with all group documents, sorted by name
+          .populate({ path: "groups", options: { sort: { name: 1 } } });
+        const classRolesArr = await ClassRole.find({
+          classId: req.params.id,
+          role: ClassRoles.STUDENT,
+        });
+        // Filter out users that are already in a group
+        const filteredUserIdArr = await Promise.all(
+          classRolesArr.map(async (classRole) => {
+            const group = await Group.findOne({
+              groupMembers: classRole.userId,
+              classId: req.params.id,
+            });
+            // If this user is in a group, set this element to null for filtering later
+            if (successfulFindOneQuery(group)) {
+              return null;
+            }
+            return classRole.userId;
+          })
+        ).then((userIdArr) => userIdArr.filter((userId) => userId));
+        // No students left to distribute
+        if (filteredUserIdArr.length === 0) {
+          res.status(400).json({ msg: "No more students to distribute" });
+        } else {
+          let counter = 0;
+          while (counter < filteredUserIdArr.length) {
+            // Joinable groups are groups that have less members then the group size limit
+            const joinableGroups = classDoc.groups.filter(
+              (group) => group.groupMembers.length < classDoc.groupSize
+            );
+            // Throw an error if there are not enough empty groups
+            if (joinableGroups.length === 0) {
+              res.status(400).json({
+                msg: `Not enough groups for students (${
+                  filteredUserIdArr.length - counter
+                } students left)`,
+              });
+              throw new Error(
+                `Not enough groups for students (${
+                  filteredUserIdArr.length - counter
+                } students left)`
+              );
+            }
+            const addedStudents = filteredUserIdArr.slice(
+              counter,
+              counter +
+                classDoc.groupSize -
+                joinableGroups[0].groupMembers.length
+            );
+            counter +=
+              classDoc.groupSize - joinableGroups[0].groupMembers.length;
+            // Fill up the current group
+            joinableGroups[0].groupMembers =
+              joinableGroups[0].groupMembers.concat(addedStudents);
+            // Assign parent tasks to the newly added user
+            // eslint-disable-next-line no-await-in-loop
+            await joinableGroups[0]
+              .save()
+              .then((groupDoc) =>
+                ParentTask.find({ _id: { $in: groupDoc.tasks } })
+              )
+              .then((tasks) =>
+                tasks.map((task) => {
+                  task.assignedTo = task.assignedTo.concat(addedStudents);
+                  task.save();
+                  return task;
+                })
+              );
+          }
+          res.json({ msg: "Successfully distributed students" });
+        }
+      } else if (req.query.auto === "mentors") {
+        // else
+      }
+    } else {
+      res.status(400).json({ msg: "Invalid command" });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
