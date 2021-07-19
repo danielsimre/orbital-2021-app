@@ -74,7 +74,7 @@ function ClassSettings(props) {
       })
       .finally(() => {
         setCompleteDialogOpen(false);
-        refreshClassData();
+        refreshClassData(classID);
         setDisplayAlert(true);
       });
   }

@@ -31,6 +31,7 @@ function AddUserDialog(props) {
   // Queried values
   const {
     groupId,
+    classID,
     refreshClassData,
     addableMentors,
     addableStudents,
@@ -112,7 +113,7 @@ function AddUserDialog(props) {
           ),
         (err) => handleAlert("Error!", err.response.data.msg, "error")
       )
-      .then(() => refreshClassData())
+      .then(() => refreshClassData(classID))
       .catch((err) => console.log(err));
   }
 

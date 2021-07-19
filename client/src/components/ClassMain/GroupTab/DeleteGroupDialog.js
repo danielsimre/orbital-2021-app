@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useParams } from "react-router";
 import {
   Button,
   Dialog,
@@ -30,8 +31,8 @@ const useStyles = makeStyles({
 
 function DeleteGroupDialog(props) {
   // Queried values
-  const { groupId, refreshClassData, isCompleted } = props;
-
+  const { groupId, refreshClassData, refreshGroupList, isCompleted } = props;
+  const { classID } = useParams();
   // Dialog values
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -67,7 +68,8 @@ function DeleteGroupDialog(props) {
       )
       .then(() => {
         setDialogOpen(false);
-        refreshClassData();
+        refreshClassData(classID);
+        refreshGroupList(classID);
       })
       .catch((err) => {
         handleAlert("Error!", err.response.data.msg, "error");

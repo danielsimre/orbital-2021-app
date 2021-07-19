@@ -48,12 +48,11 @@ function ClassMain(props) {
 
   const classes = useStyles();
 
-  function getClassData() {
+  function getClassData(classId) {
     axios
-      .get(`/api/v1/classes/${classID}`, { withCredentials: true })
+      .get(`/api/v1/classes/${classId}`, { withCredentials: true })
       .then((res) => {
         setClassData(res.data.attributes);
-        console.log(res.data.attributes);
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
@@ -82,7 +81,7 @@ function ClassMain(props) {
   }
 
   useEffect(() => {
-    getClassData();
+    getClassData(classID);
   }, [classID]);
 
   return (

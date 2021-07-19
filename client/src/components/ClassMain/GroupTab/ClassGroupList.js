@@ -168,10 +168,12 @@ function ClassGroupList(props) {
         handleDialogClose();
       })
       .then(() => refreshClassData(classID))
+      .then(() => getGroupData(classID))
       .then(() => setDisplayAlert(true))
       .catch((err) => console.log(err));
   }
 
+  // API query for list of groups
   function getGroupData(classID) {
     axios
       .get(`/api/v1/classes/${classID}/groups`, {
@@ -250,6 +252,7 @@ function ClassGroupList(props) {
                   <TableCell>
                     <AddUserDialog
                       groupId={curGroup.id}
+                      classID={classID}
                       addableMentors={curGroup.attributes.addableMentors}
                       addableStudents={curGroup.attributes.addableStudents}
                       refreshClassData={refreshClassData}
@@ -259,7 +262,9 @@ function ClassGroupList(props) {
                     />
                     <DeleteGroupDialog
                       groupId={curGroup.id}
+                      classID={classID}
                       refreshClassData={refreshClassData}
+                      refreshGroupList={getGroupData}
                       isCompleted={isCompleted}
                     />
                   </TableCell>
