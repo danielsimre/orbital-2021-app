@@ -36,10 +36,7 @@ export const update = (req, res) => {
           "Cannot update submissions of task"
         )
       )
-      .then((task) => {
-        validateClassIsIncomplete(res, task.classId);
-        return task;
-      })
+      .then((task) => validateClassIsIncomplete(res, task.classId, task))
       .then((task) => {
         const { submissionLinks } = req.body;
         validateFieldsPresent(
@@ -67,10 +64,7 @@ export const update = (req, res) => {
           "Cannot update completion status of task"
         )
       )
-      .then((task) => {
-        validateClassIsIncomplete(res, task.classId);
-        return task;
-      })
+      .then((task) => validateClassIsIncomplete(res, task.classId, task))
       .then((task) => {
         const { isCompleted } = req.body;
         validateFieldsPresent(
@@ -104,10 +98,9 @@ export const update = (req, res) => {
           )
         )
       )
-      .then((subtask) => {
-        validateClassIsIncomplete(res, subtask.classId);
-        return subtask;
-      })
+      .then((subtask) =>
+        validateClassIsIncomplete(res, subtask.classId, subtask)
+      )
       .then(async (task) => {
         const { dueDate, assignedTo, isCompleted } = req.body;
         // Check variables depending on what inputs are given in req.body
@@ -179,10 +172,7 @@ export const update = (req, res) => {
 
 export const createComment = (req, res) => {
   ParentTask.findOne({ _id: req.params.id })
-    .then((task) => {
-      validateClassIsIncomplete(res, task.classId);
-      return task;
-    })
+    .then((task) => validateClassIsIncomplete(res, task.classId, task))
     .then((curTask) => {
       const { title, content } = req.body;
       const newComment = new Comment({
@@ -217,10 +207,7 @@ export const createSubtask = (req, res) => {
     .then((task) =>
       validateCanAccessTask(res, task, req.user.id, "Cannot access this task")
     )
-    .then((task) => {
-      validateClassIsIncomplete(res, task.classId);
-      return task;
-    })
+    .then((task) => validateClassIsIncomplete(res, task.classId, task))
     .then((task) => {
       const { taskName, taskDesc, dueDate, assignedTo } = req.body;
       validateFieldsPresent(
@@ -277,10 +264,7 @@ export const deleteSubtask = (req, res) => {
         )
         .then(() => subtask)
     )
-    .then((subtask) => {
-      validateClassIsIncomplete(res, subtask.classId);
-      return subtask;
-    })
+    .then((subtask) => validateClassIsIncomplete(res, subtask.classId, subtask))
     .then((subtask) => {
       subtask.remove();
       ParentTask.collection.updateMany(

@@ -84,11 +84,10 @@ export const joinClass = (req, res) => {
   ])
     // Ensure that the invite code is valid
     // and that the user is not already enrolled in the class
-    .then(([studentClass, mentorClass]) => {
-      validateClassIsIncomplete(res, studentClass.id);
-      validateClassIsIncomplete(res, mentorClass.id);
-      return [studentClass, mentorClass];
-    })
+    .then(([studentClass, mentorClass]) => [
+      validateClassIsIncomplete(res, studentClass.id, studentClass),
+      validateClassIsIncomplete(res, mentorClass.id, mentorClass),
+    ])
     .then(([studentClass, mentorClass]) =>
       validateInviteCode(req, res, studentClass, mentorClass)
     )
@@ -128,8 +127,7 @@ export const updateInfo = (req, res) => {
   if (req.query.studentInviteCode === "") {
     validateCanAccessClass(req, res)
       .then((curClass) => {
-        validateClassIsIncomplete(res, curClass.id);
-        return curClass;
+        validateClassIsIncomplete(res, curClass.id, curClass);
       })
       .then(async (curClass) => {
         curClass.studentInviteCode = await generateInviteCode();
@@ -143,8 +141,7 @@ export const updateInfo = (req, res) => {
   } else if (req.query.mentorInviteCode === "") {
     validateCanAccessClass(req, res)
       .then((curClass) => {
-        validateClassIsIncomplete(res, curClass.id);
-        return curClass;
+        validateClassIsIncomplete(res, curClass.id, curClass);
       })
       .then(async (curClass) => {
         curClass.mentorInviteCode = await generateInviteCode();
@@ -159,8 +156,7 @@ export const updateInfo = (req, res) => {
     validateCanAccessClass(req, res)
       /* TODO: Leave commented until ready to stop toggling    
       .then((curClass) => {
-        validateClassIsIncomplete(res, curClass.id);
-        return curClass;
+        validateClassIsIncomplete(res, curClass.id, curClass);
       })
       */
       .then((curClass) => {
@@ -176,8 +172,7 @@ export const updateInfo = (req, res) => {
   } else {
     validateCanAccessClass(req, res)
       .then((curClass) => {
-        validateClassIsIncomplete(res, curClass.id);
-        return curClass;
+        validateClassIsIncomplete(res, curClass.id, curClass);
       })
       .then((curClass) => {
         let { groupSize } = req.body;
@@ -213,9 +208,8 @@ export const updateInfo = (req, res) => {
 // Can add users as group members or mentors
 export const addUsers = (req, res) => {
   validateCanAccessClass(req, res)
-    .then((classObj) => {
-      validateClassIsIncomplete(res, classObj.id);
-      return classObj;
+    .then((curClass) => {
+      validateClassIsIncomplete(res, curClass.id, curClass);
     })
     .then((classRoleObj) =>
       validateIsMentor(
@@ -351,9 +345,8 @@ export const getGroups = (req, res) => {
 
 export const createGroups = (req, res) => {
   validateCanAccessClass(req, res)
-    .then((classObj) => {
-      validateClassIsIncomplete(res, classObj.id);
-      return classObj;
+    .then((curClass) => {
+      validateClassIsIncomplete(res, curClass.id, curClass);
     })
     .then((classRoleObj) =>
       validateIsMentor(
@@ -457,9 +450,8 @@ export const getTasks = (req, res) => {
 
 export const createTasks = (req, res) => {
   validateCanAccessClass(req, res)
-    .then((classObj) => {
-      validateClassIsIncomplete(res, classObj.id);
-      return classObj;
+    .then((curClass) => {
+      validateClassIsIncomplete(res, curClass.id, curClass);
     })
     .then((classRoleObj) =>
       validateIsMentor(
@@ -563,9 +555,8 @@ export const getAnnouncements = (req, res) => {
 
 export const createAnnouncement = (req, res) => {
   validateCanAccessClass(req, res)
-    .then((classObj) => {
-      validateClassIsIncomplete(res, classObj.id);
-      return classObj;
+    .then((curClass) => {
+      validateClassIsIncomplete(res, curClass.id, curClass);
     })
     .then((classRoleObj) =>
       validateIsMentor(
@@ -599,9 +590,8 @@ export const createAnnouncement = (req, res) => {
 
 export const removeUser = (req, res) => {
   validateCanAccessClass(req, res)
-    .then((classObj) => {
-      validateClassIsIncomplete(res, classObj.id);
-      return classObj;
+    .then((curClass) => {
+      validateClassIsIncomplete(res, curClass.id, curClass);
     })
     .then((classRoleObj) => validateCanRemoveUser(req, res, classRoleObj))
     .then((classRole) => {

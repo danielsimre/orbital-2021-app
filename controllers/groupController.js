@@ -13,6 +13,7 @@ import {
   validateClassIsIncomplete,
   validateHasMentors,
   validateNoStudentsLeft,
+  validateUniqueGroupName,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 import Class from "../models/Class.js";
@@ -62,6 +63,32 @@ export const getAllInfo = (req, res) => {
     .catch((err) => console.log(err));
 };
 
+export const rename = (req, res) => {
+  const { newName } = req.body;
+
+  Group.findById(req.params.id)
+    .then((curGroup) =>
+      validateCanAccessGroup(
+        res,
+        curGroup,
+        "Group does not exist or user is not authorized to delete group"
+      )
+    )
+    .then((curGroup) => {
+      validateClassIsIncomplete(res, curGroup.classId, curGroup);
+    })
+    .then((curGroup) => {
+      validateUniqueGroupName(res, curGroup, newName);
+    })
+    .then(() => {
+      Group.findOneAndUpdate({ _id: req.params.id }, { name: newName });
+    })
+    .then(() => {
+      res.json({ msg: "Successfully updated group name" });
+    })
+    .catch((err) => console.log(err));
+};
+
 export const deleteGroup = (req, res) => {
   Group.findById(req.params.id)
     .then((curGroup) =>
@@ -72,8 +99,7 @@ export const deleteGroup = (req, res) => {
       )
     )
     .then((curGroup) => {
-      validateClassIsIncomplete(res, curGroup.classId);
-      return curGroup;
+      validateClassIsIncomplete(res, curGroup.classId, curGroup);
     })
     .then((curGroup) => {
       validateNoStudentsLeft(res, curGroup.groupMembers);
@@ -132,8 +158,7 @@ export const addUsers = (req, res) => {
       )
     )
     .then((curGroup) => {
-      validateClassIsIncomplete(res, curGroup.classId);
-      return curGroup;
+      validateClassIsIncomplete(res, curGroup.classId, curGroup);
     })
     .then(async (curGroup) => {
       const { usernames } = req.body;
@@ -241,8 +266,7 @@ export const removeUser = (req, res) => {
       )
     )
     .then((curGroup) => {
-      validateClassIsIncomplete(res, curGroup.classId);
-      return curGroup;
+      validateClassIsIncomplete(res, curGroup.classId, curGroup);
     })
     .then((curGroup) => {
       curGroup.groupMembers = curGroup.groupMembers.filter(
@@ -303,8 +327,7 @@ export const leaveGroup = (req, res) => {
       )
     )
     .then((curGroup) => {
-      validateClassIsIncomplete(res, curGroup.classId);
-      return curGroup;
+      validateClassIsIncomplete(res, curGroup.classId, curGroup);
     })
     .then((curGroup) => {
       curGroup.groupMembers = curGroup.groupMembers.filter(
