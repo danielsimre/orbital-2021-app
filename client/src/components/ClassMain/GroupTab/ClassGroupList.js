@@ -62,7 +62,8 @@ const useStyles = makeStyles({
 
 function ClassGroupList(props) {
   // Queried values
-  const { curUserRole, groupSize, refreshClassData, isCompleted } = props;
+  const { curUserRole, groupSize, groupNames, refreshClassData, isCompleted } =
+    props;
   const { classID } = useParams();
   const [queriedGroupList, setQueriedGroupList] = useState([]);
 
@@ -122,21 +123,19 @@ function ClassGroupList(props) {
     setAlertTitleText(title);
     setAlertText(message);
     setAlertState(severity);
+    setDisplayAlert(true);
   }
 
   // Current only handles adding 1 at a time
   function handleAddGroups(numOfGroups) {
     let groups = [];
     let counter = 1;
+    console.log(groupNames);
     while (groups.length < numOfGroups) {
       const curGroupName = `Group ${counter}`;
       counter += 1;
       // Checks if there is a group name conflict, if not, add to the array
-      if (
-        !queriedGroupList.some(
-          (group) => group.attributes.name === curGroupName
-        )
-      ) {
+      if (!groupNames.some((groupName) => groupName === curGroupName)) {
         groups.push(curGroupName);
       }
     }
@@ -167,7 +166,7 @@ function ClassGroupList(props) {
         handleDialogClose();
       })
       .then(() => getGroupData(classID))
-      .then(() => setDisplayAlert(true))
+      .then(() => refreshClassData())
       .catch((err) => console.log(err));
   }
 

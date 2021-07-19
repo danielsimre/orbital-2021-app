@@ -109,6 +109,10 @@ export const getInfo = (req, res) => {
             path: "userId",
           },
         })
+        .populate({
+          path: "groups",
+          select: "name",
+        })
         .then((curClass) => {
           const classObj = curClass.toObject();
           // add current user id and role into the returned object
@@ -297,12 +301,14 @@ export const getGroups = (req, res) => {
         ],
       })
     )
-    .then((curGroups) => {
+    .then(async (curGroups) => {
       const invalidStudents = [];
       // Find all students that are already in a group
-      curGroups.forEach((group) => {
-        const groupObj = group.toObject();
-        invalidStudents.push(...groupObj.attributes.groupMembers);
+      await Group.find({ classId: req.params.id }).then((allGroups) => {
+        allGroups.forEach((group) => {
+          const groupObj = group.toObject();
+          invalidStudents.push(...groupObj.attributes.groupMembers);
+        });
       });
       return Promise.all(
         curGroups.map((group) => {
@@ -620,4 +626,3 @@ export const removeUser = (req, res) => {
     })
     .then(() => res.json({ msg: "Successfully removed user from class" }));
 };
-

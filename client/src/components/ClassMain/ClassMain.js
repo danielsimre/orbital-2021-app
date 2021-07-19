@@ -51,7 +51,7 @@ function ClassMain(props) {
       .get(`/api/v1/classes/${classID}`, { withCredentials: true })
       .then((res) => {
         setClassData(res.data.attributes);
-        console.log(res.data.attributes);
+        console.log(res.data.attributes.groups);
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
@@ -126,6 +126,9 @@ function ClassMain(props) {
               <ClassGroupList
                 curUserRole={classData.role}
                 groupSize={classData.groupSize}
+                groupNames={classData.groups.map(
+                  (group) => group.attributes.name
+                )}
                 refreshClassData={() => getClassData(classID)}
                 isCompleted={classData.isCompleted}
               />
