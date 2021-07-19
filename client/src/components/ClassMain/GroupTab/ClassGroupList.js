@@ -23,6 +23,7 @@ import axios from "axios";
 
 import AddUserDialog from "./AddUserDialog";
 import DeleteGroupDialog from "./DeleteGroupDialog";
+import RenameGroupDialog from "./RenameGroupDialog";
 
 const useStyles = makeStyles({
   root: {
@@ -261,6 +262,13 @@ function ClassGroupList(props) {
                       isCompleted={isCompleted}
                     />
                     <DeleteGroupDialog
+                      groupId={curGroup.id}
+                      classID={classID}
+                      refreshClassData={refreshClassData}
+                      refreshGroupList={getGroupData}
+                      isCompleted={isCompleted}
+                    />
+                    <RenameGroupDialog
                       groupId={curGroup.id}
                       classID={classID}
                       refreshClassData={refreshClassData}
