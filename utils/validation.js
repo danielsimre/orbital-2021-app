@@ -83,8 +83,8 @@ export const validateClassIsIncomplete = (res, classId, ret) => {
         "Class data cannot be modified as it has been marked as completed"
       );
     }
-    return ret;
   });
+  return ret;
 };
 
 export const validateCanAccessGroup = (res, curGroup, msg) => {

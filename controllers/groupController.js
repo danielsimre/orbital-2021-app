@@ -74,16 +74,16 @@ export const rename = (req, res) => {
         "Group does not exist or user is not authorized to delete group"
       )
     )
-    .then((curGroup) => {
-      validateClassIsIncomplete(res, curGroup.classId, curGroup);
-    })
+    .then((curGroup) =>
+      validateClassIsIncomplete(res, curGroup.classId, curGroup)
+    )
     .then((curGroup) => {
       validateUniqueGroupName(res, curGroup, newName);
     })
-    .then(() => {
-      Group.findOneAndUpdate({ _id: req.params.id }, { name: newName });
-    })
-    .then(() => {
+    .then(() =>
+      Group.findOneAndUpdate({ _id: req.params.id }, { name: newName })
+    )
+    .then((group) => {
       res.json({ msg: "Successfully updated group name" });
     })
     .catch((err) => console.log(err));
@@ -98,9 +98,9 @@ export const deleteGroup = (req, res) => {
         "Group does not exist or user is not authorized to delete group"
       )
     )
-    .then((curGroup) => {
-      validateClassIsIncomplete(res, curGroup.classId, curGroup);
-    })
+    .then((curGroup) =>
+      validateClassIsIncomplete(res, curGroup.classId, curGroup)
+    )
     .then((curGroup) => {
       validateNoStudentsLeft(res, curGroup.groupMembers);
       return curGroup;
@@ -157,9 +157,9 @@ export const addUsers = (req, res) => {
         "Group does not exist or user is not authorized to add users to group"
       )
     )
-    .then((curGroup) => {
-      validateClassIsIncomplete(res, curGroup.classId, curGroup);
-    })
+    .then((curGroup) =>
+      validateClassIsIncomplete(res, curGroup.classId, curGroup)
+    )
     .then(async (curGroup) => {
       const { usernames } = req.body;
       validateFieldsPresent(
@@ -265,9 +265,9 @@ export const removeUser = (req, res) => {
         "Group does not exist or user is not authorized to add users to group"
       )
     )
-    .then((curGroup) => {
-      validateClassIsIncomplete(res, curGroup.classId, curGroup);
-    })
+    .then((curGroup) =>
+      validateClassIsIncomplete(res, curGroup.classId, curGroup)
+    )
     .then((curGroup) => {
       curGroup.groupMembers = curGroup.groupMembers.filter(
         (user) =>
@@ -326,9 +326,9 @@ export const leaveGroup = (req, res) => {
         "Group does not exist or user is not authorized to add users to group"
       )
     )
-    .then((curGroup) => {
-      validateClassIsIncomplete(res, curGroup.classId, curGroup);
-    })
+    .then((curGroup) =>
+      validateClassIsIncomplete(res, curGroup.classId, curGroup)
+    )
     .then((curGroup) => {
       curGroup.groupMembers = curGroup.groupMembers.filter(
         (user) =>
