@@ -33,6 +33,15 @@ router.put("/:id", ensureAuthenticated, classController.updateInfo);
 // @access Private
 router.post("/:id/users", ensureAuthenticated, classController.addUsers);
 
+// @route DELETE api/v1/classes/:classId/users/:userId
+// @desc Remove specified user from class (and groups if any)
+// @access Private
+router.delete(
+  "/:id/users/:userId",
+  ensureAuthenticated,
+  classController.removeUser
+);
+
 // @route GET api/v1/classes/:id/groups
 // @desc If the user is not a part of the class, do not return anything
 //       If the user is a part of the class as a student, return their group (if they have one)
@@ -82,15 +91,6 @@ router.post(
   "/:id/announcements",
   ensureAuthenticated,
   classController.createAnnouncement
-);
-
-// @route DELETE api/v1/classes/:classId/users/:userId
-// @desc Remove specified user from class (and groups if any)
-// @access Private
-router.delete(
-  "/:id/users/:userId",
-  ensureAuthenticated,
-  classController.removeUser
 );
 
 export default router;

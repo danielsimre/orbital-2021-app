@@ -4,14 +4,31 @@ import { ParentTask } from "../models/BaseTask.js";
 import User from "../models/User.js";
 
 import {
-  validateCanAccessGroup,
-  validateFieldsPresent,
   successfulFindOneQuery,
   successfulFindQuery,
-  validateGroupSize,
+  validateCanAccessGroup,
   validateClassIsIncomplete,
+  validateFieldsPresent,
+  validateGroupSize,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
+
+export const getAllInfo = (req, res) => {
+  Promise.all([
+    Group.find({ groupMembers: req.user.id }, "name classId").populate({
+      path: "classId",
+      select: "name",
+    }),
+    Group.find({ mentoredBy: req.user.id }, "name classId").populate({
+      path: "classId",
+      select: "name",
+    }),
+  ])
+    .then((groupArray) =>
+      res.json({ memberOf: groupArray[0], mentorOf: groupArray[1] })
+    )
+    .catch((err) => console.log(err));
+};
 
 export const getInfo = (req, res) => {
   Group.findOne({
@@ -38,23 +55,6 @@ export const getInfo = (req, res) => {
       )
     )
     .then((curGroup) => res.json(curGroup))
-    .catch((err) => console.log(err));
-};
-
-export const getAllInfo = (req, res) => {
-  Promise.all([
-    Group.find({ groupMembers: req.user.id }, "name classId").populate({
-      path: "classId",
-      select: "name",
-    }),
-    Group.find({ mentoredBy: req.user.id }, "name classId").populate({
-      path: "classId",
-      select: "name",
-    }),
-  ])
-    .then((groupArray) =>
-      res.json({ memberOf: groupArray[0], mentorOf: groupArray[1] })
-    )
     .catch((err) => console.log(err));
 };
 
