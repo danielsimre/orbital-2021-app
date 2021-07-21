@@ -50,7 +50,7 @@ const useStyles = makeStyles({
   button: {
     border: "1px solid black",
     alignSelf: "center",
-    flex: "0 0",
+    margin: "0.2em",
   },
   nogroup: {
     padding: "16px",
@@ -64,7 +64,8 @@ const useStyles = makeStyles({
 
 function ClassGroupList(props) {
   // Queried values
-  const { curUserRole, groupSize, refreshClassData, isCompleted } = props;
+  const { curUserRole, groupSize, groupNames, refreshClassData, isCompleted } =
+    props;
   const { classID } = useParams();
   const [queriedGroupList, setQueriedGroupList] = useState([]);
 
@@ -105,6 +106,7 @@ function ClassGroupList(props) {
   // Misc values
   const [isRetrieving, setIsRetrieving] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [distributeDialogOpen, setDistributeDialogOpen] = useState(false);
   const classes = useStyles();
 
   function handleDialogOpen() {
@@ -113,6 +115,14 @@ function ClassGroupList(props) {
 
   function handleDialogClose() {
     setDialogOpen(false);
+  }
+
+  function handleDistributeDialogOpen() {
+    setDistributeDialogOpen(true);
+  }
+
+  function handleDistributeDialogClose() {
+    setDistributeDialogOpen(false);
   }
 
   function handleSubmit(event) {
@@ -124,21 +134,18 @@ function ClassGroupList(props) {
     setAlertTitleText(title);
     setAlertText(message);
     setAlertState(severity);
+    setDisplayAlert(true);
   }
 
-  // Current only handles adding 1 at a time
   function handleAddGroups(numOfGroups) {
     let groups = [];
     let counter = 1;
+    console.log(groupNames);
     while (groups.length < numOfGroups) {
       const curGroupName = `Group ${counter}`;
       counter += 1;
       // Checks if there is a group name conflict, if not, add to the array
-      if (
-        !queriedGroupList.some(
-          (group) => group.attributes.name === curGroupName
-        )
-      ) {
+      if (!groupNames.some((groupName) => groupName === curGroupName)) {
         groups.push(curGroupName);
       }
     }
@@ -151,7 +158,6 @@ function ClassGroupList(props) {
         { withCredentials: true }
       )
       .then((response) => {
-        // Alert message current only handles one group
         if (response.data.nameConflict.length !== 0) {
           handleAlert(
             "Error!",
@@ -160,18 +166,20 @@ function ClassGroupList(props) {
           );
         } else {
           handleAlert(
-            "Group Added!",
-            "The group has been added successfully.",
+            "Groups Added!",
+            "Groups have been added successfully.",
             "success"
           );
         }
-        setNumOfGroups(1);
-        handleDialogClose();
       })
       .then(() => refreshClassData(classID))
       .then(() => getGroupData(classID))
-      .then(() => setDisplayAlert(true))
-      .catch((err) => console.log(err));
+      .then(() => refreshClassData())
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setNumOfGroups(1);
+        handleDialogClose();
+      });
   }
 
   // API query for list of groups
@@ -185,6 +193,24 @@ function ClassGroupList(props) {
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
+  }
+
+  function handleDistribute() {
+    axios
+      .post(`/api/v1/classes/${classID}/groups/users?auto=students`, {
+        withCredentials: true,
+      })
+      .then((response) => handleAlert("Success!", response.data.msg, "success"))
+      .then(() => getGroupData(classID))
+      .catch((err) => {
+        console.log(err);
+        handleAlert(
+          "Error!",
+          "An error occurred: " + err.response.data.msg,
+          "error"
+        );
+      })
+      .finally(() => handleDistributeDialogClose());
   }
 
   useEffect(() => {
@@ -233,6 +259,29 @@ function ClassGroupList(props) {
               </DialogActions>
             </Dialog>
           </>
+          <Button
+            className={classes.button}
+            onClick={handleDistributeDialogOpen}
+            disabled={isCompleted}
+          >
+            Auto-distribute
+          </Button>
+          <Dialog
+            open={distributeDialogOpen}
+            onClose={handleDistributeDialogClose}
+          >
+            <DialogTitle>Auto-distribute Users</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to automatically allocate all students to
+                a group?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleDistributeDialogClose}>Cancel</Button>
+              <Button onClick={handleDistribute}>Confirm</Button>
+            </DialogActions>
+          </Dialog>
         </div>
         {queriedGroupList.length === 0 ? (
           <Typography variant="h5">No groups yet.</Typography>

@@ -130,6 +130,9 @@ function ClassMain(props) {
               <ClassGroupList
                 curUserRole={classData.role}
                 groupSize={classData.groupSize}
+                groupNames={classData.groups.map(
+                  (group) => group.attributes.name
+                )}
                 refreshClassData={getClassData}
                 isCompleted={classData.isCompleted}
                 isCreator={isCreator}

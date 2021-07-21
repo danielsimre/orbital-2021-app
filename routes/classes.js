@@ -47,6 +47,15 @@ router.get("/:id/groups", ensureAuthenticated, classController.getGroups);
 // @access Private
 router.post("/:id/groups", ensureAuthenticated, classController.createGroups);
 
+// @route POST api/v1/classes/:id/groups/users
+// @desc Auto distributes users into groups (either students or mentors)
+// @access Private
+router.post(
+  "/:id/groups/users",
+  ensureAuthenticated,
+  classController.distributeUsersIntoGroups
+);
+
 // @route GET api/v1/classes/:id/tasks
 // @desc Get all tasks from this class that are assigned to this user (Only for students)
 // @access Private
@@ -75,9 +84,9 @@ router.post(
   classController.createAnnouncement
 );
 
-// @ route DELETE api/v1/classes/:classId/users/:userId
-// @ desc Remove specified user from class (and groups if any)
-// @ access Private
+// @route DELETE api/v1/classes/:classId/users/:userId
+// @desc Remove specified user from class (and groups if any)
+// @access Private
 router.delete(
   "/:id/users/:userId",
   ensureAuthenticated,
