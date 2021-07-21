@@ -27,7 +27,7 @@ const useStyles = makeStyles({
 
 function ClassSettings(props) {
   // Queried values
-  const { curUserRole, refreshClassData, isCompleted } = props;
+  const { curUserRole, refreshClassData, isCompleted, isCreator } = props;
   const { classID } = useParams();
 
   // Class Complete Dialog values
@@ -74,7 +74,7 @@ function ClassSettings(props) {
       })
       .finally(() => {
         setCompleteDialogOpen(false);
-        refreshClassData();
+        refreshClassData(classID);
         setDisplayAlert(true);
       });
   }
@@ -89,14 +89,18 @@ function ClassSettings(props) {
       <Typography variant="h5" className={classes.header}>
         Class Settings
       </Typography>
-      <div>
-        <Typography variant="body1">
-          End the class: Users can still view the class information, but will no
-          longer be able to join the class, create tasks, make modifications,
-          etc.
-        </Typography>
-        <Button onClick={handleDialogOpen}>Mark this class as finished</Button>
-      </div>
+      {isCreator && (
+        <div>
+          <Typography variant="body1">
+            End the class: Users can still view the class information, but will
+            no longer be able to join the class, create tasks, make
+            modifications, etc.
+          </Typography>
+          <Button onClick={handleDialogOpen}>
+            Mark this class as finished
+          </Button>
+        </div>
+      )}
       <Dialog open={completeDialogOpen} onClose={handleDialogClose}>
         <DialogTitle>End the class?</DialogTitle>
         <DialogContent>
@@ -111,6 +115,8 @@ function ClassSettings(props) {
           <Button
             className={classes.completeButton}
             onClick={(event) => handleClassComplete(event)}
+            // TODO: Leave as commented until ready
+            // disabled={isCompleted}
           >
             End the class
           </Button>

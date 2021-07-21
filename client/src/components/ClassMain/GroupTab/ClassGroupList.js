@@ -22,6 +22,8 @@ import AddIcon from "@material-ui/icons/Add";
 import axios from "axios";
 
 import AddUserDialog from "./AddUserDialog";
+import DeleteGroupDialog from "./DeleteGroupDialog";
+import RenameGroupDialog from "./RenameGroupDialog";
 
 const useStyles = makeStyles({
   root: {
@@ -166,11 +168,13 @@ function ClassGroupList(props) {
         setNumOfGroups(1);
         handleDialogClose();
       })
+      .then(() => refreshClassData(classID))
       .then(() => getGroupData(classID))
       .then(() => setDisplayAlert(true))
       .catch((err) => console.log(err));
   }
 
+  // API query for list of groups
   function getGroupData(classID) {
     axios
       .get(`/api/v1/classes/${classID}/groups`, {
@@ -249,11 +253,26 @@ function ClassGroupList(props) {
                   <TableCell>
                     <AddUserDialog
                       groupId={curGroup.id}
+                      classID={classID}
                       addableMentors={curGroup.attributes.addableMentors}
                       addableStudents={curGroup.attributes.addableStudents}
                       refreshClassData={refreshClassData}
                       curGroupSize={curGroup.attributes.groupMembers.length}
                       groupSizeLimit={groupSize}
+                      isCompleted={isCompleted}
+                    />
+                    <DeleteGroupDialog
+                      groupId={curGroup.id}
+                      classID={classID}
+                      refreshClassData={refreshClassData}
+                      refreshGroupList={getGroupData}
+                      isCompleted={isCompleted}
+                    />
+                    <RenameGroupDialog
+                      groupId={curGroup.id}
+                      classID={classID}
+                      refreshClassData={refreshClassData}
+                      refreshGroupList={getGroupData}
                       isCompleted={isCompleted}
                     />
                   </TableCell>
