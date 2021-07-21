@@ -85,8 +85,8 @@ export const joinClass = (req, res) => {
     // Ensure that the invite code is valid
     // and that the user is not already enrolled in the class
     .then(([studentClass, mentorClass]) => [
-      validateClassIsIncomplete(req, res, studentClass.id, studentClass),
-      validateClassIsIncomplete(req, res, mentorClass.id, mentorClass),
+      validateClassIsIncomplete(res, studentClass.id, studentClass),
+      validateClassIsIncomplete(res, mentorClass.id, mentorClass),
     ])
     .then(([studentClass, mentorClass]) =>
       validateInviteCode(req, res, studentClass, mentorClass)
@@ -130,9 +130,7 @@ export const getInfo = (req, res) => {
 export const updateInfo = (req, res) => {
   if (req.query.studentInviteCode === "") {
     validateCanAccessClass(req, res)
-      .then((curClass) =>
-        validateClassIsIncomplete(req, res, curClass.id, curClass)
-      )
+      .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
       .then(async (curClass) => {
         curClass.studentInviteCode = await generateInviteCode();
         return curClass;
@@ -144,9 +142,7 @@ export const updateInfo = (req, res) => {
       .catch((err) => console.log(err));
   } else if (req.query.mentorInviteCode === "") {
     validateCanAccessClass(req, res)
-      .then((curClass) =>
-        validateClassIsIncomplete(req, res, curClass.id, curClass)
-      )
+      .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
       .then(async (curClass) => {
         curClass.mentorInviteCode = await generateInviteCode();
         return curClass;
@@ -158,11 +154,14 @@ export const updateInfo = (req, res) => {
       .catch((err) => console.log(err));
   } else if (req.query.isCompleted === "") {
     validateCanAccessClass(req, res)
-      .then((curClass) =>
-        validateClassIsIncomplete(req, res, curClass.id, curClass)
+      /* TODO: Leave commented until ready to stop toggling    
+      .then((curClass) => 
+        validateClassIsIncomplete(res, curClass.id, curClass)
       )
+      */
       .then((curClass) => {
-        curClass.isCompleted = true;
+        // TODO: change to "= true" for completed product
+        curClass.isCompleted = !curClass.isCompleted;
         return curClass;
       })
       .then((curClass) => {
@@ -172,9 +171,7 @@ export const updateInfo = (req, res) => {
       .catch((err) => console.log(err));
   } else {
     validateCanAccessClass(req, res)
-      .then((curClass) =>
-        validateClassIsIncomplete(req, res, curClass.id, curClass)
-      )
+      .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
       .then((curClass) => {
         let { groupSize } = req.body;
         // If groupSize is not an integer, set it to null so that an error is
@@ -209,9 +206,7 @@ export const updateInfo = (req, res) => {
 // Can add users as group members or mentors
 export const addUsers = (req, res) => {
   validateCanAccessClass(req, res)
-    .then((classObj) =>
-      validateClassIsIncomplete(req, res, classObj.id, classObj)
-    )
+    .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -348,9 +343,7 @@ export const getGroups = (req, res) => {
 
 export const createGroups = (req, res) => {
   validateCanAccessClass(req, res)
-    .then((classObj) =>
-      validateClassIsIncomplete(req, res, classObj.id, classObj)
-    )
+    .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -453,9 +446,7 @@ export const getTasks = (req, res) => {
 
 export const createTasks = (req, res) => {
   validateCanAccessClass(req, res)
-    .then((classObj) =>
-      validateClassIsIncomplete(req, res, classObj.id, classObj)
-    )
+    .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -558,9 +549,7 @@ export const getAnnouncements = (req, res) => {
 
 export const createAnnouncement = (req, res) => {
   validateCanAccessClass(req, res)
-    .then((classObj) =>
-      validateClassIsIncomplete(req, res, classObj.id, classObj)
-    )
+    .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
     .then((classRoleObj) =>
       validateIsMentor(
         res,
@@ -593,9 +582,7 @@ export const createAnnouncement = (req, res) => {
 
 export const removeUser = (req, res) => {
   validateCanAccessClass(req, res)
-    .then((classObj) =>
-      validateClassIsIncomplete(req, res, classObj.id, classObj)
-    )
+    .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
     .then((classRoleObj) => validateCanRemoveUser(req, res, classRoleObj))
     .then((classRole) => {
       Group.findOne({
@@ -604,24 +591,46 @@ export const removeUser = (req, res) => {
           { groupMembers: req.params.userId },
           { mentoredBy: req.params.userId },
         ],
-      }).then((group) => {
-        if (classRole.role === ClassRoles.MENTOR) {
-          group.mentoredBy = group.mentoredBy.filter(
-            (user) =>
-              !Mongoose.Types.ObjectId(user.id).equals(
-                Mongoose.Types.ObjectId(req.params.userId)
-              )
-          );
-        } else {
-          group.groupMembers = group.groupMembers.filter(
-            (user) =>
-              !Mongoose.Types.ObjectId(user.id).equals(
-                Mongoose.Types.ObjectId(req.params.userId)
-              )
-          );
-        }
-        group.save();
-      });
+      })
+        .then((curGroup) => {
+          if (curGroup) {
+            if (classRole.role === ClassRoles.MENTOR) {
+              curGroup.mentoredBy = curGroup.mentoredBy.filter(
+                (user) =>
+                  !Mongoose.Types.ObjectId(user.id).equals(
+                    Mongoose.Types.ObjectId(req.params.userId)
+                  )
+              );
+            } else {
+              curGroup.groupMembers = curGroup.groupMembers.filter(
+                (user) =>
+                  !Mongoose.Types.ObjectId(user.id).equals(
+                    Mongoose.Types.ObjectId(req.params.userId)
+                  )
+              );
+            }
+            curGroup.save();
+            return curGroup;
+          }
+          return curGroup;
+        })
+        .then((curGroup) => {
+          if (curGroup) {
+            const taskIdArray = curGroup.tasks;
+
+            taskIdArray.forEach((taskId) => {
+              BaseTask.findById(taskId).then((task) => {
+                task.assignedTo = task.assignedTo.filter(
+                  (user) =>
+                    !Mongoose.Types.ObjectId(user.id).equals(
+                      Mongoose.Types.ObjectId(req.params.userId)
+                    )
+                );
+                task.save();
+              });
+            });
+          }
+        });
       classRole.remove();
     })
     .then(() => res.json({ msg: "Successfully removed user from class" }));
@@ -718,3 +727,4 @@ export const distributeUsersIntoGroups = async (req, res) => {
     console.log(err);
   }
 };
+

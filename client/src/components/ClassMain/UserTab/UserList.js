@@ -80,8 +80,8 @@ function UserList(props) {
   const {
     curUserRole,
     queriedUserList,
-    creatorId,
     refreshClassData,
+    isCreator,
     curUserId,
     isCompleted,
   } = props;
@@ -131,8 +131,6 @@ function UserList(props) {
       cols
     );
   }, []);
-
-  const isCreator = curUserId === creatorId;
 
   function handleAlert(title, message, severity) {
     setAlertTitleText(title);
@@ -235,9 +233,6 @@ function UserList(props) {
                         <Typography variant="caption" display="block">
                           Role: {curUser.role}
                         </Typography>
-                        <Typography variant="caption" display="block">
-                          Email: {curUser.userId.attributes.email}
-                        </Typography>
                       </div>
                       <div>
                         {
@@ -280,7 +275,7 @@ function UserList(props) {
         />
       )}
       <Snackbar
-        anchorOrigin={{ vertical: "center", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={displayAlert}
         onClose={() => setDisplayAlert(false)}
       >
