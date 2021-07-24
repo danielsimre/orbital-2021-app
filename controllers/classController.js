@@ -84,10 +84,6 @@ export const joinClass = (req, res) => {
   ])
     // Ensure that the invite code is valid
     // and that the user is not already enrolled in the class
-    .then(([studentClass, mentorClass]) => [
-      validateClassIsIncomplete(res, studentClass.id, studentClass),
-      validateClassIsIncomplete(res, mentorClass.id, mentorClass),
-    ])
     .then(([studentClass, mentorClass]) =>
       validateInviteCode(req, res, studentClass, mentorClass)
     )

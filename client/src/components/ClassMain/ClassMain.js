@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Switch, useRouteMatch, Route, useParams } from "react-router-dom";
-import { Button, makeStyles } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 import { Alert, AlertTitle } from "@material-ui/lab";
 import axios from "axios";
 
@@ -11,8 +11,6 @@ import GroupMain from "./GroupTab/GroupMain";
 import ClassAnnouncements from "./AnnouncementTab/ClassAnnouncements";
 import TaskMain from "./TaskTab/TaskMain";
 import ClassSettings from "./SettingsTab/ClassSettings";
-
-import { ClassRoles } from "../../enums";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,28 +54,6 @@ function ClassMain(props) {
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
-  }
-
-  function handleGenerateStudentInviteCode() {
-    axios
-      .put(`/api/v1/classes/${classID}?studentInviteCode`, {
-        withCredentials: true,
-      })
-      .then(() => getClassData(classID))
-      .catch((error) =>
-        console.log(`Could not find class with ID: ${classID}`)
-      );
-  }
-
-  function handleGenerateMentorInviteCode() {
-    axios
-      .put(`/api/v1/classes/${classID}?mentorInviteCode`, {
-        withCredentials: true,
-      })
-      .then(() => getClassData(classID))
-      .catch((error) =>
-        console.log(`Could not find class with ID: ${classID}`)
-      );
   }
 
   useEffect(() => {
@@ -142,6 +118,8 @@ function ClassMain(props) {
               <ClassSettings
                 curUserRole={classData.role}
                 refreshClassData={getClassData}
+                studentInviteCode={classData.studentInviteCode}
+                mentorInviteCode={classData.mentorInviteCode}
                 isCompleted={classData.isCompleted}
                 isCreator={isCreator}
               />
@@ -149,28 +127,6 @@ function ClassMain(props) {
             <Route path={`${path}`}>
               <h1>Class Main Page for {classData.name}</h1>
               <p>Description: {classData.desc}</p>
-              {classData.role === ClassRoles.MENTOR && (
-                <div>
-                  <div>
-                    Student Invite Code: {classData.studentInviteCode}
-                    <Button
-                      onClick={handleGenerateStudentInviteCode}
-                      disabled={classData.isCompleted}
-                    >
-                      Generate New Code
-                    </Button>
-                  </div>
-                  <div>
-                    Mentor Invite Code: {classData.mentorInviteCode}
-                    <Button
-                      onClick={handleGenerateMentorInviteCode}
-                      disabled={classData.isCompleted}
-                    >
-                      Generate New Code
-                    </Button>
-                  </div>
-                </div>
-              )}
               {classData.isCompleted && (
                 <Alert severity="info" className={classes.alert}>
                   <AlertTitle>This class is closed</AlertTitle>
