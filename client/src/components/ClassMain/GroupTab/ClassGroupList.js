@@ -22,6 +22,8 @@ import AddIcon from "@material-ui/icons/Add";
 import axios from "axios";
 
 import AddUserDialog from "./AddUserDialog";
+import DeleteGroupDialog from "./DeleteGroupDialog";
+import RenameGroupDialog from "./RenameGroupDialog";
 
 const useStyles = makeStyles({
   root: {
@@ -108,6 +110,7 @@ function ClassGroupList(props) {
   const classes = useStyles();
 
   function handleDialogOpen() {
+    setNumOfGroups(1);
     setDialogOpen(true);
   }
 
@@ -138,7 +141,19 @@ function ClassGroupList(props) {
   function handleAddGroups(numOfGroups) {
     let groups = [];
     let counter = 1;
-    console.log(groupNames);
+    if (
+      !Number.isInteger(numOfGroups) ||
+      numOfGroups < 1 ||
+      numOfGroups > 100
+    ) {
+      handleAlert(
+        "Error!",
+        "Invalid input. Number of groups must be a number between 1 and 100",
+        "error"
+      );
+      return;
+    }
+
     while (groups.length < numOfGroups) {
       const curGroupName = `Group ${counter}`;
       counter += 1;
@@ -170,6 +185,7 @@ function ClassGroupList(props) {
           );
         }
       })
+      .then(() => refreshClassData(classID))
       .then(() => getGroupData(classID))
       .then(() => refreshClassData())
       .catch((err) => console.log(err))
@@ -179,6 +195,7 @@ function ClassGroupList(props) {
       });
   }
 
+  // API query for list of groups
   function getGroupData(classID) {
     axios
       .get(`/api/v1/classes/${classID}/groups`, {
@@ -241,12 +258,24 @@ function ClassGroupList(props) {
                   Type in the number of groups that you want to add (up to 100).
                 </DialogContentText>
                 <TextField
+                  type="number"
                   autoFocus
                   id="number of groups"
                   label="Number of Groups"
                   fullWidth
                   value={numOfGroups}
-                  onChange={(event) => setNumOfGroups(event.target.value)}
+                  onChange={(event) => {
+                    const regex = /^[0-9]*$/g;
+                    const value = event.target.value;
+                    if (
+                      value !== "" &&
+                      regex.test(value) &&
+                      Number.parseInt(value) >= 1 &&
+                      Number.parseInt(value) <= 100
+                    ) {
+                      setNumOfGroups(Number.parseInt(value));
+                    }
+                  }}
                 />
               </DialogContent>
               <DialogActions>
@@ -298,11 +327,26 @@ function ClassGroupList(props) {
                   <TableCell>
                     <AddUserDialog
                       groupId={curGroup.id}
+                      classID={classID}
                       addableMentors={curGroup.attributes.addableMentors}
                       addableStudents={curGroup.attributes.addableStudents}
                       refreshClassData={refreshClassData}
                       curGroupSize={curGroup.attributes.groupMembers.length}
                       groupSizeLimit={groupSize}
+                      isCompleted={isCompleted}
+                    />
+                    <DeleteGroupDialog
+                      groupId={curGroup.id}
+                      classID={classID}
+                      refreshClassData={refreshClassData}
+                      refreshGroupList={getGroupData}
+                      isCompleted={isCompleted}
+                    />
+                    <RenameGroupDialog
+                      groupId={curGroup.id}
+                      classID={classID}
+                      refreshClassData={refreshClassData}
+                      refreshGroupList={getGroupData}
                       isCompleted={isCompleted}
                     />
                   </TableCell>

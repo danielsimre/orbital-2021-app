@@ -1,6 +1,7 @@
+import Mongoose from "mongoose";
 import ClassRole from "../models/ClassRole.js";
 import Group from "../models/Group.js";
-import { ParentTask } from "../models/BaseTask.js";
+import { BaseTask, ParentTask } from "../models/BaseTask.js";
 import User from "../models/User.js";
 
 import {
@@ -10,8 +11,12 @@ import {
   validateClassIsIncomplete,
   validateFieldsPresent,
   validateGroupSize,
+  validateHasMentors,
+  validateNoStudentsLeft,
+  validateUniqueGroupName,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
+import Class from "../models/Class.js";
 
 export const getAllInfo = (req, res) => {
   Promise.all([
@@ -58,6 +63,87 @@ export const getInfo = (req, res) => {
     .catch((err) => console.log(err));
 };
 
+export const rename = (req, res) => {
+  const { newName } = req.body;
+
+  Group.findById(req.params.id)
+    .then((curGroup) =>
+      validateCanAccessGroup(
+        res,
+        curGroup,
+        "Group does not exist or user is not authorized to delete group"
+      )
+    )
+    .then((curGroup) =>
+      validateClassIsIncomplete(res, curGroup.classId, curGroup)
+    )
+    .then((curGroup) => {
+      validateUniqueGroupName(res, curGroup, newName);
+    })
+    .then(() =>
+      Group.findOneAndUpdate({ _id: req.params.id }, { name: newName })
+    )
+    .then(() => {
+      res.json({ msg: "Successfully updated group name" });
+    })
+    .catch((err) => console.log(err));
+};
+
+export const deleteGroup = (req, res) => {
+  Group.findById(req.params.id)
+    .then((curGroup) =>
+      validateCanAccessGroup(
+        res,
+        curGroup,
+        "Group does not exist or user is not authorized to delete group"
+      )
+    )
+    .then((curGroup) =>
+      validateClassIsIncomplete(res, curGroup.classId, curGroup)
+    )
+    .then((curGroup) => {
+      validateNoStudentsLeft(res, curGroup.groupMembers);
+      return curGroup;
+    })
+    .catch((err) => console.log(err))
+    .then((curGroup) => {
+      const taskIdArray = curGroup.tasks; // These tasks are parent tasks
+
+      taskIdArray.forEach((taskId) => {
+        BaseTask.findById(taskId).then((task) => {
+          if (task) {
+            const subtaskIdArray = task.subtasks;
+            if (subtaskIdArray) {
+              BaseTask.deleteMany({ _id: { $in: subtaskIdArray } }).catch(
+                (err) => console.log(err)
+              ); // Delete all subtasks belong to the parent task
+            }
+          }
+        });
+        BaseTask.deleteOne({ _id: taskId }).catch((err) => console.log(err));
+      });
+      return curGroup;
+    })
+    .then((curGroup) => {
+      Class.findById(curGroup.classId).then((classObj) => {
+        classObj.groups = classObj.groups.filter(
+          (group) =>
+            !Mongoose.Types.ObjectId(group.id).equals(
+              Mongoose.Types.ObjectId(req.params.id)
+            )
+        );
+        classObj.save();
+      });
+      return curGroup;
+    })
+    .then((curGroup) => {
+      Group.deleteOne({ _id: curGroup.id }).catch((err) => console.log(err));
+    })
+    .catch((err) => console.log(err))
+    .then(() => res.json({ msg: "Successfully deleted group" }))
+    .catch((err) => console.log(err));
+};
+
 // Users will be automatically added as group members or mentors depending on their class role
 export const addUsers = (req, res) => {
   Group.findOne({
@@ -72,7 +158,7 @@ export const addUsers = (req, res) => {
       )
     )
     .then((curGroup) =>
-      validateClassIsIncomplete(req, res, curGroup.classId, curGroup)
+      validateClassIsIncomplete(res, curGroup.classId, curGroup)
     )
     .then(async (curGroup) => {
       const { usernames } = req.body;
@@ -164,5 +250,131 @@ export const addUsers = (req, res) => {
       });
       curGroup.save();
     })
+    .catch((err) => console.log(err));
+};
+
+export const removeUser = (req, res) => {
+  Group.findOne({
+    _id: req.params.id,
+    mentoredBy: req.user.id,
+  })
+    .then((curGroup) =>
+      validateCanAccessGroup(
+        res,
+        curGroup,
+        "Group does not exist or user is not authorized to add users to group"
+      )
+    )
+    .then((curGroup) =>
+      validateClassIsIncomplete(res, curGroup.classId, curGroup)
+    )
+    .then((curGroup) => {
+      curGroup.groupMembers = curGroup.groupMembers.filter(
+        (user) =>
+          !Mongoose.Types.ObjectId(user.id).equals(
+            Mongoose.Types.ObjectId(req.params.userId)
+          )
+      );
+      curGroup.save();
+      return curGroup;
+    })
+    .then((curGroup) => {
+      const taskIdArray = curGroup.tasks;
+
+      // Iterate through all tasks and their respective subtasks
+      taskIdArray.forEach((taskId) => {
+        BaseTask.findById(taskId).then((task) => {
+          const subtaskIdArray = task.subtasks;
+          subtaskIdArray.forEach((subtaskId) => {
+            BaseTask.findById(subtaskId).then((subtask) => {
+              subtask.assignedTo = subtask.assignedTo.filter(
+                (user) =>
+                  !Mongoose.Types.ObjectId(user.id).equals(
+                    Mongoose.Types.ObjectId(req.params.userId)
+                  )
+              );
+              subtask.save();
+            });
+          });
+          task.assignedTo = task.assignedTo.filter(
+            (user) =>
+              !Mongoose.Types.ObjectId(user.id).equals(
+                Mongoose.Types.ObjectId(req.params.userId)
+              )
+          );
+          task.save();
+        });
+      });
+    })
+    .then(() => res.json({ msg: "Successfully removed user from group" }))
+    .catch((err) => console.log(err));
+};
+
+export const leaveGroup = (req, res) => {
+  Group.findOne({
+    $and: [
+      { _id: req.params.id },
+      {
+        $or: [{ groupMembers: req.user.id }, { mentoredBy: req.user.id }],
+      },
+    ],
+  })
+    .then((curGroup) =>
+      validateCanAccessGroup(
+        res,
+        curGroup,
+        "Group does not exist or user is not authorized to add users to group"
+      )
+    )
+    .then((curGroup) =>
+      validateClassIsIncomplete(res, curGroup.classId, curGroup)
+    )
+    .then((curGroup) => {
+      curGroup.groupMembers = curGroup.groupMembers.filter(
+        (user) =>
+          !Mongoose.Types.ObjectId(user.id).equals(
+            Mongoose.Types.ObjectId(req.user.id)
+          )
+      );
+      curGroup.mentoredBy = curGroup.mentoredBy.filter(
+        (user) =>
+          !Mongoose.Types.ObjectId(user.id).equals(
+            Mongoose.Types.ObjectId(req.user.id)
+          )
+      );
+      validateHasMentors(res, curGroup.mentoredBy);
+
+      curGroup.save();
+      return curGroup;
+    })
+    .then((curGroup) => {
+      const taskIdArray = curGroup.tasks;
+
+      // Iterate through all tasks and their respective subtasks
+      taskIdArray.forEach((taskId) => {
+        BaseTask.findById(taskId).then((task) => {
+          const subtaskIdArray = task.subtasks;
+          subtaskIdArray.forEach((subtaskId) => {
+            BaseTask.findById(subtaskId).then((subtask) => {
+              subtask.assignedTo = subtask.assignedTo.filter(
+                (user) =>
+                  !Mongoose.Types.ObjectId(user.id).equals(
+                    Mongoose.Types.ObjectId(req.user.id)
+                  )
+              );
+              subtask.save();
+            });
+          });
+          task.assignedTo = task.assignedTo.filter(
+            (user) =>
+              !Mongoose.Types.ObjectId(user.id).equals(
+                Mongoose.Types.ObjectId(req.user.id)
+              )
+          );
+          task.save();
+        });
+      });
+    })
+    .then(() => res.json({ msg: "Successfully removed user from group" }))
     .catch((err) => console.log(err));
 };

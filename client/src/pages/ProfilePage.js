@@ -117,7 +117,6 @@ function ProfilePage(props) {
               </Typography>
               <CardContent>
                 <Typography>Username: {curUserInfo.username}</Typography>
-                <Typography>Email: {curUserInfo.email}</Typography>
               </CardContent>
             </Card>
             <Card variant="outlined" className={classes.card}>

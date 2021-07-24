@@ -44,14 +44,15 @@ function ClassMain(props) {
   const [isRetrieving, setIsRetrieving] = useState(true);
   const { path } = useRouteMatch();
 
+  const isCreator = classData.curUserId === classData.created_by;
+
   const classes = useStyles();
 
-  function getClassData() {
+  function getClassData(classId) {
     axios
-      .get(`/api/v1/classes/${classID}`, { withCredentials: true })
+      .get(`/api/v1/classes/${classId}`, { withCredentials: true })
       .then((res) => {
         setClassData(res.data.attributes);
-        console.log(res.data.attributes.groups);
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
@@ -80,7 +81,7 @@ function ClassMain(props) {
   }
 
   useEffect(() => {
-    getClassData();
+    getClassData(classID);
   }, [classID]);
 
   return (
@@ -102,8 +103,8 @@ function ClassMain(props) {
               <UserList
                 curUserRole={classData.role}
                 queriedUserList={classData.users}
-                creatorId={classData.created_by}
                 refreshClassData={getClassData}
+                isCreator={isCreator}
                 curUserId={classData.curUserId}
                 isCompleted={classData.isCompleted}
               />
@@ -119,6 +120,9 @@ function ClassMain(props) {
             <Route path={`${path}/groups/:groupID`}>
               <GroupMain
                 curUserRole={classData.role}
+                curUserId={classData.curUserId}
+                refreshClassData={getClassData}
+                isCreator={isCreator}
                 isCompleted={classData.isCompleted}
               />
             </Route>
@@ -129,8 +133,9 @@ function ClassMain(props) {
                 groupNames={classData.groups.map(
                   (group) => group.attributes.name
                 )}
-                refreshClassData={() => getClassData(classID)}
+                refreshClassData={getClassData}
                 isCompleted={classData.isCompleted}
+                isCreator={isCreator}
               />
             </Route>
             <Route path={`${path}/settings`}>
@@ -138,6 +143,7 @@ function ClassMain(props) {
                 curUserRole={classData.role}
                 refreshClassData={getClassData}
                 isCompleted={classData.isCompleted}
+                isCreator={isCreator}
               />
             </Route>
             <Route path={`${path}`}>

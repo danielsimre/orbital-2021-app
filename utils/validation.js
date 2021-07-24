@@ -74,7 +74,7 @@ export const validateCanAccessClass = (req, res) =>
       return classRoleObj.classId;
     });
 
-export const validateClassIsIncomplete = (req, res, classId, ret) =>
+export const validateClassIsIncomplete = (res, classId, ret) => {
   Class.findById(classId).then((classObj) => {
     if (classObj.isCompleted) {
       sendJsonErrMessage(
@@ -83,8 +83,9 @@ export const validateClassIsIncomplete = (req, res, classId, ret) =>
         "Class data cannot be modified as it has been marked as completed"
       );
     }
-    return ret;
   });
+  return ret;
+};
 
 export const validateCanAccessGroup = (res, curGroup, msg) => {
   if (!successfulFindOneQuery(curGroup)) {
@@ -360,3 +361,36 @@ export const validateGroupSize = (res, usernames, curGroup) =>
     .catch((err) => {
       throw err;
     });
+
+export const validateHasMentors = (res, mentorArray) => {
+  if (mentorArray.length < 1) {
+    sendJsonErrMessage(
+      res,
+      403,
+      "You cannot leave the group as it will have no mentors left"
+    );
+  }
+};
+
+export const validateNoStudentsLeft = (res, studentArray) => {
+  if (studentArray.length > 0) {
+    sendJsonErrMessage(
+      res,
+      403,
+      "You cannot delete this group as there are still students inside"
+    );
+  }
+};
+
+export const validateUniqueGroupName = (res, group, name) => {
+  Group.find({ classId: group.classId }).then((groupArr) => {
+    if (groupArr.some((grp) => grp.name === name)) {
+      sendJsonErrMessage(
+        res,
+        403,
+        "There exists another group with the same name in this class already"
+      );
+    }
+  });
+  return group;
+};

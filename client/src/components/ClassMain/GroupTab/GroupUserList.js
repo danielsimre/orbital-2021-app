@@ -1,15 +1,26 @@
 import { useEffect, useState } from "react";
 import {
+  Button,
   Card,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Table,
   TableBody,
   TableRow,
   TableCell,
   Typography,
+  Tooltip,
+  Snackbar,
   makeStyles,
 } from "@material-ui/core";
-import { Pagination } from "@material-ui/lab";
+import CloseIcon from "@material-ui/icons/Close";
+import { Alert, AlertTitle, Pagination } from "@material-ui/lab";
+import { ClassRoles } from "../../../enums";
+import axios from "axios";
 
 const useStyles = makeStyles({
   root: {
@@ -36,11 +47,23 @@ const useStyles = makeStyles({
   },
   tableCell: {
     border: "none",
+    width: "50%",
   },
   button: {
     border: "1px solid black",
     alignSelf: "center",
     flex: "0 0",
+  },
+  userButton: {
+    marginLeft: "auto",
+    color: "red",
+  },
+  userCard: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  deleteButton: {
+    color: "red",
   },
   pagination: {
     display: "flex",
@@ -50,7 +73,22 @@ const useStyles = makeStyles({
 
 function GroupUserList(props) {
   // Queried values
-  const { groupMembers, mentors } = props;
+  const {
+    groupMembers,
+    mentors,
+    isMentor,
+    isCreator,
+    curUserId,
+    isCompleted,
+    refreshGroupData,
+    groupID,
+  } = props;
+
+  // Alert values
+  const [displayAlert, setDisplayAlert] = useState(false);
+  const [alertText, setAlertText] = useState("");
+  const [alertTitleText, setAlertTitleText] = useState("");
+  const [alertState, setAlertState] = useState("");
 
   // Pagination values
   const ITEMS_PER_PAGE = 4;
@@ -83,6 +121,46 @@ function GroupUserList(props) {
         ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
       )
     );
+  }
+
+  // Dialog values
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteUserId, setDeleteUserId] = useState(null);
+
+  function handleDeleteOpen(userId) {
+    setDeleteDialogOpen(true);
+    setDeleteUserId(userId);
+  }
+
+  function handleDeleteClose() {
+    setDeleteDialogOpen(false);
+    setDeleteUserId(null);
+  }
+
+  function handleAlert(title, message, severity) {
+    setAlertTitleText(title);
+    setAlertText(message);
+    setAlertState(severity);
+    setDisplayAlert(true);
+  }
+
+  function handleDeleteUser(event) {
+    event.preventDefault();
+    axios
+      .delete(`/api/v1/groups/${groupID}/users/${deleteUserId}`, {
+        withCredentials: true,
+      })
+      .then((res) => handleAlert("Success!", res.data.msg, "success"))
+      .catch((err) => {
+        console.log(err);
+        handleAlert("Error!", err.response.data.msg, "error");
+      })
+      .finally(() => {
+        // clean up state
+        setDeleteUserId(null);
+        setDeleteDialogOpen(false);
+        refreshGroupData(groupID);
+      });
   }
 
   useEffect(() => {
@@ -137,13 +215,29 @@ function GroupUserList(props) {
                   key={curUser.attributes.username}
                 >
                   <Card variant="outlined">
-                    <CardContent>
-                      <Typography variant="h6">
-                        {curUser.attributes.username}
-                      </Typography>
-                      <Typography variant="caption" display="block">
-                        Email: {curUser.attributes.email}
-                      </Typography>
+                    <CardContent className={classes.userCard}>
+                      <div>
+                        <Typography variant="h6">
+                          {curUser.attributes.username}
+                        </Typography>
+                      </div>
+                      <div>
+                        {
+                          /* Button only clickable if you are a mentor 
+                          No overlaps occur because this button only appears on students */
+                          isMentor && (
+                            <Tooltip title="Remove user from group">
+                              <Button
+                                onClick={() => handleDeleteOpen(curUser.id)}
+                                className={classes.userButton}
+                                disabled={isCompleted}
+                              >
+                                <CloseIcon />
+                              </Button>
+                            </Tooltip>
+                          )
+                        }
+                      </div>
                     </CardContent>
                   </Card>
                 </TableCell>
@@ -175,12 +269,9 @@ function GroupUserList(props) {
                   key={curUser.attributes.username}
                 >
                   <Card variant="outlined">
-                    <CardContent>
+                    <CardContent className={classes.userCard}>
                       <Typography variant="h6">
                         {curUser.attributes.username}
-                      </Typography>
-                      <Typography variant="caption" display="block">
-                        Email: {curUser.attributes.email}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -198,6 +289,34 @@ function GroupUserList(props) {
           className={classes.pagination}
         />
       )}
+      {/* Delete User Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteClose}>
+        <DialogTitle>Remove User</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to remove this user from the group?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteClose}>Cancel</Button>
+          <Button
+            className={classes.deleteButton}
+            onClick={(event) => handleDeleteUser(event)}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={displayAlert}
+        onClose={() => setDisplayAlert(false)}
+      >
+        <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
+          <AlertTitle>{alertTitleText}</AlertTitle>
+          {alertText}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
