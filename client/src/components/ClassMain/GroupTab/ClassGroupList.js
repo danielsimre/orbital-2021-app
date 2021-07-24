@@ -185,8 +185,7 @@ function ClassGroupList(props) {
           );
         }
       })
-      .then(() => refreshClassData(classID))
-      .then(() => getGroupData(classID))
+      .then(() => getGroupData())
       .then(() => refreshClassData())
       .catch((err) => console.log(err))
       .finally(() => {
@@ -196,7 +195,7 @@ function ClassGroupList(props) {
   }
 
   // API query for list of groups
-  function getGroupData(classID) {
+  function getGroupData() {
     axios
       .get(`/api/v1/classes/${classID}/groups`, {
         withCredentials: true,
@@ -214,7 +213,7 @@ function ClassGroupList(props) {
         withCredentials: true,
       })
       .then((response) => handleAlert("Success!", response.data.msg, "success"))
-      .then(() => getGroupData(classID))
+      .then(() => getGroupData())
       .catch((err) => {
         console.log(err);
         handleAlert(
@@ -227,8 +226,8 @@ function ClassGroupList(props) {
   }
 
   useEffect(() => {
-    getGroupData(classID);
-  }, [classID]);
+    getGroupData();
+  }, []);
 
   // If the user is a mentor, display the add groups button + all groups this mentor is mentoring
   // Else, if the user is a student, redirect them directly to their group page if they have a group,
@@ -327,7 +326,6 @@ function ClassGroupList(props) {
                   <TableCell>
                     <AddUserDialog
                       groupId={curGroup.id}
-                      classID={classID}
                       addableMentors={curGroup.attributes.addableMentors}
                       addableStudents={curGroup.attributes.addableStudents}
                       refreshClassData={refreshClassData}
@@ -337,14 +335,12 @@ function ClassGroupList(props) {
                     />
                     <DeleteGroupDialog
                       groupId={curGroup.id}
-                      classID={classID}
                       refreshClassData={refreshClassData}
                       refreshGroupList={getGroupData}
                       isCompleted={isCompleted}
                     />
                     <RenameGroupDialog
                       groupId={curGroup.id}
-                      classID={classID}
                       refreshClassData={refreshClassData}
                       refreshGroupList={getGroupData}
                       isCompleted={isCompleted}

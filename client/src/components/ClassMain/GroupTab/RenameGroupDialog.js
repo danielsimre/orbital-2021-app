@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useParams } from "react-router";
 import {
   Button,
   Dialog,
@@ -30,7 +29,6 @@ const useStyles = makeStyles({
 function RenameGroupDialog(props) {
   // Queried values
   const { groupId, refreshClassData, refreshGroupList, isCompleted } = props;
-  const { classID } = useParams();
 
   // Dialog values
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -80,8 +78,8 @@ function RenameGroupDialog(props) {
         )
         .then(() => {
           setDialogOpen(false);
-          refreshClassData(classID);
-          refreshGroupList(classID);
+          refreshClassData();
+          refreshGroupList();
         })
         .catch((err) => {
           handleAlert("Error!", err.response.data.msg, "error");
