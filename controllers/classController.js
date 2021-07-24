@@ -111,9 +111,25 @@ export const getInfo = (req, res) => {
         })
         .then((curClass) => {
           const classObj = curClass.toObject();
-          // add current user id and role into the returned object
+          // Add current user id and role into the returned object
           classObj.attributes.curUserId = req.user.id;
           classObj.attributes.role = classRoleObj.role;
+          // Sort users by their username in alphabetical order
+          classObj.attributes.users.sort((user1, user2) => {
+            if (
+              user1.userId.attributes.username <
+              user2.userId.attributes.username
+            ) {
+              return -1;
+            }
+            if (
+              user1.userId.attributes.username >
+              user2.userId.attributes.username
+            ) {
+              return 1;
+            }
+            return 0;
+          });
           return classObj;
         })
     )
@@ -346,7 +362,7 @@ export const getGroups = (req, res) => {
             $or: [{ groupMembers: req.user.id }, { mentoredBy: req.user.id }],
           },
         ],
-      })
+      }).sort({ name: 1 })
     )
     .then(async (curGroups) => {
       const invalidStudents = [];

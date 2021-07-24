@@ -20,14 +20,18 @@ import Class from "../models/Class.js";
 
 export const getAllInfo = (req, res) => {
   Promise.all([
-    Group.find({ groupMembers: req.user.id }, "name classId").populate({
-      path: "classId",
-      select: "name",
-    }),
-    Group.find({ mentoredBy: req.user.id }, "name classId").populate({
-      path: "classId",
-      select: "name",
-    }),
+    Group.find({ groupMembers: req.user.id }, "name classId")
+      .populate({
+        path: "classId",
+        select: "name",
+      })
+      .sort({ name: 1 }),
+    Group.find({ mentoredBy: req.user.id }, "name classId")
+      .populate({
+        path: "classId",
+        select: "name",
+      })
+      .sort({ name: 1 }),
   ])
     .then((groupArray) =>
       res.json({ memberOf: groupArray[0], mentorOf: groupArray[1] })
