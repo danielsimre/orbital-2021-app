@@ -19,7 +19,6 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { Alert, AlertTitle, Pagination } from "@material-ui/lab";
-import { ClassRoles } from "../../../enums";
 import axios from "axios";
 
 const useStyles = makeStyles({
@@ -77,8 +76,6 @@ function GroupUserList(props) {
     groupMembers,
     mentors,
     isMentor,
-    isCreator,
-    curUserId,
     isCompleted,
     refreshGroupData,
     groupID,

@@ -96,9 +96,7 @@ function ClassMain(props) {
             <Route path={`${path}/groups/:groupID`}>
               <GroupMain
                 curUserRole={classData.role}
-                curUserId={classData.curUserId}
                 refreshClassData={getClassData}
-                isCreator={isCreator}
                 isCompleted={classData.isCompleted}
               />
             </Route>
