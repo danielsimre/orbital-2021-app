@@ -241,8 +241,16 @@ function ClassGroupList(props) {
   }
 
   useEffect(() => {
-    getGroupData();
-  }, []);
+    axios
+      .get(`/api/v1/classes/${classID}/groups`, {
+        withCredentials: true,
+      })
+      .then((response) => {
+        setQueriedGroupList(response.data);
+      })
+      .catch((err) => console.log(err))
+      .finally(() => setIsRetrieving(false));
+  }, [classID]);
 
   // If the user is a mentor, display the add groups button + all groups this mentor is mentoring
   // Else, if the user is a student, redirect them directly to their group page if they have a group,

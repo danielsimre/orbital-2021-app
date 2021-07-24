@@ -57,8 +57,14 @@ function ClassMain(props) {
   }
 
   useEffect(() => {
-    getClassData();
-  }, []);
+    axios
+      .get(`/api/v1/classes/${classID}`, { withCredentials: true })
+      .then((res) => {
+        setClassData(res.data.attributes);
+      })
+      .catch((err) => console.log(err))
+      .finally(() => setIsRetrieving(false));
+  }, [classID]);
 
   return (
     isRetrieving || (
