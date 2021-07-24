@@ -7,6 +7,7 @@ import {
   DialogContentText,
   DialogTitle,
   Paper,
+  InputLabel,
   MenuItem,
   TextField,
   Snackbar,
@@ -21,6 +22,7 @@ const useStyles = makeStyles({
   paper: {
     display: "flex",
     flexDirection: "column",
+    marginBottom: "0.5em",
   },
   snackbar: {
     textAlign: "center",
@@ -131,6 +133,7 @@ function NewClassDialog(props) {
                 onChange={(event) => setClassDescription(event.target.value)}
               />
             </Paper>
+            <InputLabel shrink>Group Size</InputLabel>
             <Select
               value={classGroupSize}
               onChange={(event) => setClassGroupSize(event.target.value)}
