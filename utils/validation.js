@@ -382,7 +382,7 @@ export const validateNoStudentsLeft = (res, studentArray) => {
   }
 };
 
-export const validateUniqueGroupName = (res, group, name) => {
+export const validateUniqueGroupName = (res, group, name) =>
   Group.find({ classId: group.classId }).then((groupArr) => {
     if (groupArr.some((grp) => grp.name === name)) {
       sendJsonErrMessage(
@@ -391,6 +391,5 @@ export const validateUniqueGroupName = (res, group, name) => {
         "There exists another group with the same name in this class already"
       );
     }
+    return group;
   });
-  return group;
-};

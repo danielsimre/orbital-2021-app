@@ -15,8 +15,8 @@ router.get("/", ensureAuthenticated, groupController.getAllInfo);
 // @access Private
 router.get("/:id", ensureAuthenticated, groupController.getInfo);
 
-// @route DELETE api/v1/groups/:id
-// @desc Delete the specified group and remove it from its class
+// @route PUT api/v1/groups/:id
+// @desc Rename the specified group
 // @access Private
 router.put("/:id", ensureAuthenticated, groupController.rename);
 

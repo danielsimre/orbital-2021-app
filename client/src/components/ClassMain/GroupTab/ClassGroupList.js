@@ -194,6 +194,21 @@ function ClassGroupList(props) {
       });
   }
 
+  function handleDeleteGroup(groupId) {
+    axios
+      .delete(`/api/v1/groups/${groupId}`, { withCredentials: true })
+      .then(() =>
+        handleAlert("Success!", "The group has been removed.", "success")
+      )
+      .then(() => {
+        setDialogOpen(false);
+        getGroupData();
+      })
+      .catch((err) => {
+        handleAlert("Error!", err.response.data.msg, "error");
+      });
+  }
+
   // API query for list of groups
   function getGroupData() {
     axios
@@ -334,14 +349,11 @@ function ClassGroupList(props) {
                       isCompleted={isCompleted}
                     />
                     <DeleteGroupDialog
-                      groupId={curGroup.id}
-                      refreshClassData={refreshClassData}
-                      refreshGroupList={getGroupData}
+                      handleDeleteGroup={() => handleDeleteGroup(curGroup.id)}
                       isCompleted={isCompleted}
                     />
                     <RenameGroupDialog
                       groupId={curGroup.id}
-                      refreshClassData={refreshClassData}
                       refreshGroupList={getGroupData}
                       isCompleted={isCompleted}
                     />

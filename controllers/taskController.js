@@ -252,7 +252,10 @@ export const deleteSubtask = (req, res) => {
 
 export const createComment = (req, res) => {
   ParentTask.findOne({ _id: req.params.id })
-    .then((task) => validateClassIsIncomplete(req, res, task.classId, task))
+    .then((task) =>
+      validateCanAccessTask(res, task, req.user.id, "Unable to access task")
+    )
+    .then((task) => validateClassIsIncomplete(res, task.classId.id, task))
     .then((curTask) => {
       const { title, content } = req.body;
       const newComment = new Comment({

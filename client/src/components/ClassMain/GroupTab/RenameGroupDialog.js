@@ -28,7 +28,7 @@ const useStyles = makeStyles({
 
 function RenameGroupDialog(props) {
   // Queried values
-  const { groupId, refreshClassData, refreshGroupList, isCompleted } = props;
+  const { groupId, refreshGroupList, isCompleted } = props;
 
   // Dialog values
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -74,11 +74,10 @@ function RenameGroupDialog(props) {
           { withCredentials: true }
         )
         .then((res) =>
-          handleAlert("Group renamed!", "The group has been renamed", "success")
+          handleAlert("Success!", "The group has been renamed.", "success")
         )
         .then(() => {
           setDialogOpen(false);
-          refreshClassData();
           refreshGroupList();
         })
         .catch((err) => {
