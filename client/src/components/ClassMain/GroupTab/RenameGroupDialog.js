@@ -63,14 +63,14 @@ function RenameGroupDialog(props) {
   const classes = useStyles();
 
   function handleRenameGroup() {
-    if (newGroupName.length < 1) {
+    if (newGroupName.trim().length < 1) {
       setHasError(true);
       setHelperText("Group name cannot be empty");
     } else {
       axios
         .put(
           `/api/v1/groups/${groupId}`,
-          { newName: newGroupName },
+          { newName: newGroupName.trim() },
           { withCredentials: true }
         )
         .then((res) =>
@@ -110,7 +110,14 @@ function RenameGroupDialog(props) {
             error={hasError}
             helperText={helperText}
             value={newGroupName}
-            onChange={(event) => setNewGroupName(event.target.value)}
+            onChange={(event) => {
+              // Do not allow spaces at the beginning, one space between words
+              const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+              const value = event.target.value;
+              if (value === "" || regex.test(value)) {
+                setNewGroupName(value);
+              }
+            }}
           />
         </DialogContent>
         <DialogActions>

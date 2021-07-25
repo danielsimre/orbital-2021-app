@@ -183,7 +183,7 @@ function ClassAnnouncements(props) {
           </div>
         </div>
         <Snackbar
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
           open={displayAlert}
           onClose={() => setDisplayAlert(false)}
         >

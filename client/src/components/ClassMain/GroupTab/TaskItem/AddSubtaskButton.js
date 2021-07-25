@@ -116,7 +116,14 @@ function AddSubtaskButton(props) {
               variant="outlined"
               required
               value={newSubtaskName}
-              onChange={(event) => setNewSubtaskName(event.target.value)}
+              onChange={(event) => {
+                // Do not allow spaces at the beginning, one space between words
+                const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setNewSubtaskName(value);
+                }
+              }}
             />
             <TextField
               id="subtask description"
@@ -125,7 +132,14 @@ function AddSubtaskButton(props) {
               required
               multiline
               value={newSubtaskDesc}
-              onChange={(event) => setNewSubtaskDesc(event.target.value)}
+              onChange={(event) => {
+                // Do not allow spaces at the beginning
+                const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setNewSubtaskDesc(value);
+                }
+              }}
             />
             <TextField
               id="date"

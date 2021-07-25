@@ -30,7 +30,7 @@ function AnnouncementForm(props) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    handleMakeAnnouncement(announceTitle, announceBody, classID);
+    handleMakeAnnouncement(announceTitle.trim(), announceBody.trim(), classID);
   }
 
   function handleMakeAnnouncement(title, content, classId) {
@@ -76,7 +76,14 @@ function AnnouncementForm(props) {
             variant="outlined"
             required
             value={announceTitle}
-            onChange={(event) => setAnnounceTitle(event.target.value)}
+            onChange={(event) => {
+              // Do not allow spaces at the beginning, one space between words
+              const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+              const value = event.target.value;
+              if (value === "" || regex.test(value)) {
+                setAnnounceTitle(value);
+              }
+            }}
           />
         </div>
         <div>
@@ -87,7 +94,14 @@ function AnnouncementForm(props) {
             multiline
             required
             value={announceBody}
-            onChange={(event) => setAnnounceBody(event.target.value)}
+            onChange={(event) => {
+              // Do not allow spaces at the beginning
+              const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
+              const value = event.target.value;
+              if (value === "" || regex.test(value)) {
+                setAnnounceBody(value);
+              }
+            }}
           />
         </div>
         <Button
