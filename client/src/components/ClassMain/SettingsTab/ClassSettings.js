@@ -23,11 +23,24 @@ const useStyles = makeStyles({
   completeButton: {
     color: "red",
   },
+  button: {
+    border: "1px solid black",
+    alignSelf: "center",
+    margin: "0.2em",
+    marginLeft: "0.5em",
+  },
 });
 
 function ClassSettings(props) {
   // Queried values
-  const { curUserRole, refreshClassData, isCompleted, isCreator } = props;
+  const {
+    curUserRole,
+    refreshClassData,
+    studentInviteCode,
+    mentorInviteCode,
+    isCompleted,
+    isCreator,
+  } = props;
   const { classID } = useParams();
 
   // Class Complete Dialog values
@@ -51,6 +64,28 @@ function ClassSettings(props) {
     setAlertTitleText(title);
     setAlertText(message);
     setAlertState(severity);
+  }
+
+  function handleGenerateStudentInviteCode() {
+    axios
+      .put(`/api/v1/classes/${classID}?studentInviteCode`, {
+        withCredentials: true,
+      })
+      .then(() => refreshClassData())
+      .catch((error) =>
+        console.log(`Could not find class with ID: ${classID}`)
+      );
+  }
+
+  function handleGenerateMentorInviteCode() {
+    axios
+      .put(`/api/v1/classes/${classID}?mentorInviteCode`, {
+        withCredentials: true,
+      })
+      .then(() => refreshClassData())
+      .catch((error) =>
+        console.log(`Could not find class with ID: ${classID}`)
+      );
   }
 
   function handleClassComplete() {
@@ -89,6 +124,28 @@ function ClassSettings(props) {
       <Typography variant="h5" className={classes.header}>
         Class Settings
       </Typography>
+      <div>
+        <div>
+          Student Invite Code: {studentInviteCode}
+          <Button
+            className={classes.button}
+            onClick={handleGenerateStudentInviteCode}
+            disabled={isCompleted}
+          >
+            Generate New Code
+          </Button>
+        </div>
+        <div>
+          Mentor Invite Code: {mentorInviteCode}
+          <Button
+            className={classes.button}
+            onClick={handleGenerateMentorInviteCode}
+            disabled={isCompleted}
+          >
+            Generate New Code
+          </Button>
+        </div>
+      </div>
       {isCreator && (
         <div>
           <Typography variant="body1">

@@ -123,8 +123,8 @@ function AddCommentButton(props) {
       .post(
         `/api/v1/tasks/${taskId}/comments`,
         {
-          title: commentTitle,
-          content: commentText,
+          title: commentTitle.trim(),
+          content: commentText.trim(),
         },
         {
           withCredentials: true,
@@ -250,7 +250,14 @@ function AddCommentButton(props) {
                 required
                 size="small"
                 value={commentTitle}
-                onChange={(event) => setCommentTitle(event.target.value)}
+                onChange={(event) => {
+                  // Do not allow spaces at the beginning, one space between words
+                  const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+                  const value = event.target.value;
+                  if (value === "" || regex.test(value)) {
+                    setCommentTitle(value);
+                  }
+                }}
               />
               <TextField
                 id="commentContent"
@@ -259,7 +266,14 @@ function AddCommentButton(props) {
                 required
                 multiline
                 value={commentText}
-                onChange={(event) => setCommentText(event.target.value)}
+                onChange={(event) => {
+                  // Do not allow spaces at the beginning
+                  const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
+                  const value = event.target.value;
+                  if (value === "" || regex.test(value)) {
+                    setCommentText(value);
+                  }
+                }}
               />
             </div>
           </form>
@@ -286,7 +300,14 @@ function AddCommentButton(props) {
                   required
                   size="small"
                   value={editTitle}
-                  onChange={(event) => setEditTitle(event.target.value)}
+                  onChange={(event) => {
+                    // Do not allow spaces at the beginning, one space between words
+                    const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+                    const value = event.target.value;
+                    if (value === "" || regex.test(value)) {
+                      setEditTitle(value);
+                    }
+                  }}
                 />
                 <TextField
                   id="commentContent"
@@ -295,7 +316,14 @@ function AddCommentButton(props) {
                   required
                   multiline
                   value={editText}
-                  onChange={(event) => setEditText(event.target.value)}
+                  onChange={(event) => {
+                    // Do not allow spaces at the beginning
+                    const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
+                    const value = event.target.value;
+                    if (value === "" || regex.test(value)) {
+                      setEditText(value);
+                    }
+                  }}
                 />
               </div>
             </form>

@@ -25,7 +25,7 @@ export const updateComment = (req, res) => {
       )
     )
     .then((comment) =>
-      Comment.findOneAndUpdate(
+      Comment.updateOne(
         { _id: comment.id },
         {
           $set: {
@@ -38,7 +38,7 @@ export const updateComment = (req, res) => {
         }
       )
     )
-    .then((comment) => res.json(comment))
+    .then(() => res.json({ msg: "Comment successfully updated" }))
     .catch((err) => console.log(err));
 };
 

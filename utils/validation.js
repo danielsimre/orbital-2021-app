@@ -308,24 +308,31 @@ export const validateInviteCode = (req, res, studentClass, mentorClass) => {
       inviteClass = mentorClass;
       newUserRole = ClassRoles.MENTOR;
     }
-    return ClassRole.findOne({
-      userId: req.user.id,
-      classId: inviteClass.id,
-    }).then((classRole) => {
-      // If user is not enrolled in class, return the class info to add to user to it
-      if (!successfulFindOneQuery(classRole)) {
-        return new ClassRole({
-          userId: req.user.id,
-          classId: inviteClass.id,
-          role: newUserRole,
-        });
-      }
-      return sendJsonErrMessage(
-        res,
-        400,
-        "User is already enrolled in the class"
-      );
-    });
+    return (
+      ClassRole.findOne({
+        userId: req.user.id,
+        classId: inviteClass.id,
+      })
+        // Check whether or not class is closed
+        .then((classRole) =>
+          validateClassIsIncomplete(res, inviteClass.id, classRole)
+        )
+        .then((classRole) => {
+          // If user is not enrolled in class, return the class info to add to user to it
+          if (!successfulFindOneQuery(classRole)) {
+            return new ClassRole({
+              userId: req.user.id,
+              classId: inviteClass.id,
+              role: newUserRole,
+            });
+          }
+          return sendJsonErrMessage(
+            res,
+            400,
+            "User is already enrolled in the class"
+          );
+        })
+    );
   }
   return sendJsonErrMessage(res, 400, "Invalid invite code");
 };
@@ -382,7 +389,7 @@ export const validateNoStudentsLeft = (res, studentArray) => {
   }
 };
 
-export const validateUniqueGroupName = (res, group, name) => {
+export const validateUniqueGroupName = (res, group, name) =>
   Group.find({ classId: group.classId }).then((groupArr) => {
     if (groupArr.some((grp) => grp.name === name)) {
       sendJsonErrMessage(
@@ -391,6 +398,5 @@ export const validateUniqueGroupName = (res, group, name) => {
         "There exists another group with the same name in this class already"
       );
     }
+    return group;
   });
-  return group;
-};

@@ -62,7 +62,7 @@ function formatData(next) {
   this.sort({ dueDate: 1 })
     .populate({ path: "classId", select: "name" })
     .populate({ path: "assignedTo", select: "username" })
-    .populate({ path: "comments" })
+    .populate({ path: "comments", select: "-taskId" })
     .populate({ path: "subtasks" });
   next();
 }

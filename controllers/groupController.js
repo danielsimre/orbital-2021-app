@@ -1,22 +1,43 @@
 import Mongoose from "mongoose";
+import { Comment } from "../models/BaseText.js";
 import ClassRole from "../models/ClassRole.js";
 import Group from "../models/Group.js";
 import { BaseTask, ParentTask } from "../models/BaseTask.js";
 import User from "../models/User.js";
-
 import {
-  validateCanAccessGroup,
-  validateFieldsPresent,
   successfulFindOneQuery,
   successfulFindQuery,
-  validateGroupSize,
+  validateCanAccessGroup,
   validateClassIsIncomplete,
+  validateFieldsPresent,
+  validateGroupSize,
   validateHasMentors,
   validateNoStudentsLeft,
   validateUniqueGroupName,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 import Class from "../models/Class.js";
+
+export const getAllInfo = (req, res) => {
+  Promise.all([
+    Group.find({ groupMembers: req.user.id }, "name classId")
+      .populate({
+        path: "classId",
+        select: "name",
+      })
+      .sort({ name: 1 }),
+    Group.find({ mentoredBy: req.user.id }, "name classId")
+      .populate({
+        path: "classId",
+        select: "name",
+      })
+      .sort({ name: 1 }),
+  ])
+    .then((groupArray) =>
+      res.json({ memberOf: groupArray[0], mentorOf: groupArray[1] })
+    )
+    .catch((err) => console.log(err));
+};
 
 export const getInfo = (req, res) => {
   Group.findOne({
@@ -29,12 +50,7 @@ export const getInfo = (req, res) => {
   })
     .populate({ path: "groupMembers", select: "username email" })
     .populate({ path: "mentoredBy", select: "username email" })
-    .populate({
-      path: "tasks",
-      populate: {
-        path: "comments",
-      },
-    })
+    .populate({ path: "tasks" })
     .then((curGroup) =>
       validateCanAccessGroup(
         res,
@@ -46,23 +62,6 @@ export const getInfo = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-export const getAllInfo = (req, res) => {
-  Promise.all([
-    Group.find({ groupMembers: req.user.id }, "name classId").populate({
-      path: "classId",
-      select: "name",
-    }),
-    Group.find({ mentoredBy: req.user.id }, "name classId").populate({
-      path: "classId",
-      select: "name",
-    }),
-  ])
-    .then((groupArray) =>
-      res.json({ memberOf: groupArray[0], mentorOf: groupArray[1] })
-    )
-    .catch((err) => console.log(err));
-};
-
 export const rename = (req, res) => {
   const { newName } = req.body;
 
@@ -71,19 +70,15 @@ export const rename = (req, res) => {
       validateCanAccessGroup(
         res,
         curGroup,
-        "Group does not exist or user is not authorized to delete group"
+        "Group does not exist or user is not authorized to rename group"
       )
     )
     .then((curGroup) =>
       validateClassIsIncomplete(res, curGroup.classId, curGroup)
     )
-    .then((curGroup) => {
-      validateUniqueGroupName(res, curGroup, newName);
-    })
-    .then(() =>
-      Group.findOneAndUpdate({ _id: req.params.id }, { name: newName })
-    )
-    .then((group) => {
+    .then((curGroup) => validateUniqueGroupName(res, curGroup, newName))
+    .then(() => Group.updateOne({ _id: req.params.id }, { name: newName }))
+    .then(() => {
       res.json({ msg: "Successfully updated group name" });
     })
     .catch((err) => console.log(err));
@@ -105,26 +100,33 @@ export const deleteGroup = (req, res) => {
       validateNoStudentsLeft(res, curGroup.groupMembers);
       return curGroup;
     })
-    .catch((err) => console.log(err))
-    .then((curGroup) => {
+    .then(async (curGroup) => {
       const taskIdArray = curGroup.tasks; // These tasks are parent tasks
-
-      taskIdArray.forEach((taskId) => {
-        BaseTask.findById(taskId).then((task) => {
-          if (task) {
-            const subtaskIdArray = task.subtasks;
-            if (subtaskIdArray) {
-              BaseTask.deleteMany({ _id: { $in: subtaskIdArray } }).catch(
-                (err) => console.log(err)
-              ); // Delete all subtasks belong to the parent task
-            }
-          }
-        });
-        BaseTask.deleteOne({ _id: taskId }).catch((err) => console.log(err));
-      });
+      const commentIdArray = []; // These are comments from the parent tasks
+      // Delete all associated tasks
+      await Promise.all(
+        taskIdArray.map((taskId) =>
+          BaseTask.findById(taskId)
+            .then(async (task) => {
+              commentIdArray.push(...task.comments);
+              if (task) {
+                const subtaskIdArray = task.subtasks;
+                if (subtaskIdArray) {
+                  // Delete all subtasks belong to the parent task
+                  await BaseTask.deleteMany({ _id: { $in: subtaskIdArray } });
+                }
+              }
+            })
+            .then(() => BaseTask.deleteOne({ _id: taskId }))
+        )
+      );
+      // Delete all associated comments
+      await Promise.all(
+        commentIdArray.map((commentId) => Comment.deleteOne({ _id: commentId }))
+      );
       return curGroup;
     })
-    .then((curGroup) => {
+    .then((curGroup) =>
       Class.findById(curGroup.classId).then((classObj) => {
         classObj.groups = classObj.groups.filter(
           (group) =>
@@ -133,13 +135,10 @@ export const deleteGroup = (req, res) => {
             )
         );
         classObj.save();
-      });
-      return curGroup;
-    })
-    .then((curGroup) => {
-      Group.deleteOne({ _id: curGroup.id }).catch((err) => console.log(err));
-    })
-    .catch((err) => console.log(err))
+        return curGroup;
+      })
+    )
+    .then((curGroup) => Group.deleteOne({ _id: curGroup.id }))
     .then(() => res.json({ msg: "Successfully deleted group" }))
     .catch((err) => console.log(err));
 };

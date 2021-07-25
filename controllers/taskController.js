@@ -2,15 +2,16 @@ import mongoose from "mongoose";
 import { BaseTask, ParentTask } from "../models/BaseTask.js";
 import { Comment } from "../models/BaseText.js";
 import User from "../models/User.js";
+
 import {
   validateCanAccessTask,
   validateCompleteParentTask,
-  validateFieldsPresent,
-  validateURLs,
+  validateClassIsIncomplete,
   validateDueDate,
+  validateFieldsPresent,
   validateIsSubtask,
   validateSubtaskData,
-  validateClassIsIncomplete,
+  validateURLs,
 } from "../utils/validation.js";
 
 export const getAllInfo = (req, res) => {
@@ -21,6 +22,51 @@ export const getAllInfo = (req, res) => {
     .then((tasks) =>
       res.json({ incompletedTasks: tasks[0], completedTasks: tasks[1] })
     )
+    .catch((err) => console.log(err));
+};
+
+// Only works for parent tasks, there cannot be subtasks of subtasks
+export const createSubtask = (req, res) => {
+  ParentTask.findOne({ _id: req.params.id })
+    .then((task) =>
+      validateCanAccessTask(res, task, req.user.id, "Cannot access this task")
+    )
+    .then((task) => validateClassIsIncomplete(res, task.classId.id, task))
+    .then((task) => {
+      const { taskName, taskDesc, dueDate, assignedTo } = req.body;
+      validateFieldsPresent(
+        res,
+        "Please add a valid string value for attributes taskName and taskDesc, " +
+          "a valid date for dueDate, and an array of user names (from members in the group) for assignedTo",
+        taskName,
+        taskDesc,
+        dueDate,
+        assignedTo
+      );
+      validateDueDate(res, new Date(dueDate));
+      return validateSubtaskData(res, task, dueDate, assignedTo);
+    })
+    .then((task) => {
+      const { taskName, taskDesc, dueDate, assignedTo } = req.body;
+      User.find({ username: { $in: assignedTo } })
+        .then((userArray) => userArray.map((user) => user.id))
+        .then((assignedToIds) => {
+          const newSubtask = new BaseTask({
+            name: taskName,
+            desc: taskDesc,
+            dueDate,
+            isMilestone: false,
+            assignedTo: assignedToIds,
+            classId: task.classId.id,
+          });
+          task.subtasks.push(newSubtask);
+          // Set the parent task to false, as a new subtask that is incompleted has been added
+          task.isCompleted = false;
+          task.save();
+          newSubtask.save();
+        });
+    })
+    .then(() => res.json({ msg: "Successfully created task" }))
     .catch((err) => console.log(err));
 };
 
@@ -36,7 +82,7 @@ export const update = (req, res) => {
           "Cannot update submissions of task"
         )
       )
-      .then((task) => validateClassIsIncomplete(res, task.classId, task))
+      .then((task) => validateClassIsIncomplete(res, task.classId.id, task))
       .then((task) => {
         const { submissionLinks } = req.body;
         validateFieldsPresent(
@@ -64,7 +110,7 @@ export const update = (req, res) => {
           "Cannot update completion status of task"
         )
       )
-      .then((task) => validateClassIsIncomplete(res, task.classId, task))
+      .then((task) => validateClassIsIncomplete(res, task.classId.id, task))
       .then((task) => {
         const { isCompleted } = req.body;
         validateFieldsPresent(
@@ -99,7 +145,7 @@ export const update = (req, res) => {
         )
       )
       .then((subtask) =>
-        validateClassIsIncomplete(res, subtask.classId, subtask)
+        validateClassIsIncomplete(res, subtask.classId.id, subtask)
       )
       .then(async (task) => {
         const { dueDate, assignedTo, isCompleted } = req.body;
@@ -170,82 +216,6 @@ export const update = (req, res) => {
   }
 };
 
-export const createComment = (req, res) => {
-  ParentTask.findOne({ _id: req.params.id })
-    .then((task) => validateClassIsIncomplete(res, task.classId, task))
-    .then((curTask) => {
-      const { title, content } = req.body;
-      const newComment = new Comment({
-        title,
-        content,
-        createdBy: req.user.id,
-        taskId: curTask.id,
-      });
-
-      newComment.save();
-      // Might not be necessary: search comments collection instead
-      // curTask.comments.push(newComment.id);
-      // curTask.save();
-    })
-    .then(() => res.json({ msg: "Successfully created comment" }))
-    .catch((err) => console.log(err));
-};
-
-export const getComments = (req, res) => {
-  ParentTask.findOne({ _id: req.params.id })
-    .then((task) =>
-      validateCanAccessTask(res, task, req.user.id, "Cannot access this task")
-    )
-    .then((task) => Comment.find({ taskId: task.id }))
-    .then((comments) => res.json(comments))
-    .catch((err) => console.log(err));
-};
-
-// Only works for parent tasks, there cannot be subtasks of subtasks
-export const createSubtask = (req, res) => {
-  ParentTask.findOne({ _id: req.params.id })
-    .then((task) =>
-      validateCanAccessTask(res, task, req.user.id, "Cannot access this task")
-    )
-    .then((task) => validateClassIsIncomplete(res, task.classId, task))
-    .then((task) => {
-      const { taskName, taskDesc, dueDate, assignedTo } = req.body;
-      validateFieldsPresent(
-        res,
-        "Please add a valid string value for attributes taskName and taskDesc, " +
-          "a valid date for dueDate, and an array of user names (from members in the group) for assignedTo",
-        taskName,
-        taskDesc,
-        dueDate,
-        assignedTo
-      );
-      validateDueDate(res, new Date(dueDate));
-      return validateSubtaskData(res, task, dueDate, assignedTo);
-    })
-    .then((task) => {
-      const { taskName, taskDesc, dueDate, assignedTo } = req.body;
-      User.find({ username: { $in: assignedTo } })
-        .then((userArray) => userArray.map((user) => user.id))
-        .then((assignedToIds) => {
-          const newSubtask = new BaseTask({
-            name: taskName,
-            desc: taskDesc,
-            dueDate,
-            isMilestone: false,
-            assignedTo: assignedToIds,
-            classId: task.classId,
-          });
-          task.subtasks.push(newSubtask);
-          // Set the parent task to false, as a new subtask that is incompleted has been added
-          task.isCompleted = false;
-          task.save();
-          newSubtask.save();
-        });
-    })
-    .then(() => res.json({ msg: "Successfully created task" }))
-    .catch((err) => console.log(err));
-};
-
 export const deleteSubtask = (req, res) => {
   // Non-parent tasks have isMilestone always set to false
   // The parent task associated with this subtask will be updated accordingly
@@ -264,7 +234,9 @@ export const deleteSubtask = (req, res) => {
         )
         .then(() => subtask)
     )
-    .then((subtask) => validateClassIsIncomplete(res, subtask.classId, subtask))
+    .then((subtask) =>
+      validateClassIsIncomplete(res, subtask.classId.id, subtask)
+    )
     .then((subtask) => {
       subtask.remove();
       ParentTask.collection.updateMany(
@@ -277,5 +249,38 @@ export const deleteSubtask = (req, res) => {
       );
     })
     .then(() => res.json({ msg: "Successfully deleted task" }))
+    .catch((err) => console.log(err));
+};
+
+export const createComment = (req, res) => {
+  ParentTask.findOne({ _id: req.params.id })
+    .then((task) =>
+      validateCanAccessTask(res, task, req.user.id, "Unable to access task")
+    )
+    .then((task) => validateClassIsIncomplete(res, task.classId.id, task))
+    .then((curTask) => {
+      const { title, content } = req.body;
+      const newComment = new Comment({
+        title,
+        content,
+        createdBy: req.user.id,
+        taskId: curTask.id,
+      });
+
+      newComment.save();
+      curTask.comments.push(newComment.id);
+      curTask.save();
+    })
+    .then(() => res.json({ msg: "Successfully created comment" }))
+    .catch((err) => console.log(err));
+};
+
+export const getComments = (req, res) => {
+  ParentTask.findOne({ _id: req.params.id })
+    .then((task) =>
+      validateCanAccessTask(res, task, req.user.id, "Cannot access this task")
+    )
+    .then((task) => Comment.find({ taskId: task.id }))
+    .then((comments) => res.json(comments))
     .catch((err) => console.log(err));
 };

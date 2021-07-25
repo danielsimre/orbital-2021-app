@@ -17,7 +17,20 @@ export const getInfo = (req, res) => {
           path: "classId",
         },
       })
-      .then((curUser) => res.json({ classes: curUser.classes }));
+      .then((curUser) => {
+        // Sort classes by their name in alphabetical order
+        curUser.classes.sort((class1, class2) => {
+          if (class1.classId.name < class2.classId.name) {
+            return -1;
+          }
+          if (class1.classId.name > class2.classId.namee) {
+            return 1;
+          }
+          return 0;
+        });
+        return curUser.classes;
+      })
+      .then((curClasses) => res.json({ classes: curClasses }));
   } else {
     User.findById(req.user.id)
       .populate("classes")

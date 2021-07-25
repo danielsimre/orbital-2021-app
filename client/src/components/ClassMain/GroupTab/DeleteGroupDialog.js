@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useParams } from "react-router";
 import {
   Button,
   Dialog,
@@ -7,13 +6,10 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Snackbar,
   Tooltip,
   makeStyles,
 } from "@material-ui/core";
-import { Alert, AlertTitle } from "@material-ui/lab";
 import DeleteIcon from "@material-ui/icons/Delete";
-import axios from "axios";
 
 const useStyles = makeStyles({
   button: {
@@ -31,8 +27,7 @@ const useStyles = makeStyles({
 
 function DeleteGroupDialog(props) {
   // Queried values
-  const { groupId, refreshClassData, refreshGroupList, isCompleted } = props;
-  const { classID } = useParams();
+  const { handleDeleteGroup, isCompleted } = props;
   // Dialog values
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -44,37 +39,8 @@ function DeleteGroupDialog(props) {
     setDialogOpen(false);
   }
 
-  // Alert values
-  const [displayAlert, setDisplayAlert] = useState(false);
-  const [alertText, setAlertText] = useState("");
-  const [alertTitleText, setAlertTitleText] = useState("");
-  const [alertState, setAlertState] = useState("");
-
-  function handleAlert(title, message, severity) {
-    setAlertTitleText(title);
-    setAlertText(message);
-    setAlertState(severity);
-    setDisplayAlert(true);
-  }
-
   // Misc values
   const classes = useStyles();
-
-  function handleDeleteGroup() {
-    axios
-      .delete(`/api/v1/groups/${groupId}`, { withCredentials: true })
-      .then((res) =>
-        handleAlert("Group removed!", "The group has been removed", "success")
-      )
-      .then(() => {
-        setDialogOpen(false);
-        refreshClassData(classID);
-        refreshGroupList(classID);
-      })
-      .catch((err) => {
-        handleAlert("Error!", err.response.data.msg, "error");
-      });
-  }
 
   return (
     <>
@@ -103,16 +69,6 @@ function DeleteGroupDialog(props) {
           </Button>
         </DialogActions>
       </Dialog>
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        open={displayAlert}
-        onClose={() => setDisplayAlert(false)}
-      >
-        <Alert onClose={() => setDisplayAlert(false)} severity={alertState}>
-          <AlertTitle>{alertTitleText}</AlertTitle>
-          {alertText}
-        </Alert>
-      </Snackbar>
     </>
   );
 }

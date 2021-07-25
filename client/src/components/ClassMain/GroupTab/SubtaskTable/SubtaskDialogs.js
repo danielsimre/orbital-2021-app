@@ -89,8 +89,8 @@ function SubtaskDialogs(props) {
       .put(
         `/api/v1/tasks/${subtaskObject.id}?subtasks`,
         {
-          name: subtaskName,
-          desc: subtaskDesc,
+          name: subtaskName.trim(),
+          desc: subtaskDesc.trim(),
           dueDate: subtaskDueDate,
           assignedTo: subtaskAssignedTo,
         },
@@ -139,7 +139,14 @@ function SubtaskDialogs(props) {
                 variant="outlined"
                 required
                 value={subtaskName}
-                onChange={(event) => setSubtaskName(event.target.value)}
+                onChange={(event) => {
+                  // Do not allow spaces at the beginning, one space between words
+                  const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+                  const value = event.target.value;
+                  if (value === "" || regex.test(value)) {
+                    setSubtaskName(value);
+                  }
+                }}
               />
               <TextField
                 id="task description"
@@ -148,7 +155,14 @@ function SubtaskDialogs(props) {
                 multiline
                 required
                 value={subtaskDesc}
-                onChange={(event) => setSubtaskDesc(event.target.value)}
+                onChange={(event) => {
+                  // Do not allow spaces at the beginning
+                  const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
+                  const value = event.target.value;
+                  if (value === "" || regex.test(value)) {
+                    setSubtaskDesc(value);
+                  }
+                }}
               />
               <TextField
                 id="date"
@@ -186,9 +200,7 @@ function SubtaskDialogs(props) {
           </form>
         </DialogContent>
       </Dialog>
-
       {/* End of Edit Subtask Dialog */}
-      {/* End of Delete Subtask Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleDeleteClose}>
         <DialogTitle>Delete Subtask?</DialogTitle>
         <DialogContent>

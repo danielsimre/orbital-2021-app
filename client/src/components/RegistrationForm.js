@@ -109,7 +109,14 @@ function RegistrationForm() {
               variant="outlined"
               type="email"
               value={registerEmail}
-              onChange={(event) => setRegisterEmail(event.target.value)}
+              onChange={(event) => {
+                // Do not allow spaces
+                const regex = /^\S*$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setRegisterEmail(value);
+                }
+              }}
             />
           </div>
           <div>
@@ -119,7 +126,14 @@ function RegistrationForm() {
               label="Username"
               variant="outlined"
               value={registerUsername}
-              onChange={(event) => setRegisterUsername(event.target.value)}
+              onChange={(event) => {
+                // Do not allow spaces
+                const regex = /^\S*$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setRegisterUsername(value);
+                }
+              }}
             />
           </div>
           <div>
@@ -130,7 +144,14 @@ function RegistrationForm() {
               variant="outlined"
               type="password"
               value={registerPassword}
-              onChange={(event) => setRegisterPassword(event.target.value)}
+              onChange={(event) => {
+                // Do not allow spaces
+                const regex = /^\S*$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setRegisterPassword(value);
+                }
+              }}
               error={hasPasswordError}
             />
           </div>
@@ -142,9 +163,14 @@ function RegistrationForm() {
               variant="outlined"
               type="password"
               value={registerPasswordConfirm}
-              onChange={(event) =>
-                setRegisterPasswordConfirm(event.target.value)
-              }
+              onChange={(event) => {
+                // Do not allow spaces
+                const regex = /^\S*$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setRegisterPasswordConfirm(value);
+                }
+              }}
               error={hasPasswordError}
               helperText={errorText}
             />

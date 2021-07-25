@@ -1,13 +1,20 @@
 import { useState } from "react";
-import { Button, TextField, makeStyles } from "@material-ui/core";
+import {
+  Button,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+  makeStyles,
+} from "@material-ui/core";
 
 import axios from "axios";
 
 const useStyles = makeStyles({
-  announcementForm: {
+  root: {
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: "column",
   },
 });
 
@@ -18,7 +25,7 @@ function AnnouncementForm(props) {
     handleAlert,
     setDisplayAlert,
     getClassAnnouncements,
-    closeForm,
+    handleDialogClose,
   } = props;
 
   // Form values
@@ -30,7 +37,7 @@ function AnnouncementForm(props) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    handleMakeAnnouncement(announceTitle, announceBody, classID);
+    handleMakeAnnouncement(announceTitle.trim(), announceBody.trim(), classID);
   }
 
   function handleMakeAnnouncement(title, content, classId) {
@@ -60,26 +67,32 @@ function AnnouncementForm(props) {
       .then(() => getClassAnnouncements(classId))
       .catch((err) => console.log(err))
       .finally(() => {
-        closeForm();
+        handleDialogClose();
         setDisplayAlert(true);
       });
   }
 
   return (
-    <form onSubmit={handleSubmit} className={classes.announcementForm}>
-      <fieldset>
-        <legend>Announcement</legend>
-        <div>
+    <>
+      <DialogTitle>Create Announcement</DialogTitle>
+      <DialogContent>
+        <DialogContentText>Create an announcement below.</DialogContentText>
+        <form className={classes.root} onSubmit={handleSubmit}>
           <TextField
             id="announcement_title"
             label="Announcement Title"
             variant="outlined"
             required
             value={announceTitle}
-            onChange={(event) => setAnnounceTitle(event.target.value)}
+            onChange={(event) => {
+              // Do not allow spaces at the beginning, one space between words
+              const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+              const value = event.target.value;
+              if (value === "" || regex.test(value)) {
+                setAnnounceTitle(value);
+              }
+            }}
           />
-        </div>
-        <div>
           <TextField
             id="announcement_body"
             label="Announcement Text"
@@ -87,19 +100,22 @@ function AnnouncementForm(props) {
             multiline
             required
             value={announceBody}
-            onChange={(event) => setAnnounceBody(event.target.value)}
+            onChange={(event) => {
+              // Do not allow spaces at the beginning
+              const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
+              const value = event.target.value;
+              if (value === "" || regex.test(value)) {
+                setAnnounceBody(value);
+              }
+            }}
           />
-        </div>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          style={{ margin: "0 auto", display: "flex" }}
-        >
-          Make Announcement
-        </Button>
-      </fieldset>
-    </form>
+          <DialogActions>
+            <Button onClick={handleDialogClose}>Cancel</Button>
+            <Button type="submit">Make Announcement</Button>
+          </DialogActions>
+        </form>
+      </DialogContent>
+    </>
   );
 }
 

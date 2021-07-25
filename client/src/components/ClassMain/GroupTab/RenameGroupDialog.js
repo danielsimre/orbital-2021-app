@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useParams } from "react-router";
 import {
   Button,
   Dialog,
@@ -29,8 +28,7 @@ const useStyles = makeStyles({
 
 function RenameGroupDialog(props) {
   // Queried values
-  const { groupId, refreshClassData, refreshGroupList, isCompleted } = props;
-  const { classID } = useParams();
+  const { groupId, refreshGroupList, isCompleted } = props;
 
   // Dialog values
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -65,23 +63,22 @@ function RenameGroupDialog(props) {
   const classes = useStyles();
 
   function handleRenameGroup() {
-    if (newGroupName.length < 1) {
+    if (newGroupName.trim().length < 1) {
       setHasError(true);
       setHelperText("Group name cannot be empty");
     } else {
       axios
         .put(
           `/api/v1/groups/${groupId}`,
-          { newName: newGroupName },
+          { newName: newGroupName.trim() },
           { withCredentials: true }
         )
         .then((res) =>
-          handleAlert("Group renamed!", "The group has been renamed", "success")
+          handleAlert("Success!", "The group has been renamed.", "success")
         )
         .then(() => {
           setDialogOpen(false);
-          refreshClassData(classID);
-          refreshGroupList(classID);
+          refreshGroupList();
         })
         .catch((err) => {
           handleAlert("Error!", err.response.data.msg, "error");
@@ -113,7 +110,14 @@ function RenameGroupDialog(props) {
             error={hasError}
             helperText={helperText}
             value={newGroupName}
-            onChange={(event) => setNewGroupName(event.target.value)}
+            onChange={(event) => {
+              // Do not allow spaces at the beginning, one space between words
+              const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+              const value = event.target.value;
+              if (value === "" || regex.test(value)) {
+                setNewGroupName(value);
+              }
+            }}
           />
         </DialogContent>
         <DialogActions>

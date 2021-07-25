@@ -110,6 +110,7 @@ function ClassGroupList(props) {
   const classes = useStyles();
 
   function handleDialogOpen() {
+    setNumOfGroups(1);
     setDialogOpen(true);
   }
 
@@ -140,7 +141,19 @@ function ClassGroupList(props) {
   function handleAddGroups(numOfGroups) {
     let groups = [];
     let counter = 1;
-    console.log(groupNames);
+    if (
+      !Number.isInteger(numOfGroups) ||
+      numOfGroups < 1 ||
+      numOfGroups > 100
+    ) {
+      handleAlert(
+        "Error!",
+        "Invalid input. Number of groups must be a number between 1 and 100",
+        "error"
+      );
+      return;
+    }
+
     while (groups.length < numOfGroups) {
       const curGroupName = `Group ${counter}`;
       counter += 1;
@@ -172,8 +185,7 @@ function ClassGroupList(props) {
           );
         }
       })
-      .then(() => refreshClassData(classID))
-      .then(() => getGroupData(classID))
+      .then(() => getGroupData())
       .then(() => refreshClassData())
       .catch((err) => console.log(err))
       .finally(() => {
@@ -182,8 +194,23 @@ function ClassGroupList(props) {
       });
   }
 
+  function handleDeleteGroup(groupId) {
+    axios
+      .delete(`/api/v1/groups/${groupId}`, { withCredentials: true })
+      .then(() =>
+        handleAlert("Success!", "The group has been removed.", "success")
+      )
+      .then(() => {
+        setDialogOpen(false);
+        getGroupData();
+      })
+      .catch((err) => {
+        handleAlert("Error!", err.response.data.msg, "error");
+      });
+  }
+
   // API query for list of groups
-  function getGroupData(classID) {
+  function getGroupData() {
     axios
       .get(`/api/v1/classes/${classID}/groups`, {
         withCredentials: true,
@@ -201,7 +228,7 @@ function ClassGroupList(props) {
         withCredentials: true,
       })
       .then((response) => handleAlert("Success!", response.data.msg, "success"))
-      .then(() => getGroupData(classID))
+      .then(() => getGroupData())
       .catch((err) => {
         console.log(err);
         handleAlert(
@@ -214,7 +241,15 @@ function ClassGroupList(props) {
   }
 
   useEffect(() => {
-    getGroupData(classID);
+    axios
+      .get(`/api/v1/classes/${classID}/groups`, {
+        withCredentials: true,
+      })
+      .then((response) => {
+        setQueriedGroupList(response.data);
+      })
+      .catch((err) => console.log(err))
+      .finally(() => setIsRetrieving(false));
   }, [classID]);
 
   // If the user is a mentor, display the add groups button + all groups this mentor is mentoring
@@ -245,12 +280,24 @@ function ClassGroupList(props) {
                   Type in the number of groups that you want to add (up to 100).
                 </DialogContentText>
                 <TextField
+                  type="number"
                   autoFocus
                   id="number of groups"
                   label="Number of Groups"
                   fullWidth
                   value={numOfGroups}
-                  onChange={(event) => setNumOfGroups(event.target.value)}
+                  onChange={(event) => {
+                    const regex = /^[0-9]*$/g;
+                    const value = event.target.value;
+                    if (
+                      value !== "" &&
+                      regex.test(value) &&
+                      Number.parseInt(value) >= 1 &&
+                      Number.parseInt(value) <= 100
+                    ) {
+                      setNumOfGroups(Number.parseInt(value));
+                    }
+                  }}
                 />
               </DialogContent>
               <DialogActions>
@@ -302,7 +349,6 @@ function ClassGroupList(props) {
                   <TableCell>
                     <AddUserDialog
                       groupId={curGroup.id}
-                      classID={classID}
                       addableMentors={curGroup.attributes.addableMentors}
                       addableStudents={curGroup.attributes.addableStudents}
                       refreshClassData={refreshClassData}
@@ -311,16 +357,11 @@ function ClassGroupList(props) {
                       isCompleted={isCompleted}
                     />
                     <DeleteGroupDialog
-                      groupId={curGroup.id}
-                      classID={classID}
-                      refreshClassData={refreshClassData}
-                      refreshGroupList={getGroupData}
+                      handleDeleteGroup={() => handleDeleteGroup(curGroup.id)}
                       isCompleted={isCompleted}
                     />
                     <RenameGroupDialog
                       groupId={curGroup.id}
-                      classID={classID}
-                      refreshClassData={refreshClassData}
                       refreshGroupList={getGroupData}
                       isCompleted={isCompleted}
                     />

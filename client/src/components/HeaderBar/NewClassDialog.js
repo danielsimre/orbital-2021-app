@@ -7,6 +7,7 @@ import {
   DialogContentText,
   DialogTitle,
   Paper,
+  InputLabel,
   MenuItem,
   TextField,
   Snackbar,
@@ -21,6 +22,7 @@ const useStyles = makeStyles({
   paper: {
     display: "flex",
     flexDirection: "column",
+    marginBottom: "0.5em",
   },
   snackbar: {
     textAlign: "center",
@@ -70,8 +72,8 @@ function NewClassDialog(props) {
       .post(
         "/api/v1/classes/",
         {
-          name: name,
-          desc: desc,
+          name: name.trim(),
+          desc: desc.trim(),
           groupSize: groupSize,
         },
         { withCredentials: true }
@@ -119,7 +121,14 @@ function NewClassDialog(props) {
                 variant="outlined"
                 required
                 value={className}
-                onChange={(event) => setClassName(event.target.value)}
+                onChange={(event) => {
+                  // Do not allow spaces at the beginning, one space between words
+                  const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+                  const value = event.target.value;
+                  if (value === "" || regex.test(value)) {
+                    setClassName(value);
+                  }
+                }}
               />
               <TextField
                 id="class_descrption"
@@ -128,9 +137,17 @@ function NewClassDialog(props) {
                 multiline
                 required
                 value={classDescription}
-                onChange={(event) => setClassDescription(event.target.value)}
+                onChange={(event) => {
+                  // Do not allow spaces at the beginning
+                  const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
+                  const value = event.target.value;
+                  if (value === "" || regex.test(value)) {
+                    setClassDescription(value);
+                  }
+                }}
               />
             </Paper>
+            <InputLabel shrink>Group Size</InputLabel>
             <Select
               value={classGroupSize}
               onChange={(event) => setClassGroupSize(event.target.value)}

@@ -7,17 +7,17 @@ import Group from "../models/Group.js";
 import User from "../models/User.js";
 
 import {
-  validateCanAccessClass,
-  validateIsMentor,
-  validateFieldsPresent,
-  validateValueInEnum,
-  validateSameTaskFramework,
-  validateDueDate,
-  successfulFindOneQuery,
-  validateCanRemoveUser,
   generateInviteCode,
-  validateInviteCode,
+  successfulFindOneQuery,
+  validateCanAccessClass,
+  validateCanRemoveUser,
   validateClassIsIncomplete,
+  validateDueDate,
+  validateFieldsPresent,
+  validateInviteCode,
+  validateIsMentor,
+  validateSameTaskFramework,
+  validateValueInEnum,
 } from "../utils/validation.js";
 import { ClassRoles } from "../utils/enums.js";
 
@@ -84,10 +84,6 @@ export const joinClass = (req, res) => {
   ])
     // Ensure that the invite code is valid
     // and that the user is not already enrolled in the class
-    .then(([studentClass, mentorClass]) => [
-      validateClassIsIncomplete(res, studentClass.id, studentClass),
-      validateClassIsIncomplete(res, mentorClass.id, mentorClass),
-    ])
     .then(([studentClass, mentorClass]) =>
       validateInviteCode(req, res, studentClass, mentorClass)
     )
@@ -115,9 +111,25 @@ export const getInfo = (req, res) => {
         })
         .then((curClass) => {
           const classObj = curClass.toObject();
-          // add current user id and role into the returned object
+          // Add current user id and role into the returned object
           classObj.attributes.curUserId = req.user.id;
           classObj.attributes.role = classRoleObj.role;
+          // Sort users by their username in alphabetical order
+          classObj.attributes.users.sort((user1, user2) => {
+            if (
+              user1.userId.attributes.username <
+              user2.userId.attributes.username
+            ) {
+              return -1;
+            }
+            if (
+              user1.userId.attributes.username >
+              user2.userId.attributes.username
+            ) {
+              return 1;
+            }
+            return 0;
+          });
           return classObj;
         })
     )
@@ -277,6 +289,62 @@ export const addUsers = (req, res) => {
     .catch((err) => console.log(err));
 };
 
+export const removeUser = (req, res) => {
+  validateCanAccessClass(req, res)
+    .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
+    .then((classRoleObj) => validateCanRemoveUser(req, res, classRoleObj))
+    .then((classRole) => {
+      Group.findOne({
+        classId: req.params.id,
+        $or: [
+          { groupMembers: req.params.userId },
+          { mentoredBy: req.params.userId },
+        ],
+      })
+        .then((curGroup) => {
+          if (curGroup) {
+            if (classRole.role === ClassRoles.MENTOR) {
+              curGroup.mentoredBy = curGroup.mentoredBy.filter(
+                (user) =>
+                  !Mongoose.Types.ObjectId(user.id).equals(
+                    Mongoose.Types.ObjectId(req.params.userId)
+                  )
+              );
+            } else {
+              curGroup.groupMembers = curGroup.groupMembers.filter(
+                (user) =>
+                  !Mongoose.Types.ObjectId(user.id).equals(
+                    Mongoose.Types.ObjectId(req.params.userId)
+                  )
+              );
+            }
+            curGroup.save();
+            return curGroup;
+          }
+          return curGroup;
+        })
+        .then((curGroup) => {
+          if (curGroup) {
+            const taskIdArray = curGroup.tasks;
+
+            taskIdArray.forEach((taskId) => {
+              BaseTask.findById(taskId).then((task) => {
+                task.assignedTo = task.assignedTo.filter(
+                  (user) =>
+                    !Mongoose.Types.ObjectId(user.id).equals(
+                      Mongoose.Types.ObjectId(req.params.userId)
+                    )
+                );
+                task.save();
+              });
+            });
+          }
+        });
+      classRole.remove();
+    })
+    .then(() => res.json({ msg: "Successfully removed user from class" }));
+};
+
 // If the user is not a part of the class, return an error
 // If the user is a part of the class as a student, return their group (if they have one)
 // If the user is a part of the class as a mentor, return all groups they are mentoring
@@ -294,7 +362,7 @@ export const getGroups = (req, res) => {
             $or: [{ groupMembers: req.user.id }, { mentoredBy: req.user.id }],
           },
         ],
-      })
+      }).sort({ name: 1 })
     )
     .then(async (curGroups) => {
       const invalidStudents = [];
@@ -426,6 +494,96 @@ export const createGroups = (req, res) => {
       curClass.save();
     })
     .catch((err) => console.log(err));
+};
+
+// Autodistributes students into all groups (greedily fill groups by alphabetical order)
+// Will only distribute users that are not in a group
+// Output message depends if there are groups left over or students left over
+export const distributeUsersIntoGroups = async (req, res) => {
+  try {
+    if (req.query.auto !== undefined) {
+      if (req.query.auto === "students") {
+        const classDoc = await Class.findById(req.params.id)
+          // Populate class with all group documents, sorted by name
+          .populate({ path: "groups", options: { sort: { name: 1 } } });
+        const classRolesArr = await ClassRole.find({
+          classId: req.params.id,
+          role: ClassRoles.STUDENT,
+        });
+        // Filter out users that are already in a group
+        const filteredUserIdArr = await Promise.all(
+          classRolesArr.map(async (classRole) => {
+            const group = await Group.findOne({
+              groupMembers: classRole.userId,
+              classId: req.params.id,
+            });
+            // If this user is in a group, set this element to null for filtering later
+            if (successfulFindOneQuery(group)) {
+              return null;
+            }
+            return classRole.userId;
+          })
+        ).then((userIdArr) => userIdArr.filter((userId) => userId));
+        // No students left to distribute
+        if (filteredUserIdArr.length === 0) {
+          res.status(400).json({ msg: "No more students to distribute" });
+        } else {
+          let counter = 0;
+          while (counter < filteredUserIdArr.length) {
+            // Joinable groups are groups that have less members then the group size limit
+            const joinableGroups = classDoc.groups.filter(
+              (group) => group.groupMembers.length < classDoc.groupSize
+            );
+            // Throw an error if there are not enough empty groups
+            if (joinableGroups.length === 0) {
+              res.status(400).json({
+                msg: `Not enough groups for students (${
+                  filteredUserIdArr.length - counter
+                } students left)`,
+              });
+              throw new Error(
+                `Not enough groups for students (${
+                  filteredUserIdArr.length - counter
+                } students left)`
+              );
+            }
+            const addedStudents = filteredUserIdArr.slice(
+              counter,
+              counter +
+                classDoc.groupSize -
+                joinableGroups[0].groupMembers.length
+            );
+            counter +=
+              classDoc.groupSize - joinableGroups[0].groupMembers.length;
+            // Fill up the current group
+            joinableGroups[0].groupMembers =
+              joinableGroups[0].groupMembers.concat(addedStudents);
+            // Assign parent tasks to the newly added user
+            // eslint-disable-next-line no-await-in-loop
+            await joinableGroups[0]
+              .save()
+              .then((groupDoc) =>
+                ParentTask.find({ _id: { $in: groupDoc.tasks } })
+              )
+              .then((tasks) =>
+                tasks.map((task) => {
+                  task.assignedTo = task.assignedTo.concat(addedStudents);
+                  task.save();
+                  return task;
+                })
+              );
+          }
+          res.json({ msg: "Successfully distributed students" });
+        }
+      } else {
+        res.status(400).json({ msg: "Invalid command" });
+      }
+    } else {
+      res.status(400).json({ msg: "Invalid command" });
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // If the user is not a part of the class, return an error
@@ -579,152 +737,3 @@ export const createAnnouncement = (req, res) => {
     .then(() => res.json({ msg: "Successfully created announcement" }))
     .catch((err) => console.log(err));
 };
-
-export const removeUser = (req, res) => {
-  validateCanAccessClass(req, res)
-    .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
-    .then((classRoleObj) => validateCanRemoveUser(req, res, classRoleObj))
-    .then((classRole) => {
-      Group.findOne({
-        classId: req.params.id,
-        $or: [
-          { groupMembers: req.params.userId },
-          { mentoredBy: req.params.userId },
-        ],
-      })
-        .then((curGroup) => {
-          if (curGroup) {
-            if (classRole.role === ClassRoles.MENTOR) {
-              curGroup.mentoredBy = curGroup.mentoredBy.filter(
-                (user) =>
-                  !Mongoose.Types.ObjectId(user.id).equals(
-                    Mongoose.Types.ObjectId(req.params.userId)
-                  )
-              );
-            } else {
-              curGroup.groupMembers = curGroup.groupMembers.filter(
-                (user) =>
-                  !Mongoose.Types.ObjectId(user.id).equals(
-                    Mongoose.Types.ObjectId(req.params.userId)
-                  )
-              );
-            }
-            curGroup.save();
-            return curGroup;
-          }
-          return curGroup;
-        })
-        .then((curGroup) => {
-          if (curGroup) {
-            const taskIdArray = curGroup.tasks;
-
-            taskIdArray.forEach((taskId) => {
-              BaseTask.findById(taskId).then((task) => {
-                task.assignedTo = task.assignedTo.filter(
-                  (user) =>
-                    !Mongoose.Types.ObjectId(user.id).equals(
-                      Mongoose.Types.ObjectId(req.params.userId)
-                    )
-                );
-                task.save();
-              });
-            });
-          }
-        });
-      classRole.remove();
-    })
-    .then(() => res.json({ msg: "Successfully removed user from class" }));
-};
-
-// Automatically adds users enrolled into the class to groups
-// ?auto=students to autodistribute students into all groups (greedily fill groups by alphabetical order)
-// Will only distribute users that are not in a group
-// Output message depends if there are groups left over or students left over
-// ?auto=mentors&mentorsPerGroup={num} to autodistribute mentors based on num (excluding owner)
-export const distributeUsersIntoGroups = async (req, res) => {
-  try {
-    if (req.query.auto !== undefined) {
-      if (req.query.auto === "students") {
-        const classDoc = await Class.findById(req.params.id)
-          // Populate class with all group documents, sorted by name
-          .populate({ path: "groups", options: { sort: { name: 1 } } });
-        const classRolesArr = await ClassRole.find({
-          classId: req.params.id,
-          role: ClassRoles.STUDENT,
-        });
-        // Filter out users that are already in a group
-        const filteredUserIdArr = await Promise.all(
-          classRolesArr.map(async (classRole) => {
-            const group = await Group.findOne({
-              groupMembers: classRole.userId,
-              classId: req.params.id,
-            });
-            // If this user is in a group, set this element to null for filtering later
-            if (successfulFindOneQuery(group)) {
-              return null;
-            }
-            return classRole.userId;
-          })
-        ).then((userIdArr) => userIdArr.filter((userId) => userId));
-        // No students left to distribute
-        if (filteredUserIdArr.length === 0) {
-          res.status(400).json({ msg: "No more students to distribute" });
-        } else {
-          let counter = 0;
-          while (counter < filteredUserIdArr.length) {
-            // Joinable groups are groups that have less members then the group size limit
-            const joinableGroups = classDoc.groups.filter(
-              (group) => group.groupMembers.length < classDoc.groupSize
-            );
-            // Throw an error if there are not enough empty groups
-            if (joinableGroups.length === 0) {
-              res.status(400).json({
-                msg: `Not enough groups for students (${
-                  filteredUserIdArr.length - counter
-                } students left)`,
-              });
-              throw new Error(
-                `Not enough groups for students (${
-                  filteredUserIdArr.length - counter
-                } students left)`
-              );
-            }
-            const addedStudents = filteredUserIdArr.slice(
-              counter,
-              counter +
-                classDoc.groupSize -
-                joinableGroups[0].groupMembers.length
-            );
-            counter +=
-              classDoc.groupSize - joinableGroups[0].groupMembers.length;
-            // Fill up the current group
-            joinableGroups[0].groupMembers =
-              joinableGroups[0].groupMembers.concat(addedStudents);
-            // Assign parent tasks to the newly added user
-            // eslint-disable-next-line no-await-in-loop
-            await joinableGroups[0]
-              .save()
-              .then((groupDoc) =>
-                ParentTask.find({ _id: { $in: groupDoc.tasks } })
-              )
-              .then((tasks) =>
-                tasks.map((task) => {
-                  task.assignedTo = task.assignedTo.concat(addedStudents);
-                  task.save();
-                  return task;
-                })
-              );
-          }
-          res.json({ msg: "Successfully distributed students" });
-        }
-      } else if (req.query.auto === "mentors") {
-        // else
-      }
-    } else {
-      res.status(400).json({ msg: "Invalid command" });
-    }
-  } catch (err) {
-    console.log(err);
-  }
-};
-

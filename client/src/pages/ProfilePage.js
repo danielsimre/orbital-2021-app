@@ -84,7 +84,7 @@ function ProfilePage(props) {
     axios
       .put(
         "/api/v1/users/username",
-        { newUsername: newUsername },
+        { newUsername: newUsername.trim() },
         { withCredentials: true }
       )
       .then((res) => {
@@ -143,7 +143,14 @@ function ProfilePage(props) {
               variant="outlined"
               required
               value={newUsername}
-              onChange={(event) => setNewUsername(event.target.value)}
+              onChange={(event) => {
+                // Do not allow spaces
+                const regex = /^\S*$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setNewUsername(value);
+                }
+              }}
             />
           </DialogContent>
           <DialogActions>
