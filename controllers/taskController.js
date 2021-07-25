@@ -31,7 +31,7 @@ export const createSubtask = (req, res) => {
     .then((task) =>
       validateCanAccessTask(res, task, req.user.id, "Cannot access this task")
     )
-    .then((task) => validateClassIsIncomplete(res, task.classId, task))
+    .then((task) => validateClassIsIncomplete(res, task.classId.id, task))
     .then((task) => {
       const { taskName, taskDesc, dueDate, assignedTo } = req.body;
       validateFieldsPresent(
@@ -57,7 +57,7 @@ export const createSubtask = (req, res) => {
             dueDate,
             isMilestone: false,
             assignedTo: assignedToIds,
-            classId: task.classId,
+            classId: task.classId.id,
           });
           task.subtasks.push(newSubtask);
           // Set the parent task to false, as a new subtask that is incompleted has been added
@@ -82,7 +82,7 @@ export const update = (req, res) => {
           "Cannot update submissions of task"
         )
       )
-      .then((task) => validateClassIsIncomplete(res, task.classId, task))
+      .then((task) => validateClassIsIncomplete(res, task.classId.id, task))
       .then((task) => {
         const { submissionLinks } = req.body;
         validateFieldsPresent(
@@ -110,7 +110,7 @@ export const update = (req, res) => {
           "Cannot update completion status of task"
         )
       )
-      .then((task) => validateClassIsIncomplete(res, task.classId, task))
+      .then((task) => validateClassIsIncomplete(res, task.classId.id, task))
       .then((task) => {
         const { isCompleted } = req.body;
         validateFieldsPresent(
@@ -145,7 +145,7 @@ export const update = (req, res) => {
         )
       )
       .then((subtask) =>
-        validateClassIsIncomplete(res, subtask.classId, subtask)
+        validateClassIsIncomplete(res, subtask.classId.id, subtask)
       )
       .then(async (task) => {
         const { dueDate, assignedTo, isCompleted } = req.body;
@@ -234,7 +234,9 @@ export const deleteSubtask = (req, res) => {
         )
         .then(() => subtask)
     )
-    .then((subtask) => validateClassIsIncomplete(res, subtask.classId, subtask))
+    .then((subtask) =>
+      validateClassIsIncomplete(res, subtask.classId.id, subtask)
+    )
     .then((subtask) => {
       subtask.remove();
       ParentTask.collection.updateMany(
