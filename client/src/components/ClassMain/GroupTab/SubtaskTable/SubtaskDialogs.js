@@ -200,9 +200,7 @@ function SubtaskDialogs(props) {
           </form>
         </DialogContent>
       </Dialog>
-
       {/* End of Edit Subtask Dialog */}
-      {/* End of Delete Subtask Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleDeleteClose}>
         <DialogTitle>Delete Subtask?</DialogTitle>
         <DialogContent>

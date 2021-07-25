@@ -3,8 +3,7 @@ import {
   Button,
   Card,
   CardContent,
-  Modal,
-  Paper,
+  Dialog,
   Typography,
   Tooltip,
   Snackbar,
@@ -36,11 +35,6 @@ const useStyles = makeStyles({
   announceText: {
     fontSize: 14,
   },
-  paper: {
-    width: "20%",
-    margin: "0 auto",
-    padding: "16px",
-  },
   button: {
     border: "1px solid black",
     alignSelf: "center",
@@ -70,16 +64,16 @@ function ClassAnnouncements(props) {
   const [alertState, setAlertState] = useState("");
 
   // Misc values
-  const [formModalOpen, setFormModalOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [isRetrieving, setIsRetrieving] = useState(true);
   const classes = useStyles();
 
-  function openForm() {
-    setFormModalOpen(true);
+  function handleDialogOpen() {
+    setDialogOpen(true);
   }
 
-  function closeForm() {
-    setFormModalOpen(false);
+  function handleDialogClose() {
+    setDialogOpen(false);
   }
 
   function getClassAnnouncements(classId) {
@@ -128,24 +122,22 @@ function ClassAnnouncements(props) {
               >
                 <Button
                   className={classes.button}
-                  onClick={openForm}
+                  onClick={handleDialogOpen}
                   disabled={isCompleted}
                 >
                   <AddIcon />
                 </Button>
               </Tooltip>
             )}
-            <Modal open={formModalOpen} onClose={closeForm}>
-              <Paper elevation={1} className={classes.paper}>
-                <AnnouncementForm
-                  classID={classID}
-                  handleAlert={handleAlert}
-                  setDisplayAlert={setDisplayAlert}
-                  getClassAnnouncements={getClassAnnouncements}
-                  closeForm={closeForm}
-                />
-              </Paper>
-            </Modal>
+            <Dialog open={dialogOpen} onClose={handleDialogClose}>
+              <AnnouncementForm
+                classID={classID}
+                handleAlert={handleAlert}
+                setDisplayAlert={setDisplayAlert}
+                getClassAnnouncements={getClassAnnouncements}
+                handleDialogClose={handleDialogClose}
+              />
+            </Dialog>
           </div>
           <div>
             {displayList.length === 0 ? (

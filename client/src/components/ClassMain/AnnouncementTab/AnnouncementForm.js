@@ -1,13 +1,20 @@
 import { useState } from "react";
-import { Button, TextField, makeStyles } from "@material-ui/core";
+import {
+  Button,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+  makeStyles,
+} from "@material-ui/core";
 
 import axios from "axios";
 
 const useStyles = makeStyles({
-  announcementForm: {
+  root: {
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: "column",
   },
 });
 
@@ -18,7 +25,7 @@ function AnnouncementForm(props) {
     handleAlert,
     setDisplayAlert,
     getClassAnnouncements,
-    closeForm,
+    handleDialogClose,
   } = props;
 
   // Form values
@@ -60,16 +67,17 @@ function AnnouncementForm(props) {
       .then(() => getClassAnnouncements(classId))
       .catch((err) => console.log(err))
       .finally(() => {
-        closeForm();
+        handleDialogClose();
         setDisplayAlert(true);
       });
   }
 
   return (
-    <form onSubmit={handleSubmit} className={classes.announcementForm}>
-      <fieldset>
-        <legend>Announcement</legend>
-        <div>
+    <>
+      <DialogTitle>Create Announcement</DialogTitle>
+      <DialogContent>
+        <DialogContentText>Create an announcement below.</DialogContentText>
+        <form className={classes.root} onSubmit={handleSubmit}>
           <TextField
             id="announcement_title"
             label="Announcement Title"
@@ -85,8 +93,6 @@ function AnnouncementForm(props) {
               }
             }}
           />
-        </div>
-        <div>
           <TextField
             id="announcement_body"
             label="Announcement Text"
@@ -103,17 +109,13 @@ function AnnouncementForm(props) {
               }
             }}
           />
-        </div>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          style={{ margin: "0 auto", display: "flex" }}
-        >
-          Make Announcement
-        </Button>
-      </fieldset>
-    </form>
+          <DialogActions>
+            <Button onClick={handleDialogClose}>Cancel</Button>
+            <Button type="submit">Make Announcement</Button>
+          </DialogActions>
+        </form>
+      </DialogContent>
+    </>
   );
 }
 
