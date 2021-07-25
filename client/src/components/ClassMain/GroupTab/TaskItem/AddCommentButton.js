@@ -184,11 +184,7 @@ function AddCommentButton(props) {
 
   return (
     <>
-      <Button
-        onClick={handleDialogOpen}
-        className={classes.button}
-        disabled={isCompleted}
-      >
+      <Button onClick={handleDialogOpen} className={classes.button}>
         View Comments
       </Button>
       {/* Start of Comment List Dialog */}
@@ -224,12 +220,18 @@ function AddCommentButton(props) {
                 {curUserId === comment.attributes.createdBy.id && (
                   <div className={classes.commentAction}>
                     <Tooltip title="Edit comment" placement="top">
-                      <Button onClick={() => handleEditOpen(index)}>
+                      <Button
+                        onClick={() => handleEditOpen(index)}
+                        disabled={isCompleted}
+                      >
                         <EditIcon />
                       </Button>
                     </Tooltip>
                     <Tooltip title="Delete comment" placement="top">
-                      <Button onClick={() => handleDeleteOpen(index)}>
+                      <Button
+                        onClick={() => handleDeleteOpen(index)}
+                        disabled={isCompleted}
+                      >
                         <DeleteIcon />
                       </Button>
                     </Tooltip>
@@ -250,6 +252,7 @@ function AddCommentButton(props) {
                 required
                 size="small"
                 value={commentTitle}
+                disabled={isCompleted}
                 onChange={(event) => {
                   // Do not allow spaces at the beginning, one space between words
                   const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
@@ -266,6 +269,7 @@ function AddCommentButton(props) {
                 required
                 multiline
                 value={commentText}
+                disabled={isCompleted}
                 onChange={(event) => {
                   // Do not allow spaces at the beginning
                   const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
@@ -280,7 +284,11 @@ function AddCommentButton(props) {
         </Paper>
         <DialogActions>
           <Button onClick={handleDialogClose}>Cancel</Button>
-          <Button type="submit" onClick={(event) => handlePostComment(event)}>
+          <Button
+            type="submit"
+            onClick={(event) => handlePostComment(event)}
+            disabled={isCompleted}
+          >
             Post
           </Button>
         </DialogActions>
@@ -331,7 +339,11 @@ function AddCommentButton(props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleEditClose}>Cancel</Button>
-          <Button type="submit" onClick={(event) => handleEditComment(event)}>
+          <Button
+            type="submit"
+            onClick={(event) => handleEditComment(event)}
+            disabled={isCompleted}
+          >
             Save
           </Button>
         </DialogActions>
@@ -352,6 +364,7 @@ function AddCommentButton(props) {
             type="submit"
             className={classes.deleteButton}
             onClick={(event) => handleDeleteComment(event)}
+            disabled={isCompleted}
           >
             Delete
           </Button>
