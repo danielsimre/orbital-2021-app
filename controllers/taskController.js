@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { BaseTask, ParentTask } from "../models/BaseTask.js";
 import { Comment } from "../models/BaseText.js";
+import ClassRole from "../models/ClassRole.js";
 import User from "../models/User.js";
 
 import {
@@ -13,6 +14,7 @@ import {
   validateSubtaskData,
   validateURLs,
 } from "../utils/validation.js";
+import { ClassRoles } from "../utils/enums.js";
 
 export const getAllInfo = (req, res) => {
   Promise.all([
@@ -111,6 +113,21 @@ export const update = (req, res) => {
         )
       )
       .then((task) => validateClassIsIncomplete(res, task.classId.id, task))
+      .then((task) =>
+        ClassRole.findOne({
+          userId: req.user.id,
+          classId: task.classId.id,
+        }).then((classRoleObj) => {
+          if (classRoleObj.role === ClassRoles.MENTOR) {
+            res.status(400).json({
+              msg: "Mentors cannot change completion status of tasks",
+            });
+            throw new Error("Mentors cannot change completion status of tasks");
+          } else {
+            return task;
+          }
+        })
+      )
       .then((task) => {
         const { isCompleted } = req.body;
         validateFieldsPresent(
