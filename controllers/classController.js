@@ -22,7 +22,8 @@ import {
 import { ClassRoles } from "../utils/enums.js";
 
 export const create = async (req, res) => {
-  const { name, desc, groupSize } = req.body;
+  let { name, desc } = req.body;
+  const { groupSize } = req.body;
 
   // Ensure all fields are filled in
   validateFieldsPresent(
@@ -32,6 +33,9 @@ export const create = async (req, res) => {
     desc,
     groupSize
   );
+
+  name = name.trim();
+  desc = desc.trim();
 
   const newClass = new Class({
     name,
@@ -712,7 +716,7 @@ export const createAnnouncement = (req, res) => {
     )
     // Add announcement to the class
     .then(() => {
-      const { title, content } = req.body;
+      let { title, content } = req.body;
 
       validateFieldsPresent(
         res,
@@ -720,6 +724,9 @@ export const createAnnouncement = (req, res) => {
         title,
         content
       );
+
+      title = title.trim();
+      content = content.trim();
 
       const newAnnouncement = new Announcement({
         createdBy: req.user.id,

@@ -63,9 +63,18 @@ export const getInfo = (req, res) => {
 };
 
 export const rename = (req, res) => {
-  const { newName } = req.body;
+  let { newName } = req.body;
 
   Group.findById(req.params.id)
+    .then((curGroup) => {
+      validateFieldsPresent(
+        res,
+        "Please enter a string for attribute newName",
+        newName
+      );
+      newName = newName.trim();
+      return curGroup;
+    })
     .then((curGroup) =>
       validateCanAccessGroup(
         res,

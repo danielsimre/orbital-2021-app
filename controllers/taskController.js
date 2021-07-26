@@ -276,7 +276,17 @@ export const createComment = (req, res) => {
     )
     .then((task) => validateClassIsIncomplete(res, task.classId.id, task))
     .then((curTask) => {
-      const { title, content } = req.body;
+      let { title, content } = req.body;
+      validateFieldsPresent(
+        res,
+        "Please enter a string for attributes title and content",
+        title,
+        content
+      );
+
+      title = title.trim();
+      content = content.trim();
+
       const newComment = new Comment({
         title,
         content,
