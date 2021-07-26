@@ -36,93 +36,82 @@ function App() {
   // This const is used to (crudely) force HeaderBar to update username
   const [updateUser, setUpdateUser] = useState(false);
 
-  /*
-  function getUserData() {
-    try {
-      axios
-        .get("/api/v1/users/auth", {
-          withCredentials: true,
-        })
-        .then((response) => {
-          return response.data.isAuthenticated;
-        });
-    } catch (err) {
-      console.log(err.response.data);
-      setIsAuthenticated(false);
-    } finally {
-      console.log("In finally block");
-    }
-  }
-  async function getUserData() {
-    const res = await axios.get("/api/v1/users/auth", {
-      withCredentials: true,
-    });
-    return await res.data.isAuthenticated;
-  }
-  */
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      const res = await axios.get("/api/v1/users/auth", {
-        withCredentials: true,
-      });
-      setIsAuthenticated(res.data.isAuthenticated);
-    })();
-  }, [setIsAuthenticated]);
+    async function fetchData() {
+      try {
+        await axios
+          .get("/api/v1/users/auth", {
+            withCredentials: true,
+          })
+          .then((response) => {
+            setIsAuthenticated(response.data.isAuthenticated);
+          });
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   return (
-    <BrowserRouter>
-      <HeaderBar
-        isAuthenticated={isAuthenticated}
-        setIsAuthenticated={setIsAuthenticated}
-        updateUser={updateUser}
-      />
-      <Switch>
-        <Route exact path="/">
-          <LoginPage
-            isAuthenticated={isAuthenticated}
-            setIsAuthenticated={setIsAuthenticated}
-          />
-        </Route>
-
-        <Route exact path="/register">
-          <RegistrationPage isAuthenticated={isAuthenticated} />
-        </Route>
-
-        <ProtectedRoute
-          path="/home"
-          component={HomePage}
+    isLoading || (
+      <BrowserRouter>
+        <HeaderBar
           isAuthenticated={isAuthenticated}
-        />
-
-        <ProtectedRoute
-          path="/classes/:classID"
-          component={ClassMainPage}
-          isAuthenticated={isAuthenticated}
-        />
-
-        <ProtectedRoute
-          path="/classes"
-          component={MyClassesPage}
-          isAuthenticated={isAuthenticated}
-        />
-
-        <ProtectedRoute
-          path="/groups"
-          component={MyGroupsPage}
-          isAuthenticated={isAuthenticated}
-        />
-        <ProtectedRoute
-          path="/profile"
-          component={ProfilePage}
-          isAuthenticated={isAuthenticated}
+          setIsAuthenticated={setIsAuthenticated}
           updateUser={updateUser}
-          setUpdateUser={setUpdateUser}
         />
+        <Switch>
+          <Route exact path="/">
+            <LoginPage
+              isAuthenticated={isAuthenticated}
+              setIsAuthenticated={setIsAuthenticated}
+            />
+          </Route>
 
-        <Route path="*" component={Page404} />
-      </Switch>
-    </BrowserRouter>
+          <Route exact path="/register">
+            <RegistrationPage isAuthenticated={isAuthenticated} />
+          </Route>
+
+          <ProtectedRoute
+            path="/home"
+            component={HomePage}
+            isAuthenticated={isAuthenticated}
+          />
+
+          <ProtectedRoute
+            path="/classes/:classID"
+            component={ClassMainPage}
+            isAuthenticated={isAuthenticated}
+          />
+
+          <ProtectedRoute
+            path="/classes"
+            component={MyClassesPage}
+            isAuthenticated={isAuthenticated}
+          />
+
+          <ProtectedRoute
+            path="/groups"
+            component={MyGroupsPage}
+            isAuthenticated={isAuthenticated}
+          />
+          <ProtectedRoute
+            path="/profile"
+            component={ProfilePage}
+            isAuthenticated={isAuthenticated}
+            updateUser={updateUser}
+            setUpdateUser={setUpdateUser}
+          />
+
+          <Route path="*" component={Page404} />
+        </Switch>
+      </BrowserRouter>
+    )
   );
 }
 

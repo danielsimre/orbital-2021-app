@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Redirect, useParams } from "react-router-dom";
 import {
   Button,
   Dialog,
@@ -44,9 +44,9 @@ const useStyles = makeStyles({
 
 function GroupMain(props) {
   // Queried values
-  const { groupID } = useParams();
+  const { classID, groupID } = useParams();
   const { curUserRole, isCompleted } = props;
-  const [groupData, setGroupData] = useState({});
+  const [groupData, setGroupData] = useState(undefined);
 
   const isMentor = curUserRole === ClassRoles.MENTOR;
 
@@ -133,7 +133,11 @@ function GroupMain(props) {
   }, [groupID]);
 
   return (
-    isRetrieving || (
+    isRetrieving ||
+    // If user is not authorized to view this group, redirect them to the class main page
+    (groupData === undefined ? (
+      <Redirect to={`/classes/${classID}`} />
+    ) : (
       <div className={classes.root}>
         <div>
           <Typography variant="h5" className={classes.header}>
@@ -204,7 +208,7 @@ function GroupMain(props) {
           </Alert>
         </Snackbar>
       </div>
-    )
+    ))
   );
 }
 
