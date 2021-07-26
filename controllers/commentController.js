@@ -2,6 +2,7 @@ import { Comment } from "../models/BaseText.js";
 import { BaseTask } from "../models/BaseTask.js";
 import {
   validateAuthorOfComment,
+  validateClassIsIncomplete,
   validateFieldsPresent,
 } from "../utils/validation.js";
 
@@ -28,6 +29,9 @@ export const updateComment = (req, res) => {
       );
       return comment;
     })
+    .then((comment) =>
+      validateClassIsIncomplete(res, comment.taskId.classId.id, comment)
+    )
     .then((comment) =>
       validateAuthorOfComment(
         res,
@@ -56,6 +60,9 @@ export const updateComment = (req, res) => {
 
 export const deleteComment = (req, res) => {
   Comment.findById(req.params.id)
+    .then((comment) =>
+      validateClassIsIncomplete(res, comment.taskId.classId.id, comment)
+    )
     .then((comment) =>
       validateAuthorOfComment(
         res,
