@@ -99,6 +99,10 @@ export const joinClass = (req, res) => {
 };
 
 export const getInfo = (req, res) => {
+  if (!Mongoose.isValidObjectId(req.params.id)) {
+    res.status(404).json("Invalid class id");
+    return;
+  }
   validateCanAccessClass(req, res)
     // Query the class, now with info of ALL users involved in the class
     .then((classRoleObj) =>

@@ -40,6 +40,10 @@ export const getAllInfo = (req, res) => {
 };
 
 export const getInfo = (req, res) => {
+  if (!Mongoose.isValidObjectId(req.params.id)) {
+    res.status(404).json("Invalid group id");
+    return;
+  }
   Group.findOne({
     $and: [
       { _id: req.params.id },
