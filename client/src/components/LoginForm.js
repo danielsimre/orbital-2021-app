@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, TextField, Snackbar, makeStyles } from "@material-ui/core";
 import { Alert, AlertTitle } from "@material-ui/lab";
+import logo from "../logo.png";
 import axios from "axios";
 
 const useStyles = makeStyles({
@@ -17,6 +18,19 @@ const useStyles = makeStyles({
     marginTop: "0.3em",
     display: "flex",
     background: "#eba834",
+  },
+  logo: {
+    height: "4em",
+    width: "4em",
+  },
+  header: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    marginTop: "0em",
   },
 });
 
@@ -72,6 +86,10 @@ function LoginForm(props) {
       <form onSubmit={handleLogin}>
         <fieldset>
           <legend>Sign in</legend>
+          <div className={classes.header}>
+            <img src={logo} alt={"ProjExpress Logo"} className={classes.logo} />
+            <h2 className={classes.title}>ProjExpress</h2>
+          </div>
           <div>
             <TextField
               id="email"
