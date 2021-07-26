@@ -43,6 +43,7 @@ const useStyles = makeStyles({
   },
   tableCell: {
     border: "none",
+    width: "50%",
   },
   tableHeader: {
     display: "flex",
