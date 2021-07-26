@@ -76,8 +76,6 @@ function AddCommentButton(props) {
         axios.spread((comments, userData) => {
           setCommentList(comments.data);
           setCurUserId(userData.data.id);
-          console.log(comments.data);
-          console.log(userData.data.id);
         })
       )
       .catch((err) => console.error(err))

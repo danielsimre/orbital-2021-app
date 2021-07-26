@@ -172,8 +172,7 @@ function ClassSettings(props) {
           <Button
             className={classes.completeButton}
             onClick={(event) => handleClassComplete(event)}
-            // TODO: Leave as commented until ready
-            // disabled={isCompleted}
+            disabled={isCompleted}
           >
             End the class
           </Button>

@@ -166,14 +166,9 @@ export const updateInfo = (req, res) => {
       .catch((err) => console.log(err));
   } else if (req.query.isCompleted === "") {
     validateCanAccessClass(req, res)
-      /* TODO: Leave commented until ready to stop toggling    
-      .then((curClass) => 
-        validateClassIsIncomplete(res, curClass.id, curClass)
-      )
-      */
+      .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
       .then((curClass) => {
-        // TODO: change to "= true" for completed product
-        curClass.isCompleted = !curClass.isCompleted;
+        curClass.isCompleted = true;
         return curClass;
       })
       .then((curClass) => {
