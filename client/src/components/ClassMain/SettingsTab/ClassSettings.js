@@ -153,7 +153,7 @@ function ClassSettings(props) {
             no longer be able to join the class, create tasks, make
             modifications, etc.
           </Typography>
-          <Button onClick={handleDialogOpen}>
+          <Button onClick={handleDialogOpen} disabled={isCompleted}>
             Mark this class as finished
           </Button>
         </div>
@@ -172,7 +172,6 @@ function ClassSettings(props) {
           <Button
             className={classes.completeButton}
             onClick={(event) => handleClassComplete(event)}
-            disabled={isCompleted}
           >
             End the class
           </Button>

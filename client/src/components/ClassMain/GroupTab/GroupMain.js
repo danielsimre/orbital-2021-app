@@ -85,16 +85,16 @@ function GroupMain(props) {
     setLeaveDialogOpen(false);
   }
 
-  function getGroupData(groupId) {
+  function getGroupData() {
     axios
-      .get(`/api/v1/groups/${groupId}`, {
+      .get(`/api/v1/groups/${groupID}`, {
         withCredentials: true,
       })
       .then((res) => {
         setGroupData(res.data.attributes);
       })
       .catch((err) => {
-        console.log(`Could not find group with ID: ${groupId}`);
+        console.log(`Could not find group with ID: ${groupID}`);
       })
       .finally(() => setIsRetrieving(false));
   }
@@ -119,7 +119,17 @@ function GroupMain(props) {
   }
 
   useEffect(() => {
-    getGroupData(groupID);
+    axios
+      .get(`/api/v1/groups/${groupID}`, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        setGroupData(res.data.attributes);
+      })
+      .catch((err) => {
+        console.log(`Could not find group with ID: ${groupID}`);
+      })
+      .finally(() => setIsRetrieving(false));
   }, [groupID]);
 
   return (
@@ -128,13 +138,14 @@ function GroupMain(props) {
         <div>
           <Typography variant="h5" className={classes.header}>
             {groupData.name}
+            <RenameGroupDialog
+              groupId={groupID}
+              refreshGroupList={getGroupData}
+              isCompleted={isCompleted}
+            />
           </Typography>
+
           <Button onClick={handleLeaveOpen}>Leave Group</Button>
-          <RenameGroupDialog
-            groupId={groupID}
-            refreshGroupList={getGroupData}
-            isCompleted={isCompleted}
-          />
         </div>
         <Tabs
           value={tabIndex}
@@ -148,7 +159,7 @@ function GroupMain(props) {
         {tabIndex === 0 ? (
           <GroupTaskList
             queriedTaskList={groupData.tasks}
-            refreshGroupData={() => getGroupData(groupID)}
+            refreshGroupData={getGroupData}
             groupMembers={groupData.groupMembers}
             isMentor={isMentor}
             isCompleted={isCompleted}
@@ -159,7 +170,7 @@ function GroupMain(props) {
             mentors={groupData.mentoredBy}
             isMentor={isMentor}
             isCompleted={isCompleted}
-            refreshGroupData={() => getGroupData(groupID)}
+            refreshGroupData={getGroupData}
             groupID={groupID}
           />
         )}
