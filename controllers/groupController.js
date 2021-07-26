@@ -40,6 +40,10 @@ export const getAllInfo = (req, res) => {
 };
 
 export const getInfo = (req, res) => {
+  if (!Mongoose.isValidObjectId(req.params.id)) {
+    res.status(404).json("Invalid group id");
+    return;
+  }
   Group.findOne({
     $and: [
       { _id: req.params.id },
@@ -63,9 +67,18 @@ export const getInfo = (req, res) => {
 };
 
 export const rename = (req, res) => {
-  const { newName } = req.body;
+  let { newName } = req.body;
 
   Group.findById(req.params.id)
+    .then((curGroup) => {
+      validateFieldsPresent(
+        res,
+        "Please enter a string for attribute newName",
+        newName
+      );
+      newName = newName.trim();
+      return curGroup;
+    })
     .then((curGroup) =>
       validateCanAccessGroup(
         res,

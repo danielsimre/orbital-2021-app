@@ -20,6 +20,7 @@ const useStyles = makeStyles({
     border: "1px solid black",
     alignSelf: "center",
     flex: "0 0",
+    marginLeft: "0.5em",
   },
   snackbar: {
     textAlign: "center",

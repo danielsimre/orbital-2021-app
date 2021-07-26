@@ -15,13 +15,23 @@ export const successfulFindQuery = (queriedObjects) => queriedObjects.length;
 export const successfulFindOneQuery = (queriedObject) => queriedObject;
 
 export const validateFieldsPresent = (res, msg, ...fields) => {
-  if (!fields.every((field) => field !== undefined && field !== "")) {
+  if (
+    !fields.every(
+      (field) =>
+        field !== undefined &&
+        (typeof field !== "string" || field.trim() !== "")
+    )
+  ) {
     sendJsonErrMessage(res, 400, msg);
   }
 };
 
 export const validateRegistration = (req, res, queriedUser) => {
-  const { username, email, password, passwordConfirm } = req.body;
+  let { username, email, password, passwordConfirm } = req.body;
+  username = username.trim();
+  email = email.trim();
+  password = password.trim();
+  passwordConfirm = passwordConfirm.trim();
 
   validateFieldsPresent(
     res,
@@ -74,7 +84,7 @@ export const validateCanAccessClass = (req, res) =>
       return classRoleObj.classId;
     });
 
-export const validateClassIsIncomplete = (res, classId, ret) => {
+export const validateClassIsIncomplete = (res, classId, ret) =>
   Class.findById(classId).then((classObj) => {
     if (classObj.isCompleted) {
       sendJsonErrMessage(
@@ -83,9 +93,8 @@ export const validateClassIsIncomplete = (res, classId, ret) => {
         "Class data cannot be modified as it has been marked as completed"
       );
     }
+    return ret;
   });
-  return ret;
-};
 
 export const validateCanAccessGroup = (res, curGroup, msg) => {
   if (!successfulFindOneQuery(curGroup)) {

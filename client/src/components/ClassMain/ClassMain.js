@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { Switch, useRouteMatch, Route, useParams } from "react-router-dom";
+import {
+  Switch,
+  useRouteMatch,
+  Route,
+  Redirect,
+  useParams,
+} from "react-router-dom";
 import { makeStyles } from "@material-ui/core";
 import { Alert, AlertTitle } from "@material-ui/lab";
 import axios from "axios";
@@ -37,12 +43,12 @@ const useStyles = makeStyles((theme) => ({
 function ClassMain(props) {
   const { classID } = useParams();
 
-  const [classData, setClassData] = useState({});
+  // These are dependent on querying the class data from the API, so they are undefined for now
+  const [classData, setClassData] = useState(undefined);
+  const [isCreator, setIsCreator] = useState(undefined);
 
   const [isRetrieving, setIsRetrieving] = useState(true);
   const { path } = useRouteMatch();
-
-  const isCreator = classData.curUserId === classData.created_by;
 
   const classes = useStyles();
 
@@ -51,6 +57,9 @@ function ClassMain(props) {
       .get(`/api/v1/classes/${classID}`, { withCredentials: true })
       .then((res) => {
         setClassData(res.data.attributes);
+        setIsCreator(
+          res.data.attributes.curUserId === res.data.attributes.created_by
+        );
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
@@ -61,13 +70,20 @@ function ClassMain(props) {
       .get(`/api/v1/classes/${classID}`, { withCredentials: true })
       .then((res) => {
         setClassData(res.data.attributes);
+        setIsCreator(
+          res.data.attributes.curUserId === res.data.attributes.created_by
+        );
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
   }, [classID]);
 
   return (
-    isRetrieving || (
+    isRetrieving ||
+    // If user is not authorized to view this class, redirect them to the view classes page
+    (classData === undefined ? (
+      <Redirect to={`/classes`} />
+    ) : (
       <div className={classes.root}>
         <div className={classes.sidebar}>
           <ClassSidebar classID={classID} curUserRole={classData.role} />
@@ -142,7 +158,7 @@ function ClassMain(props) {
           </Switch>
         </div>
       </div>
-    )
+    ))
   );
 }
 

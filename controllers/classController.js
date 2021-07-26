@@ -22,7 +22,8 @@ import {
 import { ClassRoles } from "../utils/enums.js";
 
 export const create = async (req, res) => {
-  const { name, desc, groupSize } = req.body;
+  let { name, desc } = req.body;
+  const { groupSize } = req.body;
 
   // Ensure all fields are filled in
   validateFieldsPresent(
@@ -32,6 +33,9 @@ export const create = async (req, res) => {
     desc,
     groupSize
   );
+
+  name = name.trim();
+  desc = desc.trim();
 
   const newClass = new Class({
     name,
@@ -95,6 +99,10 @@ export const joinClass = (req, res) => {
 };
 
 export const getInfo = (req, res) => {
+  if (!Mongoose.isValidObjectId(req.params.id)) {
+    res.status(404).json("Invalid class id");
+    return;
+  }
   validateCanAccessClass(req, res)
     // Query the class, now with info of ALL users involved in the class
     .then((classRoleObj) =>
@@ -166,14 +174,9 @@ export const updateInfo = (req, res) => {
       .catch((err) => console.log(err));
   } else if (req.query.isCompleted === "") {
     validateCanAccessClass(req, res)
-      /* TODO: Leave commented until ready to stop toggling    
-      .then((curClass) => 
-        validateClassIsIncomplete(res, curClass.id, curClass)
-      )
-      */
+      .then((curClass) => validateClassIsIncomplete(res, curClass.id, curClass))
       .then((curClass) => {
-        // TODO: change to "= true" for completed product
-        curClass.isCompleted = !curClass.isCompleted;
+        curClass.isCompleted = true;
         return curClass;
       })
       .then((curClass) => {
@@ -717,7 +720,7 @@ export const createAnnouncement = (req, res) => {
     )
     // Add announcement to the class
     .then(() => {
-      const { title, content } = req.body;
+      let { title, content } = req.body;
 
       validateFieldsPresent(
         res,
@@ -725,6 +728,9 @@ export const createAnnouncement = (req, res) => {
         title,
         content
       );
+
+      title = title.trim();
+      content = content.trim();
 
       const newAnnouncement = new Announcement({
         createdBy: req.user.id,

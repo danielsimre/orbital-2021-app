@@ -5,6 +5,7 @@ import User from "../models/User.js";
 import {
   validateRegistration,
   validateUniqueUsername,
+  validateFieldsPresent,
 } from "../utils/validation.js";
 
 export const getInfo = (req, res) => {
@@ -39,13 +40,17 @@ export const getInfo = (req, res) => {
 };
 
 export const register = (req, res) => {
-  const { username, email, password } = req.body;
-
+  let { username, email, password } = req.body;
   User.findOne({ $or: [{ email }, { username }] })
     .then((queriedUser) => validateRegistration(req, res, queriedUser))
     // Hash password with bcryptjs, then store in database
-    .then(() => bcrypt.genSalt(10))
-    .then((salt) => bcrypt.hash(password, salt))
+    .then(() => {
+      username = username.trim();
+      email = email.trim();
+      password = password.trim();
+      return bcrypt.genSalt(10);
+    })
+    .then((salt) => bcrypt.hash(password.trim(), salt))
     .then((hash) => {
       const newUser = new User({
         username,
@@ -92,15 +97,21 @@ export const logout = (req, res) => {
 };
 
 export const changeUsername = (req, res) => {
-  const { newUsername } = req.body;
+  let { newUsername } = req.body;
+
+  // Ensure all fields are filled in
+  validateFieldsPresent(
+    res,
+    "Please enter a string for attribute newUsername",
+    newUsername
+  );
+  newUsername = newUsername.trim();
 
   User.findOne({ username: newUsername })
     .then((queriedUser) => {
       validateUniqueUsername(req, res, queriedUser);
     })
-    .then(() =>
-      User.findOneAndUpdate({ _id: req.user.id }, { username: newUsername })
-    )
+    .then(() => User.updateOne({ _id: req.user.id }, { username: newUsername }))
     .then(() => {
       res.json({ msg: "Successfully updated your username" });
     })
