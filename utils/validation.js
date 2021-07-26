@@ -74,7 +74,7 @@ export const validateCanAccessClass = (req, res) =>
       return classRoleObj.classId;
     });
 
-export const validateClassIsIncomplete = (res, classId, ret) => {
+export const validateClassIsIncomplete = (res, classId, ret) =>
   Class.findById(classId).then((classObj) => {
     if (classObj.isCompleted) {
       sendJsonErrMessage(
@@ -83,9 +83,8 @@ export const validateClassIsIncomplete = (res, classId, ret) => {
         "Class data cannot be modified as it has been marked as completed"
       );
     }
+    return ret;
   });
-  return ret;
-};
 
 export const validateCanAccessGroup = (res, curGroup, msg) => {
   if (!successfulFindOneQuery(curGroup)) {

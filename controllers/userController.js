@@ -98,9 +98,7 @@ export const changeUsername = (req, res) => {
     .then((queriedUser) => {
       validateUniqueUsername(req, res, queriedUser);
     })
-    .then(() =>
-      User.findOneAndUpdate({ _id: req.user.id }, { username: newUsername })
-    )
+    .then(() => User.updateOne({ _id: req.user.id }, { username: newUsername }))
     .then(() => {
       res.json({ msg: "Successfully updated your username" });
     })

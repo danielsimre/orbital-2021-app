@@ -18,6 +18,7 @@ import axios from "axios";
 
 import GroupTaskList from "./GroupTaskList";
 import GroupUserList from "./GroupUserList";
+import RenameGroupDialog from "./RenameGroupDialog";
 import { ClassRoles } from "../../../enums";
 
 const useStyles = makeStyles({
@@ -129,6 +130,11 @@ function GroupMain(props) {
             {groupData.name}
           </Typography>
           <Button onClick={handleLeaveOpen}>Leave Group</Button>
+          <RenameGroupDialog
+            groupId={groupID}
+            refreshGroupList={getGroupData}
+            isCompleted={isCompleted}
+          />
         </div>
         <Tabs
           value={tabIndex}
