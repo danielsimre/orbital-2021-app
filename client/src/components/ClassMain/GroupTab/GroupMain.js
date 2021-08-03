@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Redirect, useParams } from "react-router-dom";
 import {
   Button,
   Dialog,
@@ -18,6 +18,7 @@ import axios from "axios";
 
 import GroupTaskList from "./GroupTaskList";
 import GroupUserList from "./GroupUserList";
+import RenameGroupDialog from "./RenameGroupDialog";
 import { ClassRoles } from "../../../enums";
 
 const useStyles = makeStyles({
@@ -43,9 +44,9 @@ const useStyles = makeStyles({
 
 function GroupMain(props) {
   // Queried values
-  const { groupID } = useParams();
+  const { classID, groupID } = useParams();
   const { curUserRole, isCompleted } = props;
-  const [groupData, setGroupData] = useState({});
+  const [groupData, setGroupData] = useState(undefined);
 
   const isMentor = curUserRole === ClassRoles.MENTOR;
 
@@ -84,16 +85,16 @@ function GroupMain(props) {
     setLeaveDialogOpen(false);
   }
 
-  function getGroupData(groupId) {
+  function getGroupData() {
     axios
-      .get(`/api/v1/groups/${groupId}`, {
+      .get(`/api/v1/groups/${groupID}`, {
         withCredentials: true,
       })
       .then((res) => {
         setGroupData(res.data.attributes);
       })
       .catch((err) => {
-        console.log(`Could not find group with ID: ${groupId}`);
+        console.log(`Could not find group with ID: ${groupID}`);
       })
       .finally(() => setIsRetrieving(false));
   }
@@ -118,16 +119,36 @@ function GroupMain(props) {
   }
 
   useEffect(() => {
-    getGroupData(groupID);
+    axios
+      .get(`/api/v1/groups/${groupID}`, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        setGroupData(res.data.attributes);
+      })
+      .catch((err) => {
+        console.log(`Could not find group with ID: ${groupID}`);
+      })
+      .finally(() => setIsRetrieving(false));
   }, [groupID]);
 
   return (
-    isRetrieving || (
+    isRetrieving ||
+    // If user is not authorized to view this group, redirect them to the class main page
+    (groupData === undefined ? (
+      <Redirect to={`/classes/${classID}`} />
+    ) : (
       <div className={classes.root}>
         <div>
           <Typography variant="h5" className={classes.header}>
             {groupData.name}
+            <RenameGroupDialog
+              groupId={groupID}
+              refreshGroupList={getGroupData}
+              isCompleted={isCompleted}
+            />
           </Typography>
+
           <Button onClick={handleLeaveOpen}>Leave Group</Button>
         </div>
         <Tabs
@@ -142,7 +163,7 @@ function GroupMain(props) {
         {tabIndex === 0 ? (
           <GroupTaskList
             queriedTaskList={groupData.tasks}
-            refreshGroupData={() => getGroupData(groupID)}
+            refreshGroupData={getGroupData}
             groupMembers={groupData.groupMembers}
             isMentor={isMentor}
             isCompleted={isCompleted}
@@ -153,7 +174,7 @@ function GroupMain(props) {
             mentors={groupData.mentoredBy}
             isMentor={isMentor}
             isCompleted={isCompleted}
-            refreshGroupData={() => getGroupData(groupID)}
+            refreshGroupData={getGroupData}
             groupID={groupID}
           />
         )}
@@ -187,7 +208,7 @@ function GroupMain(props) {
           </Alert>
         </Snackbar>
       </div>
-    )
+    ))
   );
 }
 

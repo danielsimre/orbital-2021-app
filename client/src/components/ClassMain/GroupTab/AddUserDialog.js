@@ -73,7 +73,6 @@ function AddUserDialog(props) {
 
   function handleSelectStudents(students) {
     if (students.length > groupSizeLimit - curGroupSize) {
-      console.log(students.length);
       handleAlert(
         "Error!",
         `You can only add up to ${

@@ -1,6 +1,10 @@
 import { Comment } from "../models/BaseText.js";
 import { BaseTask } from "../models/BaseTask.js";
-import { validateAuthorOfComment } from "../utils/validation.js";
+import {
+  validateAuthorOfComment,
+  validateClassIsIncomplete,
+  validateFieldsPresent,
+} from "../utils/validation.js";
 
 export const getAllInfo = (req, res) => {
   BaseTask.find({ assignedTo: req.user.id })
@@ -16,6 +20,18 @@ export const getComment = (req, res) => {
 
 export const updateComment = (req, res) => {
   Comment.findById(req.params.id)
+    .then((comment) => {
+      validateFieldsPresent(
+        res,
+        "Please enter a non-empty string for attributes title and content",
+        req.body.title,
+        req.body.content
+      );
+      return comment;
+    })
+    .then((comment) =>
+      validateClassIsIncomplete(res, comment.taskId.classId.id, comment)
+    )
     .then((comment) =>
       validateAuthorOfComment(
         res,
@@ -44,6 +60,9 @@ export const updateComment = (req, res) => {
 
 export const deleteComment = (req, res) => {
   Comment.findById(req.params.id)
+    .then((comment) =>
+      validateClassIsIncomplete(res, comment.taskId.classId.id, comment)
+    )
     .then((comment) =>
       validateAuthorOfComment(
         res,
