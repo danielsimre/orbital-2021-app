@@ -32,6 +32,9 @@ const useStyles = makeStyles({
   title: {
     marginTop: "0em",
   },
+  textField: {
+    padding: "0.5rem",
+  },
 });
 
 function LoginForm(props) {
@@ -90,7 +93,7 @@ function LoginForm(props) {
             <img src={logo} alt={"ProjExpress Logo"} className={classes.logo} />
             <h2 className={classes.title}>ProjExpress</h2>
           </div>
-          <div>
+          <div className={classes.textField}>
             <TextField
               id="email"
               label="Email"
@@ -100,7 +103,7 @@ function LoginForm(props) {
               onChange={(event) => setLogInEmail(event.target.value)}
             />
           </div>
-          <div>
+          <div className={classes.textField}>
             <TextField
               id="password"
               label="Password"

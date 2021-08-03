@@ -19,6 +19,9 @@ const useStyles = makeStyles({
     display: "flex",
     background: "#eba834",
   },
+  textField: {
+    padding: "0.5rem",
+  },
 });
 
 function RegistrationForm() {
@@ -101,7 +104,7 @@ function RegistrationForm() {
       <form onSubmit={handleRegistration}>
         <fieldset>
           <legend>Register</legend>
-          <div>
+          <div className={classes.textField}>
             <TextField
               required
               id="email"
@@ -119,7 +122,7 @@ function RegistrationForm() {
               }}
             />
           </div>
-          <div>
+          <div className={classes.textField}>
             <TextField
               required
               id="username"
@@ -136,7 +139,7 @@ function RegistrationForm() {
               }}
             />
           </div>
-          <div>
+          <div className={classes.textField}>
             <TextField
               required
               id="password"
@@ -155,7 +158,7 @@ function RegistrationForm() {
               error={hasPasswordError}
             />
           </div>
-          <div>
+          <div className={classes.textField}>
             <TextField
               required
               id="password"
