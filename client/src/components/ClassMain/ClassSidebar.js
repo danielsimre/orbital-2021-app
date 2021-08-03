@@ -16,6 +16,8 @@ function ClassSidebar(props) {
   const { classID, curUserRole } = props;
   const classes = useStyles();
 
+  const isMentor = curUserRole === "MENTOR";
+
   return (
     <div className={classes.root}>
       <List component="nav">
@@ -49,7 +51,9 @@ function ClassSidebar(props) {
           component={Link}
           to={`/classes/${classID}/tasks`}
         >
-          <ListItemText primary="Class Tasks" />
+          <ListItemText
+            primary={isMentor ? "Task Framework" : "Class Task List"}
+          />
         </ListItem>
         <ListItem
           button
@@ -57,7 +61,7 @@ function ClassSidebar(props) {
           component={Link}
           to={`/classes/${classID}/groups`}
         >
-          <ListItemText primary="Project Groups" />
+          <ListItemText primary={isMentor ? "Project Groups" : "My Group"} />
         </ListItem>
         {curUserRole === ClassRoles.MENTOR && (
           <ListItem
