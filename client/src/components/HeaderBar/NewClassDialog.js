@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Paper,
   InputLabel,
   MenuItem,
   TextField,
@@ -23,6 +22,7 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     marginBottom: "0.5em",
+    gap: "0.5em",
   },
   snackbar: {
     textAlign: "center",
@@ -114,7 +114,7 @@ function NewClassDialog(props) {
             Enter in a name and description for the class.
           </DialogContentText>
           <form onSubmit={handleSubmit}>
-            <Paper className={classes.paper}>
+            <div className={classes.paper}>
               <TextField
                 id="class_name"
                 label="Class Name"
@@ -130,6 +130,7 @@ function NewClassDialog(props) {
                   }
                 }}
               />
+
               <TextField
                 id="class_descrption"
                 label="Class Description"
@@ -146,7 +147,7 @@ function NewClassDialog(props) {
                   }
                 }}
               />
-            </Paper>
+            </div>
             <InputLabel shrink>Group Size</InputLabel>
             <Select
               value={classGroupSize}

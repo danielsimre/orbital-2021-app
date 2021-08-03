@@ -20,6 +20,7 @@ const useStyles = makeStyles({
   root: {
     display: "flex",
     flexDirection: "column",
+    gap: "0.5rem",
   },
   button: {
     border: "1px solid black",
@@ -241,43 +242,41 @@ function AddCommentButton(props) {
         </DialogContent>
         <Paper className={classes.box}>
           <Typography variant="body1">Add a comment below</Typography>
-          <form>
-            <div className={classes.root}>
-              <TextField
-                id="commentTitle"
-                label="Title"
-                variant="outlined"
-                required
-                size="small"
-                value={commentTitle}
-                disabled={isCompleted}
-                onChange={(event) => {
-                  // Do not allow spaces at the beginning, one space between words
-                  const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
-                  const value = event.target.value;
-                  if (value === "" || regex.test(value)) {
-                    setCommentTitle(value);
-                  }
-                }}
-              />
-              <TextField
-                id="commentContent"
-                label="Comment"
-                variant="outlined"
-                required
-                multiline
-                value={commentText}
-                disabled={isCompleted}
-                onChange={(event) => {
-                  // Do not allow spaces at the beginning
-                  const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
-                  const value = event.target.value;
-                  if (value === "" || regex.test(value)) {
-                    setCommentText(value);
-                  }
-                }}
-              />
-            </div>
+          <form className={classes.root}>
+            <TextField
+              id="commentTitle"
+              label="Title"
+              variant="outlined"
+              required
+              size="small"
+              value={commentTitle}
+              disabled={isCompleted}
+              onChange={(event) => {
+                // Do not allow spaces at the beginning, one space between words
+                const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setCommentTitle(value);
+                }
+              }}
+            />
+            <TextField
+              id="commentContent"
+              label="Comment"
+              variant="outlined"
+              required
+              multiline
+              value={commentText}
+              disabled={isCompleted}
+              onChange={(event) => {
+                // Do not allow spaces at the beginning
+                const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setCommentText(value);
+                }
+              }}
+            />
           </form>
         </Paper>
         <DialogActions>

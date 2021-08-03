@@ -17,6 +17,7 @@ const useStyles = makeStyles({
   root: {
     display: "flex",
     flexDirection: "column",
+    gap: "0.5rem",
   },
   button: {
     border: "1px solid black",
