@@ -50,6 +50,9 @@ function GroupList(props) {
   const [mentorPage, setMentorPage] = useState(1);
   const [displayMentorList, setDisplayMentorList] = useState([]);
 
+  const classCompleted = (group) =>
+    group.attributes.classId.attributes.isCompleted;
+
   function handleMemberChange(event, value) {
     setMemberPage(value);
     setDisplayMemberList(
@@ -59,6 +62,7 @@ function GroupList(props) {
       )
     );
   }
+
   function handleMentorChange(event, value) {
     setMentorPage(value);
     setDisplayMentorList(
@@ -79,10 +83,24 @@ function GroupList(props) {
         withCredentials: true,
       })
       .then((response) => {
-        setMemberGroupList(response.data.memberOf);
-        setMentorGroupList(response.data.mentorOf);
-        setDisplayMemberList(response.data.memberOf.slice(0, ITEMS_PER_PAGE));
-        setDisplayMentorList(response.data.mentorOf.slice(0, ITEMS_PER_PAGE));
+        setMemberGroupList(
+          response.data.memberOf.filter((group) => !classCompleted(group))
+        );
+        setMentorGroupList(
+          response.data.mentorOf.filter((group) => !classCompleted(group))
+        );
+        setDisplayMemberList(
+          response.data.memberOf
+            .filter((group) => !classCompleted(group))
+            .slice(0, ITEMS_PER_PAGE)
+        );
+        setDisplayMentorList(
+          response.data.mentorOf
+            .filter((group) => !classCompleted(group))
+            .slice(0, ITEMS_PER_PAGE)
+        );
+        console.log(response.data.memberOf);
+        console.log(response.data.mentorOf);
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
