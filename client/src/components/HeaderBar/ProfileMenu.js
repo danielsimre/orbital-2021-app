@@ -52,6 +52,7 @@ function ProfileMenu(props) {
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
         <MenuItem component={Link} to="/profile">
           Profile
