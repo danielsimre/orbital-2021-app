@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogTitle,
   MenuItem,
-  Paper,
   Select,
   TextField,
   makeStyles,

@@ -155,7 +155,9 @@ function NewClassDialog(props) {
               className={classes.select}
             >
               {groupSizeOptions.map((number) => (
-                <MenuItem value={number}>{number}</MenuItem>
+                <MenuItem key={number} value={number}>
+                  {number}
+                </MenuItem>
               ))}
             </Select>
             <DialogActions>
