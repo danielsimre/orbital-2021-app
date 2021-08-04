@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { List, ListItem, ListItemText, makeStyles } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { ClassRoles } from "../../enums";
@@ -16,6 +17,12 @@ function ClassSidebar(props) {
   const { classID, curUserRole } = props;
   const classes = useStyles();
 
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  function handleSelectTab(event, index) {
+    setSelectedTab(index);
+  }
+
   const isMentor = curUserRole === "MENTOR";
 
   return (
@@ -23,6 +30,8 @@ function ClassSidebar(props) {
       <List component="nav">
         <ListItem
           button
+          onClick={(event) => handleSelectTab(event, 0)}
+          selected={selectedTab === 0}
           className={classes.option}
           component={Link}
           to={`/classes/${classID}`}
@@ -31,6 +40,8 @@ function ClassSidebar(props) {
         </ListItem>
         <ListItem
           button
+          onClick={(event) => handleSelectTab(event, 1)}
+          selected={selectedTab === 1}
           className={classes.option}
           component={Link}
           to={`/classes/${classID}/announcements`}
@@ -39,6 +50,8 @@ function ClassSidebar(props) {
         </ListItem>
         <ListItem
           button
+          onClick={(event) => handleSelectTab(event, 2)}
+          selected={selectedTab === 2}
           className={classes.option}
           component={Link}
           to={`/classes/${classID}/users`}
@@ -47,6 +60,8 @@ function ClassSidebar(props) {
         </ListItem>
         <ListItem
           button
+          onClick={(event) => handleSelectTab(event, 3)}
+          selected={selectedTab === 3}
           className={classes.option}
           component={Link}
           to={`/classes/${classID}/tasks`}
@@ -57,6 +72,8 @@ function ClassSidebar(props) {
         </ListItem>
         <ListItem
           button
+          onClick={(event) => handleSelectTab(event, 4)}
+          selected={selectedTab === 4}
           className={classes.option}
           component={Link}
           to={`/classes/${classID}/groups`}
@@ -66,6 +83,8 @@ function ClassSidebar(props) {
         {curUserRole === ClassRoles.MENTOR && (
           <ListItem
             button
+            onClick={(event) => handleSelectTab(event, 5)}
+            selected={selectedTab === 5}
             className={classes.option}
             component={Link}
             to={`/classes/${classID}/settings`}

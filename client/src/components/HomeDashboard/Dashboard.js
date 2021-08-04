@@ -69,7 +69,7 @@ function Dashboard() {
         <div className={classes.container}>
           <div className={classes.left}>
             <CustomBox>
-              <Typography variant="h5">Upcoming Tasks</Typography>
+              <Typography variant="h5">Task List</Typography>
               <DashboardTasks userTaskList={userTaskList} />
             </CustomBox>
           </div>
