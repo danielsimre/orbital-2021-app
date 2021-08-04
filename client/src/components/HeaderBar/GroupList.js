@@ -99,8 +99,6 @@ function GroupList(props) {
             .filter((group) => !classCompleted(group))
             .slice(0, ITEMS_PER_PAGE)
         );
-        console.log(response.data.memberOf);
-        console.log(response.data.mentorOf);
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));

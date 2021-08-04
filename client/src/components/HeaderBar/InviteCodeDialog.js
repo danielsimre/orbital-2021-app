@@ -23,6 +23,11 @@ const useStyles = makeStyles({
   snackbar: {
     textAlign: "center",
   },
+  button: {
+    border: "1px solid black",
+    alignSelf: "center",
+    flex: "0 0",
+  },
 });
 
 function InviteCodeDialog(props) {
@@ -92,7 +97,13 @@ function InviteCodeDialog(props) {
 
   return (
     <>
-      <Button onClick={handleDialogOpen}>Join Class via Invite Code</Button>
+      <Button
+        onClick={handleDialogOpen}
+        className={classes.button}
+        size="small"
+      >
+        Use Invite Code
+      </Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
         <DialogTitle>Enter Class Invite Code</DialogTitle>
         <DialogContent>

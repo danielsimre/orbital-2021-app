@@ -30,6 +30,11 @@ const useStyles = makeStyles({
   select: {
     width: "10%",
   },
+  button: {
+    border: "1px solid black",
+    alignSelf: "center",
+    flex: "0 0",
+  },
 });
 
 function NewClassDialog(props) {
@@ -106,7 +111,13 @@ function NewClassDialog(props) {
 
   return (
     <>
-      <Button onClick={handleDialogOpen}>Create New Class</Button>
+      <Button
+        onClick={handleDialogOpen}
+        className={classes.button}
+        size="small"
+      >
+        Create New Class
+      </Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth>
         <DialogTitle>Create New Class</DialogTitle>
         <DialogContent>
