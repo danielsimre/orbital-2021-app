@@ -96,7 +96,6 @@ function ClassSettings(props) {
         { withCredentials: true }
       )
       .then((res) => {
-        console.log(res);
         handleAlert(
           "Class Locked",
           "The class is now locked. You can still view the class information, but can no longer modify anything.",

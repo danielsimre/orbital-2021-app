@@ -160,7 +160,6 @@ function UserList(props) {
         { withCredentials: true }
       )
       .then((response) => {
-        console.log(response.data);
         const message = `User does not exist for emails: ${response.data.doesNotExist} \n
         User is already in the class: ${response.data.alreadyAdded} \n
         Sucessfully added users: ${response.data.successfullyAdded}`;

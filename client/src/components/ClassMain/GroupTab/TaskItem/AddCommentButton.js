@@ -171,7 +171,6 @@ function AddCommentButton(props) {
     event.preventDefault();
     axios
       .delete(`/api/v1/comments/${curCommentId}/`, { withCredentials: true })
-      .then((res) => console.log(res.data.msg))
       .catch((err) => console.log(err))
       .finally(() => {
         // clean up state

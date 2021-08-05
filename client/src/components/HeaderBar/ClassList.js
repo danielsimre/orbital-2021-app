@@ -124,7 +124,6 @@ function ClassList() {
         withCredentials: true,
       })
       .then((response) => {
-        console.log(response);
         setQueriedClassList(
           response.data.classes.filter((classObj) => !completedClass(classObj))
         );

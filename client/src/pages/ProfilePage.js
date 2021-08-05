@@ -71,7 +71,6 @@ function ProfilePage(props) {
       .get("/api/v1/users", { withCredentials: true })
       .then((res) => {
         setCurUserInfo(res.data.attributes);
-        console.log(res.data);
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
