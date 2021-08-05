@@ -98,7 +98,7 @@ function ClassList() {
     );
   }
 
-  const completedClass = (classObj) => classObj.isCompleted;
+  const completedClass = (classObj) => classObj.classId.attributes.isCompleted;
   const classList = showCompleted ? displayCompletedList : displayList;
   const paginationButtons = showCompleted
     ? numCompletedPages < 2 || (
@@ -124,6 +124,7 @@ function ClassList() {
         withCredentials: true,
       })
       .then((response) => {
+        console.log(response);
         setQueriedClassList(
           response.data.classes.filter((classObj) => !completedClass(classObj))
         );

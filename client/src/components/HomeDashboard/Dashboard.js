@@ -48,9 +48,9 @@ function Dashboard() {
       ])
       .then(
         axios.spread((announcements, tasks, comments, userData) => {
-          setUserAnnouncementList(announcements.data.slice(0, 2));
-          setUserTaskList(tasks.data.incompletedTasks.slice(0, 5));
-          setUserCommentList(comments.data.slice(0, 2));
+          setUserAnnouncementList(announcements.data);
+          setUserTaskList(tasks.data.incompletedTasks);
+          setUserCommentList(comments.data);
           setUsername(userData.data.attributes.username);
         })
       )
