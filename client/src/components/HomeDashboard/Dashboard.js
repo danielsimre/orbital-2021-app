@@ -36,6 +36,9 @@ function Dashboard() {
   const [isRetrieving, setIsRetrieving] = useState(true);
   const classes = useStyles();
 
+  const isCompletedClass = (task) =>
+    task.attributes.classId.attributes.isCompleted;
+
   // Query for user info (tasks, announcements, comments)
   function getAllUserDashInfo() {
     // Query announcements
@@ -48,8 +51,13 @@ function Dashboard() {
       ])
       .then(
         axios.spread((announcements, tasks, comments, userData) => {
+          console.log(tasks);
           setUserAnnouncementList(announcements.data);
-          setUserTaskList(tasks.data.incompletedTasks);
+          setUserTaskList(
+            tasks.data.incompletedTasks.filter(
+              (task) => !isCompletedClass(task)
+            )
+          );
           setUserCommentList(comments.data);
           setUsername(userData.data.attributes.username);
         })
