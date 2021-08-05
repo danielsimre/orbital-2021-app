@@ -214,10 +214,10 @@ function AddCommentButton(props) {
                 </Typography>
                 <Typography variant="caption" display="block">
                   Made by: {comment.attributes.createdBy.attributes.username} on{" "}
-                  {comment.attributes.creationDate}.
+                  {comment.attributes.creationDate.slice(0, 10)}
                 </Typography>
                 <Typography variant="caption" display="block">
-                  Last Edited: {comment.attributes.lastEditDate}
+                  Last Edited: {comment.attributes.lastEditDate.slice(0, 10)}
                 </Typography>
                 {curUserId === comment.attributes.createdBy.id && (
                   <div className={classes.commentAction}>
