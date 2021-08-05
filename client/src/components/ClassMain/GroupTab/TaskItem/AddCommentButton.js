@@ -213,11 +213,20 @@ function AddCommentButton(props) {
                   {comment.attributes.content}
                 </Typography>
                 <Typography variant="caption" display="block">
-                  Made by: {comment.attributes.createdBy.attributes.username} on{" "}
-                  {comment.attributes.creationDate.slice(0, 10)}
+                  {`Made by ${
+                    comment.attributes.createdBy.attributes.username
+                  } in
+              ${comment.attributes.taskId.attributes.name} (Class ${
+                    comment.attributes.taskId.attributes.classId.attributes.name
+                  }) on
+              ${comment.attributes.creationDate.slice(0, 10)}, 
+              ${comment.attributes.creationDate.slice(11, 19)}`}
                 </Typography>
                 <Typography variant="caption" display="block">
-                  Last Edited: {comment.attributes.lastEditDate.slice(0, 10)}
+                  Last Edited:{" "}
+                  {comment.attributes.lastEditDate.slice(0, 10) +
+                    ", " +
+                    comment.attributes.creationDate.slice(11, 19)}
                 </Typography>
                 {curUserId === comment.attributes.createdBy.id && (
                   <div className={classes.commentAction}>
