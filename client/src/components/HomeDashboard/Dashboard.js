@@ -51,7 +51,6 @@ function Dashboard() {
       ])
       .then(
         axios.spread((announcements, tasks, comments, userData) => {
-          console.log(announcements.data);
           setUserAnnouncementList(
             announcements.data.filter((ann) => !isCompletedClass(ann))
           );
