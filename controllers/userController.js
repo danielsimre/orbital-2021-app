@@ -117,3 +117,45 @@ export const changeUsername = (req, res) => {
     })
     .catch((err) => console.log(err));
 };
+
+export const changePassword = (req, res) => {
+  let { curPassword, newPassword, confirmNewPassword } = req.body;
+
+  validateFieldsPresent(
+    res,
+    "There are missing fields. Ensure that all fields are filled in.",
+    curPassword,
+    newPassword,
+    confirmNewPassword
+  );
+
+  curPassword = curPassword.trim();
+  newPassword = newPassword.trim();
+  confirmNewPassword = confirmNewPassword.trim();
+
+  if (newPassword !== confirmNewPassword) {
+    res.status(400).json({ msg: "Password confirmation failed" });
+  } else {
+    User.findById(req.user.id)
+      .select("+password")
+      .then((queriedUser) => {
+        bcrypt.compare(curPassword, queriedUser.password, (err, result) => {
+          if (result === false) {
+            res.json({ msg: "Wrong password given. Try again." });
+          }
+        });
+      })
+      .then(() => bcrypt.genSalt(10))
+      .then((salt) => bcrypt.hash(newPassword.trim(), salt))
+      .then((hash) => {
+        User.findById(req.user.id)
+          .select("+password")
+          .then((user) => {
+            user.password = hash;
+            user.save();
+          });
+      })
+      .then(() => res.json({ msg: "Successfully updated your password" }))
+      .catch((err) => console.log(err));
+  }
+};

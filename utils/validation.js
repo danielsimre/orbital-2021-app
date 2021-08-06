@@ -71,6 +71,12 @@ export const validateUniqueUsername = (req, res, queriedUser) => {
   }
 };
 
+export const validateSamePassword = (res, password, passwordConfirm) => {
+  if (password !== passwordConfirm) {
+    sendJsonErrMessage(res, 400, "Password confirmation failed");
+  }
+};
+
 // Verify that the user can access the current class
 // and returns that class if so
 export const validateCanAccessClass = (req, res) =>

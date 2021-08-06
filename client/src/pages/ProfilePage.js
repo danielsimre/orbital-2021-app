@@ -30,6 +30,11 @@ const useStyles = makeStyles({
     textAlign: "center",
     padding: "1rem",
   },
+  textfields: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+  },
 });
 
 function ProfilePage(props) {
@@ -41,6 +46,14 @@ function ProfilePage(props) {
   // Change username dialog values
   const [userDialogOpen, setUserDialogOpen] = useState(false);
   const [newUsername, setNewUsername] = useState("");
+
+  // Change password dialog values
+  const [passDialogOpen, setPassDialogOpen] = useState(false);
+  const [curPassword, setCurPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passNoMatch, setPassNoMatch] = useState(false);
+  const [passMatchText, setPassMatchText] = useState("");
 
   // Alert values
   const [displayAlert, setDisplayAlert] = useState(false);
@@ -54,6 +67,14 @@ function ProfilePage(props) {
 
   function handleUserClose() {
     setUserDialogOpen(false);
+  }
+
+  function handlePassOpen() {
+    setPassDialogOpen(true);
+  }
+
+  function handlePassClose() {
+    setPassDialogOpen(false);
   }
 
   // Misc values
@@ -100,6 +121,37 @@ function ProfilePage(props) {
       });
   }
 
+  function handleChangePass(event) {
+    event.preventDefault();
+
+    // Check if passwords are the same
+    if (newPassword.trim() !== confirmNewPassword.trim()) {
+      setPassNoMatch(true);
+      setPassMatchText("Passwords do not match");
+    } else {
+      // PUT request
+      axios
+        .put(
+          "/api/v1/users/password",
+          {
+            curPassword: curPassword.trim(),
+            newPassword: newPassword.trim(),
+            confirmNewPassword: confirmNewPassword.trim(),
+          },
+          { withCredentials: true }
+        )
+        .then((res) => {
+          handleAlert("Password changed!", res.data.msg, "success");
+          setPassDialogOpen(false);
+        })
+        .catch((err) => {
+          handleAlert("Error!", err.response.data.msg, "error");
+        })
+        .finally(() => {
+          setDisplayAlert(true);
+        });
+    }
+  }
   useEffect(() => getUserData(), []);
 
   return (
@@ -124,7 +176,7 @@ function ProfilePage(props) {
               </Typography>
               <CardContent>
                 <Button onClick={handleUserOpen}>Change Username</Button>
-                <Button>Change Password</Button>
+                <Button onClick={handlePassOpen}>Change Password</Button>
               </CardContent>
             </Card>
           </div>
@@ -155,6 +207,75 @@ function ProfilePage(props) {
           <DialogActions>
             <Button onClick={handleUserClose}>Cancel</Button>
             <Button type="submit" onClick={(event) => handleChangeUser(event)}>
+              Submit
+            </Button>
+          </DialogActions>
+        </Dialog>
+        {/* Edit Password Dialog */}
+        <Dialog open={passDialogOpen} onClose={handlePassClose}>
+          <DialogTitle>Change Password</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Change your password. Your new password should still be at least 6
+              characters long.
+            </DialogContentText>
+            <div className={classes.textfields}>
+              <TextField
+                id="curPassword"
+                label="Current Password"
+                variant="outlined"
+                type="password"
+                required
+                value={curPassword}
+                onChange={(event) => {
+                  // Do not allow spaces
+                  const regex = /^\S*$/g;
+                  const value = event.target.value;
+                  if (value === "" || regex.test(value)) {
+                    setCurPassword(value);
+                  }
+                }}
+              />
+              <TextField
+                id="newPassword"
+                label="New Password"
+                variant="outlined"
+                type="password"
+                required
+                value={newPassword}
+                helperText={passMatchText}
+                error={passNoMatch}
+                onChange={(event) => {
+                  // Do not allow spaces
+                  const regex = /^\S*$/g;
+                  const value = event.target.value;
+                  if (value === "" || regex.test(value)) {
+                    setNewPassword(value);
+                  }
+                }}
+              />
+              <TextField
+                id="newPasswordConfirm"
+                label="Confirm New Password"
+                variant="outlined"
+                type="password"
+                required
+                value={confirmNewPassword}
+                error={passNoMatch}
+                onChange={(event) => {
+                  // Do not allow spaces
+                  const regex = /^\S*$/g;
+                  const value = event.target.value;
+                  if (value === "" || regex.test(value)) {
+                    setConfirmNewPassword(value);
+                  }
+                }}
+              />
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handlePassClose}>Cancel</Button>
+            <Button type="submit" onClick={(event) => handleChangePass(event)}>
               Submit
             </Button>
           </DialogActions>
