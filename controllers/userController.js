@@ -139,23 +139,30 @@ export const changePassword = (req, res) => {
     User.findById(req.user.id)
       .select("+password")
       .then((queriedUser) => {
-        bcrypt.compare(curPassword, queriedUser.password, (err, result) => {
-          if (result === false) {
-            res.json({ msg: "Wrong password given. Try again." });
-          }
-        });
-      })
-      .then(() => bcrypt.genSalt(10))
-      .then((salt) => bcrypt.hash(newPassword.trim(), salt))
-      .then((hash) => {
-        User.findById(req.user.id)
-          .select("+password")
-          .then((user) => {
-            user.password = hash;
-            user.save();
+        bcrypt
+          .compare(curPassword, queriedUser.password)
+          .then((result) => {
+            if (!result) {
+              res.status(400).json({ msg: "Wrong password given. Try again." });
+              throw Error("Wrong password given");
+            } else {
+              bcrypt
+                .genSalt(10)
+                .then((salt) => bcrypt.hash(newPassword.trim(), salt))
+                .then((hashedPass) => {
+                  queriedUser.password = hashedPass;
+                  queriedUser.save();
+                });
+            }
+          })
+          .then(() => {
+            res.json({ msg: "Successfully updated your password" });
+          })
+          .catch((err) => {
+            console.log(err);
+            throw err;
           });
       })
-      .then(() => res.json({ msg: "Successfully updated your password" }))
       .catch((err) => console.log(err));
   }
 };

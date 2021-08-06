@@ -61,6 +61,9 @@ function ProfilePage(props) {
   const [alertTitleText, setAlertTitleText] = useState("");
   const [alertState, setAlertState] = useState("");
 
+  // Misc values
+  const MIN_PASSWORD_LENGTH = 6;
+
   function handleUserOpen() {
     setUserDialogOpen(true);
   }
@@ -128,6 +131,9 @@ function ProfilePage(props) {
     if (newPassword.trim() !== confirmNewPassword.trim()) {
       setPassNoMatch(true);
       setPassMatchText("Passwords do not match");
+    } else if (newPassword.trim().length < MIN_PASSWORD_LENGTH) {
+      setPassNoMatch(true);
+      setPassMatchText("Password is too short. Minimum 6 characters.");
     } else {
       // PUT request
       axios
@@ -149,6 +155,9 @@ function ProfilePage(props) {
         })
         .finally(() => {
           setDisplayAlert(true);
+          setCurPassword("");
+          setNewPassword("");
+          setConfirmNewPassword("");
         });
     }
   }
@@ -243,7 +252,6 @@ function ProfilePage(props) {
                 type="password"
                 required
                 value={newPassword}
-                helperText={passMatchText}
                 error={passNoMatch}
                 onChange={(event) => {
                   // Do not allow spaces
@@ -262,6 +270,7 @@ function ProfilePage(props) {
                 required
                 value={confirmNewPassword}
                 error={passNoMatch}
+                helperText={passMatchText}
                 onChange={(event) => {
                   // Do not allow spaces
                   const regex = /^\S*$/g;
