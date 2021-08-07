@@ -68,6 +68,7 @@ const useStyles = makeStyles({
   userCard: {
     display: "flex",
     justifyContent: "space-between",
+    height: "4rem",
   },
   userButton: {
     marginLeft: "auto",
@@ -232,6 +233,10 @@ function UserList(props) {
                         </Typography>
                         <Typography variant="caption" display="block">
                           Role: {curUser.role}
+                        </Typography>
+                        <Typography variant="caption" display="block">
+                          {curUser.role === "STUDENT" &&
+                            `Group: ${curUser.group}`}
                         </Typography>
                       </div>
                       <div>
