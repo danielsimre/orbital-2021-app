@@ -40,12 +40,14 @@ export const getInfo = (req, res) => {
 };
 
 export const register = (req, res) => {
-  let { username, email, password } = req.body;
+  let { username, firstName, lastName, email, password } = req.body;
   User.findOne({ $or: [{ email }, { username }] })
     .then((queriedUser) => validateRegistration(req, res, queriedUser))
     // Hash password with bcryptjs, then store in database
     .then(() => {
       username = username.trim();
+      firstName = firstName.trim();
+      lastName = lastName.trim();
       email = email.trim();
       password = password.trim();
       return bcrypt.genSalt(10);
@@ -54,6 +56,8 @@ export const register = (req, res) => {
     .then((hash) => {
       const newUser = new User({
         username,
+        firstName,
+        lastName,
         email,
         password: hash,
       });
@@ -63,6 +67,8 @@ export const register = (req, res) => {
       res.json({
         id: newUser.id,
         username,
+        firstName,
+        lastName,
         email,
       });
     })

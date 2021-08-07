@@ -27,10 +27,13 @@ const useStyles = makeStyles({
 function RegistrationForm() {
   // Form values
   const [registerUsername, setRegisterUsername] = useState("");
+  const [registerFirstName, setRegisterFirstName] = useState("");
+  const [registerLastName, setRegisterLastName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerPasswordConfirm, setRegisterPasswordConfirm] = useState("");
   const [hasPasswordError, setHasPasswordError] = useState(false);
+  const [hasNameError, setHasNameError] = useState(false);
 
   // Alert values
   const [displayAlert, setDisplayAlert] = useState(false);
@@ -41,6 +44,7 @@ function RegistrationForm() {
   // Misc values
   const classes = useStyles();
   const [errorText, setErrorText] = useState("");
+  const [nameErrorText, setNameErrorText] = useState("");
 
   const MIN_PASSWORD_LENGTH = 6;
 
@@ -48,16 +52,27 @@ function RegistrationForm() {
     event.preventDefault();
     registerUser(
       registerUsername,
+      registerFirstName,
+      registerLastName,
       registerEmail,
       registerPassword,
       registerPasswordConfirm
     );
   }
 
-  function registerUser(username, email, password, passwordConfirm) {
+  function registerUser(
+    username,
+    first,
+    last,
+    email,
+    password,
+    passwordConfirm
+  ) {
     // Reset state of password checker
     setHasPasswordError(false);
+    setHasNameError(false);
     setErrorText("");
+    setNameErrorText("");
 
     // Validate password
     if (password !== passwordConfirm) {
@@ -66,6 +81,12 @@ function RegistrationForm() {
     } else if (password.length < MIN_PASSWORD_LENGTH) {
       setHasPasswordError(true);
       setErrorText("Password is too short");
+    } else if (
+      registerFirstName.trim() === "" ||
+      registerLastName.trim() === ""
+    ) {
+      setHasNameError(true);
+      setNameErrorText("Please fill in a name");
     } else {
       // Passwords are valid
       axios
@@ -73,6 +94,8 @@ function RegistrationForm() {
           "/api/v1/users/register",
           {
             username: username,
+            firstName: first.trim(),
+            lastName: last.trim(),
             email: email,
             password: password,
             passwordConfirm: passwordConfirm,
@@ -136,6 +159,33 @@ function RegistrationForm() {
                 if (value === "" || regex.test(value)) {
                   setRegisterUsername(value);
                 }
+              }}
+            />
+          </div>
+          <div className={classes.textField}>
+            <TextField
+              required
+              id="first name"
+              label="First name"
+              variant="outlined"
+              value={registerFirstName}
+              error={hasNameError}
+              onChange={(event) => {
+                setRegisterFirstName(event.target.value);
+              }}
+            />
+          </div>
+          <div className={classes.textField}>
+            <TextField
+              required
+              id="last name"
+              label="Last name"
+              variant="outlined"
+              value={registerLastName}
+              error={hasNameError}
+              helperText={nameErrorText}
+              onChange={(event) => {
+                setRegisterLastName(event.target.value);
               }}
             />
           </div>
