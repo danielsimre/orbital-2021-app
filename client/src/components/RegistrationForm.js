@@ -183,7 +183,7 @@ function RegistrationForm() {
               variant="outlined"
               value={registerLastName}
               error={hasNameError}
-              helperText={nameErrorText}
+              helperText={nameErrorText || "Please use your real name"}
               onChange={(event) => {
                 setRegisterLastName(event.target.value);
               }}
@@ -206,6 +206,7 @@ function RegistrationForm() {
                 }
               }}
               error={hasPasswordError}
+              helperText={hasPasswordError || "Minimum 6 characters"}
             />
           </div>
           <div className={classes.textField}>
