@@ -193,7 +193,7 @@ function UserList(props) {
         handleAlert("Error!", err, "error");
       })
       .finally(() => {
-        // clean up state
+        // Clean up state
         setDeleteUserId(null);
         setDeleteDialogOpen(false);
         refreshClassData(classID);

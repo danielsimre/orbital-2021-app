@@ -10,6 +10,7 @@ import {
   Snackbar,
   makeStyles,
 } from "@material-ui/core";
+import AssignmentIcon from "@material-ui/icons/Assignment";
 import { Alert, AlertTitle } from "@material-ui/lab";
 import { Redirect, useParams } from "react-router-dom";
 import { ClassRoles } from "../../../enums";
@@ -129,6 +130,13 @@ function ClassSettings(props) {
           Student Invite Code: {studentInviteCode}
           <Button
             className={classes.button}
+            onClick={() => navigator.clipboard.writeText(studentInviteCode)}
+            disabled={isCompleted}
+          >
+            <AssignmentIcon />
+          </Button>
+          <Button
+            className={classes.button}
             onClick={handleGenerateStudentInviteCode}
             disabled={isCompleted}
           >
@@ -137,6 +145,13 @@ function ClassSettings(props) {
         </div>
         <div>
           Mentor Invite Code: {mentorInviteCode}
+          <Button
+            className={classes.button}
+            onClick={() => navigator.clipboard.writeText(mentorInviteCode)}
+            disabled={isCompleted}
+          >
+            <AssignmentIcon />
+          </Button>
           <Button
             className={classes.button}
             onClick={handleGenerateMentorInviteCode}
