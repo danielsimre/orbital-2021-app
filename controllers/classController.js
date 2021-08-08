@@ -140,6 +140,27 @@ export const getInfo = (req, res) => {
           });
           return classObj;
         })
+        .then(async (classObj) => {
+          const newUserObjArr = await Promise.all(
+            classObj.attributes.users.map(async (user) => {
+              const userGroupName = await Group.findOne({
+                $and: [
+                  { classId: req.params.id },
+                  { groupMembers: user.userId.id },
+                ],
+              }).then((group) => {
+                if (group) {
+                  return group.name;
+                }
+                return "Not in group yet";
+              });
+              user.group = userGroupName;
+              return user;
+            })
+          );
+          classObj.attributes.users = newUserObjArr;
+          return classObj;
+        })
     )
     .then((curClass) => res.json(curClass))
     .catch((err) => console.log(err));

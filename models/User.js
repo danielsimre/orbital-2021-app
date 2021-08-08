@@ -46,6 +46,12 @@ const UserSchema = new Schema(
       default: Date.now,
       select: false,
     },
+    firstName: {
+      type: String,
+    },
+    lastName: {
+      type: String,
+    },
   },
   baseOptions
 );

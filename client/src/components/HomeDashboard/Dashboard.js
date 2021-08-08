@@ -37,6 +37,9 @@ function Dashboard() {
   const [isRetrieving, setIsRetrieving] = useState(true);
   const classes = useStyles();
 
+  const isCompletedClass = (item) =>
+    item.attributes.classId.attributes.isCompleted;
+
   // Query for user info (tasks, announcements, comments)
   function getAllUserDashInfo() {
     // Query announcements
@@ -49,10 +52,16 @@ function Dashboard() {
       ])
       .then(
         axios.spread((announcements, tasks, comments, userData) => {
-          setUserAnnouncementList(announcements.data.slice(0, 2));
-          setUserTaskList(tasks.data.incompletedTasks);
-          setUserSubtaskList(tasks.data.incompletedSubtasks);
-          setUserCommentList(comments.data.slice(0, 2));
+          setUserAnnouncementList(
+            announcements.data.filter((ann) => !isCompletedClass(ann))
+          );
+          setUserTaskList(tasks.data.incompletedTasks.filter(
+              (task) => !isCompletedClass(task)
+            ));
+          setUserSubtaskList(tasks.data.incompletedSubtasks.filter(
+              (task) => !isCompletedClass(task)
+            ));
+          setUserCommentList(comments.data);          
           setUsername(userData.data.attributes.username);
         })
       )
@@ -71,7 +80,7 @@ function Dashboard() {
         <div className={classes.container}>
           <div className={classes.left}>
             <CustomBox>
-              <Typography variant="h5">Upcoming Tasks</Typography>
+              <Typography variant="h5">Incomplete Tasks</Typography>
               <DashboardTasks
                 userTaskList={userTaskList}
                 userSubtaskList={userSubtaskList}

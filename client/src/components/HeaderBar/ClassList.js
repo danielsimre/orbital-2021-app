@@ -49,21 +49,34 @@ const useStyles = makeStyles({
     display: "flex",
     justifyContent: "center",
   },
+  button: {
+    border: "1px solid black",
+    alignSelf: "center",
+    flex: "0 0",
+  },
 });
 
 function ClassList() {
   // Queried values
   const [queriedClassList, setQueriedClassList] = useState([]);
-
-  // Misc values
-  const [isRetrieving, setIsRetrieving] = useState(true);
-  const classes = useStyles();
+  const [completedClassList, setCompletedClassList] = useState([]);
 
   // Pagination values
   const ITEMS_PER_PAGE = 5;
   const numPages = Math.ceil(queriedClassList.length / ITEMS_PER_PAGE);
   const [page, setPage] = useState(1);
   const [displayList, setDisplayList] = useState([]);
+
+  const numCompletedPages = Math.ceil(
+    completedClassList.length / ITEMS_PER_PAGE
+  );
+  const [completedPage, setCompletedPage] = useState(1);
+  const [displayCompletedList, setDisplayCompletedList] = useState([]);
+
+  // Misc values
+  const [isRetrieving, setIsRetrieving] = useState(true);
+  const [showCompleted, setShowCompleted] = useState(false);
+  const classes = useStyles();
 
   function handleChange(event, value) {
     setPage(value);
@@ -75,14 +88,58 @@ function ClassList() {
     );
   }
 
+  function handleCompletedChange(event, value) {
+    setCompletedPage(value);
+    setDisplayCompletedList(
+      completedClassList.slice(
+        ITEMS_PER_PAGE * (value - 1),
+        ITEMS_PER_PAGE * (value - 1) + ITEMS_PER_PAGE
+      )
+    );
+  }
+
+  const completedClass = (classObj) => classObj.classId.attributes.isCompleted;
+  const classList = showCompleted ? displayCompletedList : displayList;
+  const paginationButtons = showCompleted
+    ? numCompletedPages < 2 || (
+        <Pagination
+          count={numCompletedPages}
+          page={completedPage}
+          onChange={handleCompletedChange}
+          className={classes.pagination}
+        />
+      )
+    : numPages < 2 || (
+        <Pagination
+          count={numPages}
+          page={page}
+          onChange={handleChange}
+          className={classes.pagination}
+        />
+      );
+
   function queryClassList() {
     axios
       .get("/api/v1/users?classes", {
         withCredentials: true,
       })
       .then((response) => {
-        setQueriedClassList(response.data.classes);
-        setDisplayList(response.data.classes.slice(0, ITEMS_PER_PAGE));
+        setQueriedClassList(
+          response.data.classes.filter((classObj) => !completedClass(classObj))
+        );
+        setCompletedClassList(
+          response.data.classes.filter((classObj) => completedClass(classObj))
+        );
+        setDisplayList(
+          response.data.classes
+            .filter((classObj) => !completedClass(classObj))
+            .slice(0, ITEMS_PER_PAGE)
+        );
+        setDisplayCompletedList(
+          response.data.classes
+            .filter((classObj) => completedClass(classObj))
+            .slice(0, ITEMS_PER_PAGE)
+        );
       })
       .catch((err) => console.log(err))
       .finally(() => setIsRetrieving(false));
@@ -106,9 +163,18 @@ function ClassList() {
           <div className={classes.header}>
             <span className={classes.span}></span>
             <Typography variant="h5" className={classes.title}>
-              Class List
+              {showCompleted ? "Completed Class List" : "Current Class List"}
             </Typography>
             <div className={classes.buttons}>
+              <Button
+                onClick={() => setShowCompleted(!showCompleted)}
+                className={classes.button}
+                size="small"
+              >
+                {showCompleted
+                  ? "View Current Classes"
+                  : "View Completed Classes"}
+              </Button>
               <NewClassDialog refreshClassList={queryClassList} />
               <InviteCodeDialog refreshClassList={queryClassList} />
             </div>
@@ -123,7 +189,7 @@ function ClassList() {
               </TableRow>
             </TableHead>
             <TableBody align="center">
-              {displayList.map((curClass, index) => (
+              {classList.map((curClass, index) => (
                 <TableRow key={index} hover>
                   <TableCell>
                     {(page - 1) * ITEMS_PER_PAGE + index + 1}
@@ -146,14 +212,7 @@ function ClassList() {
               ))}
             </TableBody>
           </Table>
-          {numPages < 2 || (
-            <Pagination
-              count={numPages}
-              page={page}
-              onChange={handleChange}
-              className={classes.pagination}
-            />
-          )}
+          {paginationButtons}
         </div>
       </>
     )

@@ -60,7 +60,7 @@ const BaseTaskSchema = new Schema(
 // Cannot use arrow notation in this case, due to usage of 'this'
 function formatData(next) {
   this.sort({ dueDate: 1 })
-    .populate({ path: "classId", select: "name" })
+    .populate({ path: "classId", select: "name isCompleted" })
     .populate({ path: "assignedTo", select: "username" })
     .populate({ path: "comments", select: "-taskId" })
     .populate({ path: "subtasks" });

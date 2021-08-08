@@ -39,7 +39,7 @@ function DashboardAnnouncements(props) {
   const { userAnnouncementList } = props;
 
   // Pagination values
-  const ITEMS_PER_PAGE = 3;
+  const ITEMS_PER_PAGE = 2;
   const numPages = Math.ceil(userAnnouncementList.length / ITEMS_PER_PAGE);
   const [page, setPage] = useState(1);
   const [displayList, setDisplayList] = useState(

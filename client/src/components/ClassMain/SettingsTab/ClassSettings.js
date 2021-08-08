@@ -47,7 +47,7 @@ function ClassSettings(props) {
   // Class Complete Dialog values
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
 
-  // for the alert
+  // Alert values
   const [displayAlert, setDisplayAlert] = useState(false);
   const [alertText, setAlertText] = useState("");
   const [alertTitleText, setAlertTitleText] = useState("");
@@ -97,7 +97,6 @@ function ClassSettings(props) {
         { withCredentials: true }
       )
       .then((res) => {
-        console.log(res);
         handleAlert(
           "Class Locked",
           "The class is now locked. You can still view the class information, but can no longer modify anything.",
@@ -168,7 +167,11 @@ function ClassSettings(props) {
             no longer be able to join the class, create tasks, make
             modifications, etc.
           </Typography>
-          <Button onClick={handleDialogOpen} disabled={isCompleted}>
+          <Button
+            className={classes.button}
+            onClick={handleDialogOpen}
+            disabled={isCompleted}
+          >
             Mark this class as finished
           </Button>
         </div>

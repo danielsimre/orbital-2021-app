@@ -23,13 +23,13 @@ export const getAllInfo = (req, res) => {
     Group.find({ groupMembers: req.user.id }, "name classId")
       .populate({
         path: "classId",
-        select: "name",
+        select: "name isCompleted",
       })
       .sort({ name: 1 }),
     Group.find({ mentoredBy: req.user.id }, "name classId")
       .populate({
         path: "classId",
-        select: "name",
+        select: "name isCompleted",
       })
       .sort({ name: 1 }),
   ])
