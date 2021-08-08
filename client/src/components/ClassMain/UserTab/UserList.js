@@ -161,8 +161,8 @@ function UserList(props) {
       )
       .then((response) => {
         console.log(response.data);
-        const message = `User does not exist for emails: ${response.data.doesNotExist} \n
-        User is already in the class: ${response.data.alreadyAdded} \n
+        const message = `User does not exist for emails: ${response.data.doesNotExist} <br />
+        User is already in the class: ${response.data.alreadyAdded} <br />
         Sucessfully added users: ${response.data.successfullyAdded}`;
         if (response.data.successfullyAdded.length === 0) {
           handleAlert("Failure!", message, "error");

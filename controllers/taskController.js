@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { BaseTask, ParentTask } from "../models/BaseTask.js";
+import { ParentTask, SubTask } from "../models/BaseTask.js";
 import { Comment } from "../models/BaseText.js";
 import ClassRole from "../models/ClassRole.js";
 import User from "../models/User.js";
@@ -18,11 +18,18 @@ import { ClassRoles } from "../utils/enums.js";
 
 export const getAllInfo = (req, res) => {
   Promise.all([
-    BaseTask.find({ assignedTo: req.user.id, isCompleted: false }),
-    BaseTask.find({ assignedTo: req.user.id, isCompleted: true }),
+    ParentTask.find({ assignedTo: req.user.id, isCompleted: false }),
+    ParentTask.find({ assignedTo: req.user.id, isCompleted: true }),
+    SubTask.find({ assignedTo: req.user.id, isCompleted: false }),
+    SubTask.find({ assignedTo: req.user.id, isCompleted: true }),
   ])
     .then((tasks) =>
-      res.json({ incompletedTasks: tasks[0], completedTasks: tasks[1] })
+      res.json({
+        incompletedTasks: tasks[0],
+        completedTasks: tasks[1],
+        incompletedSubtasks: tasks[2],
+        completedSubtasks: tasks[3],
+      })
     )
     .catch((err) => console.log(err));
 };
@@ -53,7 +60,7 @@ export const createSubtask = (req, res) => {
       User.find({ username: { $in: assignedTo } })
         .then((userArray) => userArray.map((user) => user.id))
         .then((assignedToIds) => {
-          const newSubtask = new BaseTask({
+          const newSubtask = new SubTask({
             name: taskName,
             desc: taskDesc,
             dueDate,
@@ -148,7 +155,7 @@ export const update = (req, res) => {
     // api/v1/tasks/:id?subtasks is to edit the info of a subtask
     // Attributes that can be updated are name, desc, dueDate, assignedTo, isCompleted
   } else if (req.query.subtasks === "") {
-    BaseTask.findById(req.params.id)
+    SubTask.findById(req.params.id)
       .then((subtask) => validateIsSubtask(res, subtask))
       .then((subtask) =>
         // Check that user can access parent of this subtask
@@ -220,7 +227,7 @@ export const update = (req, res) => {
         if (updatedSubtask.desc === "") {
           delete updatedSubtask.desc;
         }
-        return BaseTask.updateOne({ _id: req.params.id }, updatedSubtask).then(
+        return SubTask.updateOne({ _id: req.params.id }, updatedSubtask).then(
           () => editedFields
         );
       })
@@ -236,7 +243,7 @@ export const update = (req, res) => {
 export const deleteSubtask = (req, res) => {
   // Non-parent tasks have isMilestone always set to false
   // The parent task associated with this subtask will be updated accordingly
-  BaseTask.findById(req.params.id)
+  SubTask.findById(req.params.id)
     .then((subtask) => validateIsSubtask(res, subtask))
     .then((subtask) =>
       // Check that user can access parent of this subtask

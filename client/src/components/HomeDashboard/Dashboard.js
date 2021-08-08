@@ -28,6 +28,7 @@ const useStyles = makeStyles({
 function Dashboard() {
   // Queried values
   const [userTaskList, setUserTaskList] = useState([]);
+  const [userSubtaskList, setUserSubtaskList] = useState([]);
   const [userAnnouncementList, setUserAnnouncementList] = useState([]);
   const [userCommentList, setUserCommentList] = useState([]);
   const [username, setUsername] = useState("");
@@ -49,7 +50,8 @@ function Dashboard() {
       .then(
         axios.spread((announcements, tasks, comments, userData) => {
           setUserAnnouncementList(announcements.data.slice(0, 2));
-          setUserTaskList(tasks.data.incompletedTasks.slice(0, 5));
+          setUserTaskList(tasks.data.incompletedTasks);
+          setUserSubtaskList(tasks.data.incompletedSubtasks);
           setUserCommentList(comments.data.slice(0, 2));
           setUsername(userData.data.attributes.username);
         })
@@ -70,7 +72,10 @@ function Dashboard() {
           <div className={classes.left}>
             <CustomBox>
               <Typography variant="h5">Upcoming Tasks</Typography>
-              <DashboardTasks userTaskList={userTaskList} />
+              <DashboardTasks
+                userTaskList={userTaskList}
+                userSubtaskList={userSubtaskList}
+              />
             </CustomBox>
           </div>
           <div className={classes.right}>
