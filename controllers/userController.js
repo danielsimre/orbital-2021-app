@@ -40,12 +40,14 @@ export const getInfo = (req, res) => {
 };
 
 export const register = (req, res) => {
-  let { username, email, password } = req.body;
+  let { username, firstName, lastName, email, password } = req.body;
   User.findOne({ $or: [{ email }, { username }] })
     .then((queriedUser) => validateRegistration(req, res, queriedUser))
     // Hash password with bcryptjs, then store in database
     .then(() => {
       username = username.trim();
+      firstName = firstName.trim();
+      lastName = lastName.trim();
       email = email.trim();
       password = password.trim();
       return bcrypt.genSalt(10);
@@ -54,6 +56,8 @@ export const register = (req, res) => {
     .then((hash) => {
       const newUser = new User({
         username,
+        firstName,
+        lastName,
         email,
         password: hash,
       });
@@ -63,6 +67,8 @@ export const register = (req, res) => {
       res.json({
         id: newUser.id,
         username,
+        firstName,
+        lastName,
         email,
       });
     })
@@ -116,4 +122,53 @@ export const changeUsername = (req, res) => {
       res.json({ msg: "Successfully updated your username" });
     })
     .catch((err) => console.log(err));
+};
+
+export const changePassword = (req, res) => {
+  let { curPassword, newPassword, confirmNewPassword } = req.body;
+
+  validateFieldsPresent(
+    res,
+    "There are missing fields. Ensure that all fields are filled in.",
+    curPassword,
+    newPassword,
+    confirmNewPassword
+  );
+
+  curPassword = curPassword.trim();
+  newPassword = newPassword.trim();
+  confirmNewPassword = confirmNewPassword.trim();
+
+  if (newPassword !== confirmNewPassword) {
+    res.status(400).json({ msg: "Password confirmation failed" });
+  } else {
+    User.findById(req.user.id)
+      .select("+password")
+      .then((queriedUser) => {
+        bcrypt
+          .compare(curPassword, queriedUser.password)
+          .then((result) => {
+            if (!result) {
+              res.status(400).json({ msg: "Wrong password given. Try again." });
+              throw Error("Wrong password given");
+            } else {
+              bcrypt
+                .genSalt(10)
+                .then((salt) => bcrypt.hash(newPassword.trim(), salt))
+                .then((hashedPass) => {
+                  queriedUser.password = hashedPass;
+                  queriedUser.save();
+                });
+            }
+          })
+          .then(() => {
+            res.json({ msg: "Successfully updated your password" });
+          })
+          .catch((err) => {
+            console.log(err);
+            throw err;
+          });
+      })
+      .catch((err) => console.log(err));
+  }
 };

@@ -31,6 +31,8 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     maxHeight: "100%",
     overflow: "auto",
+    gap: "0.5rem",
+    padding: "0.5rem",
   },
   button: {
     border: "1px solid black",

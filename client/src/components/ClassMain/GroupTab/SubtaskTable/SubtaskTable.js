@@ -41,7 +41,6 @@ function SubtaskTable(props) {
         }
       )
       .then((res) => {
-        console.log(res.data.msg);
         refreshGroupData();
       })
       .catch((err) => console.log(err));

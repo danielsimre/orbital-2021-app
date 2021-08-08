@@ -20,6 +20,7 @@ const useStyles = makeStyles({
   root: {
     display: "flex",
     flexDirection: "column",
+    gap: "0.5rem",
   },
   button: {
     border: "1px solid black",
@@ -170,7 +171,6 @@ function AddCommentButton(props) {
     event.preventDefault();
     axios
       .delete(`/api/v1/comments/${curCommentId}/`, { withCredentials: true })
-      .then((res) => console.log(res.data.msg))
       .catch((err) => console.log(err))
       .finally(() => {
         // clean up state
@@ -182,11 +182,7 @@ function AddCommentButton(props) {
 
   return (
     <>
-      <Button
-        onClick={handleDialogOpen}
-        className={classes.button}
-        disabled={isCompleted}
-      >
+      <Button onClick={handleDialogOpen} className={classes.button}>
         View Comments
       </Button>
       {/* Start of Comment List Dialog */}
@@ -222,12 +218,18 @@ function AddCommentButton(props) {
                 {curUserId === comment.attributes.createdBy.id && (
                   <div className={classes.commentAction}>
                     <Tooltip title="Edit comment" placement="top">
-                      <Button onClick={() => handleEditOpen(index)}>
+                      <Button
+                        onClick={() => handleEditOpen(index)}
+                        disabled={isCompleted}
+                      >
                         <EditIcon />
                       </Button>
                     </Tooltip>
                     <Tooltip title="Delete comment" placement="top">
-                      <Button onClick={() => handleDeleteOpen(index)}>
+                      <Button
+                        onClick={() => handleDeleteOpen(index)}
+                        disabled={isCompleted}
+                      >
                         <DeleteIcon />
                       </Button>
                     </Tooltip>
@@ -239,46 +241,50 @@ function AddCommentButton(props) {
         </DialogContent>
         <Paper className={classes.box}>
           <Typography variant="body1">Add a comment below</Typography>
-          <form>
-            <div className={classes.root}>
-              <TextField
-                id="commentTitle"
-                label="Title"
-                variant="outlined"
-                required
-                size="small"
-                value={commentTitle}
-                onChange={(event) => {
-                  // Do not allow spaces at the beginning, one space between words
-                  const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
-                  const value = event.target.value;
-                  if (value === "" || regex.test(value)) {
-                    setCommentTitle(value);
-                  }
-                }}
-              />
-              <TextField
-                id="commentContent"
-                label="Comment"
-                variant="outlined"
-                required
-                multiline
-                value={commentText}
-                onChange={(event) => {
-                  // Do not allow spaces at the beginning
-                  const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
-                  const value = event.target.value;
-                  if (value === "" || regex.test(value)) {
-                    setCommentText(value);
-                  }
-                }}
-              />
-            </div>
+          <form className={classes.root}>
+            <TextField
+              id="commentTitle"
+              label="Title"
+              variant="outlined"
+              required
+              size="small"
+              value={commentTitle}
+              disabled={isCompleted}
+              onChange={(event) => {
+                // Do not allow spaces at the beginning, one space between words
+                const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setCommentTitle(value);
+                }
+              }}
+            />
+            <TextField
+              id="commentContent"
+              label="Comment"
+              variant="outlined"
+              required
+              multiline
+              value={commentText}
+              disabled={isCompleted}
+              onChange={(event) => {
+                // Do not allow spaces at the beginning
+                const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setCommentText(value);
+                }
+              }}
+            />
           </form>
         </Paper>
         <DialogActions>
           <Button onClick={handleDialogClose}>Cancel</Button>
-          <Button type="submit" onClick={(event) => handlePostComment(event)}>
+          <Button
+            type="submit"
+            onClick={(event) => handlePostComment(event)}
+            disabled={isCompleted}
+          >
             Post
           </Button>
         </DialogActions>
@@ -329,7 +335,11 @@ function AddCommentButton(props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleEditClose}>Cancel</Button>
-          <Button type="submit" onClick={(event) => handleEditComment(event)}>
+          <Button
+            type="submit"
+            onClick={(event) => handleEditComment(event)}
+            disabled={isCompleted}
+          >
             Save
           </Button>
         </DialogActions>
@@ -350,6 +360,7 @@ function AddCommentButton(props) {
             type="submit"
             className={classes.deleteButton}
             onClick={(event) => handleDeleteComment(event)}
+            disabled={isCompleted}
           >
             Delete
           </Button>

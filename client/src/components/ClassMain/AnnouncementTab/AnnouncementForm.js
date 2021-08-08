@@ -15,6 +15,8 @@ const useStyles = makeStyles({
   root: {
     display: "flex",
     flexDirection: "column",
+    gap: "0.5rem",
+    padding: "0.5rem",
   },
 });
 

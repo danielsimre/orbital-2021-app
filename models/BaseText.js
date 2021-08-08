@@ -52,7 +52,7 @@ function formatData(next) {
     })
     .populate({
       path: "classId",
-      select: "name",
+      select: "name isCompleted",
     })
     .populate({
       path: "taskId",

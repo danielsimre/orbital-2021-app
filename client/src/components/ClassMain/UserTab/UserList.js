@@ -68,6 +68,7 @@ const useStyles = makeStyles({
   userCard: {
     display: "flex",
     justifyContent: "space-between",
+    height: "4rem",
   },
   userButton: {
     marginLeft: "auto",
@@ -160,7 +161,6 @@ function UserList(props) {
         { withCredentials: true }
       )
       .then((response) => {
-        console.log(response.data);
         const message = `User does not exist for emails: ${response.data.doesNotExist} \n
         User is already in the class: ${response.data.alreadyAdded} \n
         Sucessfully added users: ${response.data.successfullyAdded}`;
@@ -233,6 +233,10 @@ function UserList(props) {
                         </Typography>
                         <Typography variant="caption" display="block">
                           Role: {curUser.role}
+                        </Typography>
+                        <Typography variant="caption" display="block">
+                          {curUser.role === "STUDENT" &&
+                            `Group: ${curUser.group}`}
                         </Typography>
                       </div>
                       <div>

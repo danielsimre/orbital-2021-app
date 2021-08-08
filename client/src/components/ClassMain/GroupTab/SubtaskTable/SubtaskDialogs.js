@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogTitle,
   MenuItem,
-  Paper,
   Select,
   TextField,
   makeStyles,
@@ -16,6 +15,11 @@ import EditIcon from "@material-ui/icons/Edit";
 import axios from "axios";
 
 const useStyles = makeStyles({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+  },
   deleteButton: {
     color: "red",
   },
@@ -99,7 +103,6 @@ function SubtaskDialogs(props) {
         }
       )
       .then((res) => {
-        console.log(res.data.msg);
         refreshGroupData();
       })
       .catch((err) => console.log(err));
@@ -131,68 +134,69 @@ function SubtaskDialogs(props) {
       <Dialog open={editDialogOpen} onClose={handleEditClose}>
         <DialogTitle>Edit Subtask</DialogTitle>
         <DialogContent>
-          <form onSubmit={(event) => handleEditSubtask(event)}>
-            <Paper>
-              <TextField
-                id="task name"
-                label="Task Name"
-                variant="outlined"
-                required
-                value={subtaskName}
-                onChange={(event) => {
-                  // Do not allow spaces at the beginning, one space between words
-                  const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
-                  const value = event.target.value;
-                  if (value === "" || regex.test(value)) {
-                    setSubtaskName(value);
-                  }
-                }}
-              />
-              <TextField
-                id="task description"
-                label="Task Description"
-                variant="outlined"
-                multiline
-                required
-                value={subtaskDesc}
-                onChange={(event) => {
-                  // Do not allow spaces at the beginning
-                  const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
-                  const value = event.target.value;
-                  if (value === "" || regex.test(value)) {
-                    setSubtaskDesc(value);
-                  }
-                }}
-              />
-              <TextField
-                id="date"
-                label="Due Date"
-                type="date"
-                required
-                error={dateError}
-                helperText={dateHelperText}
-                value={subtaskDueDate}
-                onChange={(event) => setSubtaskDueDate(event.target.value)}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-              Assigned To:
-              <Select
-                multiple
-                value={subtaskAssignedTo}
-                onChange={(event) => setSubtaskAssignedTo(event.target.value)}
-              >
-                {groupMembers.map((groupMember) => (
-                  <MenuItem
-                    key={groupMember.attributes.username}
-                    value={groupMember.attributes.username}
-                  >
-                    {groupMember.attributes.username}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Paper>
+          <form
+            className={classes.root}
+            onSubmit={(event) => handleEditSubtask(event)}
+          >
+            <TextField
+              id="task name"
+              label="Task Name"
+              variant="outlined"
+              required
+              value={subtaskName}
+              onChange={(event) => {
+                // Do not allow spaces at the beginning, one space between words
+                const regex = /^[^\s]+(\s?[^\s]+)*(\s)?$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setSubtaskName(value);
+                }
+              }}
+            />
+            <TextField
+              id="task description"
+              label="Task Description"
+              variant="outlined"
+              multiline
+              required
+              value={subtaskDesc}
+              onChange={(event) => {
+                // Do not allow spaces at the beginning
+                const regex = /^[^\s]+(\s+[^\s]+)*(\s)*$/g;
+                const value = event.target.value;
+                if (value === "" || regex.test(value)) {
+                  setSubtaskDesc(value);
+                }
+              }}
+            />
+            <TextField
+              id="date"
+              label="Due Date"
+              type="date"
+              required
+              error={dateError}
+              helperText={dateHelperText}
+              value={subtaskDueDate}
+              onChange={(event) => setSubtaskDueDate(event.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            Assigned To:
+            <Select
+              multiple
+              value={subtaskAssignedTo}
+              onChange={(event) => setSubtaskAssignedTo(event.target.value)}
+            >
+              {groupMembers.map((groupMember) => (
+                <MenuItem
+                  key={groupMember.attributes.username}
+                  value={groupMember.attributes.username}
+                >
+                  {groupMember.attributes.username}
+                </MenuItem>
+              ))}
+            </Select>
             <DialogActions>
               <Button onClick={handleEditClose}>Cancel</Button>
               <Button type="submit">Save</Button>

@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Paper,
   InputLabel,
   MenuItem,
   TextField,
@@ -23,12 +22,18 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     marginBottom: "0.5em",
+    gap: "0.5em",
   },
   snackbar: {
     textAlign: "center",
   },
   select: {
     width: "10%",
+  },
+  button: {
+    border: "1px solid black",
+    alignSelf: "center",
+    flex: "0 0",
   },
 });
 
@@ -106,7 +111,13 @@ function NewClassDialog(props) {
 
   return (
     <>
-      <Button onClick={handleDialogOpen}>Create New Class</Button>
+      <Button
+        onClick={handleDialogOpen}
+        className={classes.button}
+        size="small"
+      >
+        Create New Class
+      </Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth>
         <DialogTitle>Create New Class</DialogTitle>
         <DialogContent>
@@ -114,7 +125,7 @@ function NewClassDialog(props) {
             Enter in a name and description for the class.
           </DialogContentText>
           <form onSubmit={handleSubmit}>
-            <Paper className={classes.paper}>
+            <div className={classes.paper}>
               <TextField
                 id="class_name"
                 label="Class Name"
@@ -130,6 +141,7 @@ function NewClassDialog(props) {
                   }
                 }}
               />
+
               <TextField
                 id="class_descrption"
                 label="Class Description"
@@ -146,7 +158,7 @@ function NewClassDialog(props) {
                   }
                 }}
               />
-            </Paper>
+            </div>
             <InputLabel shrink>Group Size</InputLabel>
             <Select
               value={classGroupSize}
@@ -154,7 +166,9 @@ function NewClassDialog(props) {
               className={classes.select}
             >
               {groupSizeOptions.map((number) => (
-                <MenuItem value={number}>{number}</MenuItem>
+                <MenuItem key={number} value={number}>
+                  {number}
+                </MenuItem>
               ))}
             </Select>
             <DialogActions>
