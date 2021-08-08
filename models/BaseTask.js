@@ -81,4 +81,7 @@ const ParentTask = BaseTask.discriminator(
   })
 );
 
-export { BaseTask, ParentTask };
+// Same attributes as BaseTask, but allows for querying all subtasks only
+const SubTask = BaseTask.discriminator("SubTask", new mongoose.Schema());
+
+export { BaseTask, ParentTask, SubTask };

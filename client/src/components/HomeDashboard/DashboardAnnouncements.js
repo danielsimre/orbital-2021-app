@@ -1,6 +1,13 @@
 import { useState } from "react";
-import { Card, CardContent, Typography, makeStyles } from "@material-ui/core";
+import {
+  Button,
+  Card,
+  CardContent,
+  Typography,
+  makeStyles,
+} from "@material-ui/core";
 import { Pagination } from "@material-ui/lab";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles({
   root: {
@@ -15,6 +22,16 @@ const useStyles = makeStyles({
   pagination: {
     display: "flex",
     justifyContent: "center",
+  },
+  cardContent: {
+    display: "flex",
+    flexDirection: "row",
+  },
+  button: {
+    marginLeft: "auto",
+    height: "50%",
+    marginTop: "auto",
+    marginBottom: "auto",
   },
 });
 
@@ -51,19 +68,28 @@ function DashboardAnnouncements(props) {
           className={classes.root}
           key={ann.attributes.title}
         >
-          <CardContent>
-            <Typography className={classes.title}>
-              {ann.attributes.title}
-            </Typography>
-            <Typography className={classes.text}>
-              {ann.attributes.content}
-            </Typography>
-            <Typography variant="caption">
-              {`Made by ${ann.attributes.createdBy.attributes.username} in
+          <CardContent className={classes.cardContent}>
+            <div>
+              <Typography className={classes.title}>
+                {ann.attributes.title}
+              </Typography>
+              <Typography className={classes.text}>
+                {ann.attributes.content}
+              </Typography>
+              <Typography variant="caption">
+                {`Made by ${ann.attributes.createdBy.attributes.username} in
               ${ann.attributes.classId.attributes.name} on
               ${ann.attributes.creationDate.slice(0, 10)}, 
               ${ann.attributes.creationDate.slice(11, 19)}`}
-            </Typography>
+              </Typography>
+            </div>
+            <Button
+              component={Link}
+              to={`/classes/${ann.attributes.classId.id}/announcements`}
+              className={classes.button}
+            >
+              View
+            </Button>
           </CardContent>
         </Card>
       ))}

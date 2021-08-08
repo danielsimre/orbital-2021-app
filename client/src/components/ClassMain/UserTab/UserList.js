@@ -161,8 +161,9 @@ function UserList(props) {
         { withCredentials: true }
       )
       .then((response) => {
-        const message = `User does not exist for emails: ${response.data.doesNotExist} \n
-        User is already in the class: ${response.data.alreadyAdded} \n
+        console.log(response.data);
+        const message = `User does not exist for emails: ${response.data.doesNotExist} <br />
+        User is already in the class: ${response.data.alreadyAdded} <br />
         Sucessfully added users: ${response.data.successfullyAdded}`;
         if (response.data.successfullyAdded.length === 0) {
           handleAlert("Failure!", message, "error");
@@ -193,7 +194,7 @@ function UserList(props) {
         handleAlert("Error!", err, "error");
       })
       .finally(() => {
-        // clean up state
+        // Clean up state
         setDeleteUserId(null);
         setDeleteDialogOpen(false);
         refreshClassData(classID);

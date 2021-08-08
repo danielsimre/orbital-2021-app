@@ -28,6 +28,7 @@ const useStyles = makeStyles({
 function Dashboard() {
   // Queried values
   const [userTaskList, setUserTaskList] = useState([]);
+  const [userSubtaskList, setUserSubtaskList] = useState([]);
   const [userAnnouncementList, setUserAnnouncementList] = useState([]);
   const [userCommentList, setUserCommentList] = useState([]);
   const [username, setUsername] = useState("");
@@ -54,12 +55,13 @@ function Dashboard() {
           setUserAnnouncementList(
             announcements.data.filter((ann) => !isCompletedClass(ann))
           );
-          setUserTaskList(
-            tasks.data.incompletedTasks.filter(
+          setUserTaskList(tasks.data.incompletedTasks.filter(
               (task) => !isCompletedClass(task)
-            )
-          );
-          setUserCommentList(comments.data);
+            ));
+          setUserSubtaskList(tasks.data.incompletedSubtasks.filter(
+              (task) => !isCompletedClass(task)
+            ));
+          setUserCommentList(comments.data);          
           setUsername(userData.data.attributes.username);
         })
       )
@@ -78,8 +80,11 @@ function Dashboard() {
         <div className={classes.container}>
           <div className={classes.left}>
             <CustomBox>
-              <Typography variant="h5">Task List</Typography>
-              <DashboardTasks userTaskList={userTaskList} />
+              <Typography variant="h5">Incomplete Tasks</Typography>
+              <DashboardTasks
+                userTaskList={userTaskList}
+                userSubtaskList={userSubtaskList}
+              />
             </CustomBox>
           </div>
           <div className={classes.right}>
