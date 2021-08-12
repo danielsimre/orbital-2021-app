@@ -17,7 +17,7 @@ function ClassSidebar(props) {
   const { classID, curUserRole } = props;
   const classes = useStyles();
 
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState(-1);
 
   function handleSelectTab(event, index) {
     setSelectedTab(index);
