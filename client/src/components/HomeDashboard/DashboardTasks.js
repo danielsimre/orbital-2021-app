@@ -26,6 +26,9 @@ const useStyles = makeStyles({
     display: "flex",
     justifyContent: "center",
   },
+  overdue: {
+    backgroundColor: "#ffb8b8",
+  },
 });
 
 function DashboardTasks(props) {
@@ -66,6 +69,8 @@ function DashboardTasks(props) {
       )
     );
   }
+
+  const isOverdue = (date) => new Date(date) < Date.now();
 
   const displayList = tabIndex === 0 ? displayTaskList : displaySubtaskList;
 
@@ -115,11 +120,27 @@ function DashboardTasks(props) {
             <TableBody>
               {displayList.map((task) => (
                 <TableRow key={task.id}>
-                  <TableCell>{task.attributes.name}</TableCell>
-                  <TableCell align="right">
+                  <TableCell
+                    className={
+                      isOverdue(task.attributes.dueDate) && classes.overdue
+                    }
+                  >
+                    {task.attributes.name}
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                    className={
+                      isOverdue(task.attributes.dueDate) && classes.overdue
+                    }
+                  >
                     {task.attributes.dueDate.slice(0, 10)}
                   </TableCell>
-                  <TableCell align="right">
+                  <TableCell
+                    align="right"
+                    className={
+                      isOverdue(task.attributes.dueDate) && classes.overdue
+                    }
+                  >
                     <Button
                       component={Link}
                       to={`/classes/${task.attributes.classId.id}/groups`}

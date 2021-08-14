@@ -195,6 +195,8 @@ function AddCommentButton(props) {
         <DialogContent>
           {isRetriving ? (
             <div>Loading...</div>
+          ) : commentList.length === 0 ? (
+            "No comments yet!"
           ) : (
             commentList.map((comment, index) => (
               <Paper
