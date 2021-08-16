@@ -82,28 +82,31 @@ function AddUserDialog(props) {
             Add users to this class by uploading a csv file <br />
             containing the emails of the users you want to add.
           </DialogContentText>
-          <div>
-            <Input
-              type="file"
-              inputProps={{ accept: ".csv" }}
-              name="file"
-              placeholder={null}
-              onChange={(event) => setUserEmailsCSV(event.target.files[0])}
-            />
-          </div>
-          <Select
-            value={newUserRole}
-            onChange={(event) => setNewUserRole(event.target.value)}
-            label="New User Role"
-          >
-            <MenuItem value={ClassRoles.STUDENT}>Student</MenuItem>
-            <MenuItem value={ClassRoles.MENTOR}>Mentor</MenuItem>
-          </Select>
+          <form onSubmit={(event) => handleSubmit()}>
+            <div>
+              <Input
+                type="file"
+                inputProps={{ accept: ".csv" }}
+                name="file"
+                placeholder={null}
+                onChange={(event) => setUserEmailsCSV(event.target.files[0])}
+                required
+              />
+            </div>
+            <Select
+              value={newUserRole}
+              onChange={(event) => setNewUserRole(event.target.value)}
+              label="New User Role"
+            >
+              <MenuItem value={ClassRoles.STUDENT}>Student</MenuItem>
+              <MenuItem value={ClassRoles.MENTOR}>Mentor</MenuItem>
+            </Select>
+            <DialogActions>
+              <Button onClick={handleDialogClose}>Cancel</Button>
+              <Button type="submit">Add</Button>
+            </DialogActions>
+          </form>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose}>Cancel</Button>
-          <Button onClick={handleSubmit}>Add</Button>
-        </DialogActions>
       </Dialog>
     </>
   );
