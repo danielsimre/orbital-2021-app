@@ -18,6 +18,15 @@ const baseOptions = {
       return { id: ret.id, type: "tasks", attributes: { ...rest } };
     },
   },
+  toObject: {
+    virtuals: true,
+    transform: (doc, ret) => {
+      const { id, ...rest } = ret;
+      delete rest._id;
+      delete rest.__v;
+      return { id: ret.id, type: "tasks", attributes: { ...rest } };
+    },
+  },
 };
 
 const BaseTaskSchema = new Schema(
