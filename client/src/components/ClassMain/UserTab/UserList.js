@@ -97,6 +97,8 @@ function UserList(props) {
   // Dialog values
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState(null);
+  const [addUserResultText, setAddUserResultText] = useState("");
+  const [resultDialogOpen, setResultDialogOpen] = useState(false);
 
   // Pagination values
   const ITEMS_PER_PAGE = 6;
@@ -162,18 +164,20 @@ function UserList(props) {
       )
       .then((response) => {
         console.log(response.data);
-        const message = `User does not exist for emails: ${response.data.doesNotExist} <br />
-        User is already in the class: ${response.data.alreadyAdded} <br />
-        Sucessfully added users: ${response.data.successfullyAdded}`;
-        if (response.data.successfullyAdded.length === 0) {
-          handleAlert("Failure!", message, "error");
-        } else {
-          handleAlert(
-            `${response.data.successfullyAdded.length} users added!`,
-            message,
-            "success"
-          );
+        let message = "";
+        if (response.data.doesNotExist.length !== 0) {
+          message += `Email is invalid: ${response.data.doesNotExist} \n`;
         }
+        if (response.data.alreadyAdded.length !== 0) {
+          message += `User is already in the class: ${response.data.alreadyAdded} \n`;
+        }
+        if (response.data.successfullyAdded.length !== 0) {
+          message += `Sucessfully added users: ${response.data.successfullyAdded}`;
+        } else {
+          message += `Sucessfully added users: None`;
+        }
+        setAddUserResultText(message);
+        setResultDialogOpen(true);
       })
       .then(() => refreshClassData(classID))
       .catch((err) => {
@@ -308,6 +312,21 @@ function UserList(props) {
           >
             Delete
           </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Add User Result Dialog */}
+      <Dialog
+        open={resultDialogOpen}
+        onClose={() => setResultDialogOpen(false)}
+      >
+        <DialogTitle>Add Users Result</DialogTitle>
+        <DialogContent>
+          <DialogContentText style={{ whiteSpace: "pre-line" }}>
+            {addUserResultText}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setResultDialogOpen(false)}>Ok</Button>
         </DialogActions>
       </Dialog>
     </div>

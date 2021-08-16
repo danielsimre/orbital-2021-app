@@ -39,7 +39,6 @@ export const getAllInfo = (req, res) => {
             const group = await Group.findOne({
               tasks: commentObj.attributes.taskId.id,
             });
-            console.log(group);
             commentObj.attributes.groupId = group._id;
             return commentObj;
           })
