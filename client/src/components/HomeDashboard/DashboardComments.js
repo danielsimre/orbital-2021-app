@@ -83,7 +83,7 @@ function DashboardComments(props) {
             </div>
             <Button
               component={Link}
-              to={`/classes/${comment.attributes.taskId.attributes.classId.id}/groups`}
+              to={`/classes/${comment.attributes.taskId.attributes.classId.id}/groups/${comment.attributes.groupId}`}
               className={classes.button}
             >
               View

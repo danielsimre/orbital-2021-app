@@ -1,5 +1,6 @@
 import { Comment } from "../models/BaseText.js";
 import { BaseTask } from "../models/BaseTask.js";
+import Group from "../models/Group.js";
 import {
   validateAuthorOfComment,
   validateClassIsIncomplete,
@@ -7,10 +8,44 @@ import {
 } from "../utils/validation.js";
 
 export const getAllInfo = (req, res) => {
-  BaseTask.find({ assignedTo: req.user.id })
-    .select("_id")
-    .then((arr) => Comment.find({ taskId: { $in: arr } }))
-    .then((comments) => res.json(comments))
+  Promise.all([
+    BaseTask.find({ assignedTo: req.user.id })
+      .select("_id")
+      .then((tasks) => tasks.map((task) => task._id)),
+    Group.find({ mentoredBy: req.user.id })
+      .select("tasks")
+      .then((groupsArr) => {
+        let taskArr = [];
+        groupsArr.forEach((group) => {
+          taskArr = taskArr.concat(group.tasks);
+        });
+        return taskArr;
+      }),
+    // taskArr[0] represent comments belonging to tasks that this user belongs to
+    // taskArr[1] represent comments belonging to all tasks in groups that the user is mentoring
+  ])
+    .then((taskArr) =>
+      // Exclude comments made by this user
+      Comment.find({
+        taskId: {
+          $in: taskArr[0].concat(taskArr[1]),
+        },
+        createdBy: { $ne: req.user.id },
+      }).then((comments) =>
+        // Add groupId to each comment
+        Promise.all(
+          comments.map(async (comment) => {
+            const commentObj = comment.toObject();
+            const group = await Group.findOne({
+              tasks: commentObj.attributes.taskId.id,
+            });
+            commentObj.attributes.groupId = group._id;
+            return commentObj;
+          })
+        )
+      )
+    )
+    .then((commentObjArr) => res.json(commentObjArr))
     .catch((err) => console.log(err));
 };
 
